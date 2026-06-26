@@ -7,7 +7,9 @@ import pytest
 
 from backend.image.base import ImageError, ImageProvider
 from backend.markdown import MarkdownGenerator
-from backend.parser import ConceptExtractor, KnowledgeObjectBuilder
+from backend.models import SourceType
+from backend.parser import ConceptExtractor, KnowledgeObjectBuilder, NewsExtractor
+from backend.parser.fetcher import ArticleFetcher, FetchedArticle
 from backend.planner import EducationalPlanner
 from backend.services import KnowledgePipeline
 from backend.storage import IllustrationWriter, VaultWriter
@@ -45,21 +47,29 @@ class _FakeImageProvider(ImageProvider):
         return output_path
 
 
+class _FakeFetcher(ArticleFetcher):
+    def fetch(self, url: str) -> FetchedArticle:
+        return FetchedArticle(url=url, title="Article", text="Some article body.")
+
+
 def _pipeline(
     vault: Path,
     response: str = RESPONSE,
     plan_response: str = PLAN_RESPONSE,
     image_provider: ImageProvider | None = None,
+    with_news: bool = False,
 ) -> KnowledgePipeline:
     illustration_writer = (
         IllustrationWriter(vault, image_provider) if image_provider is not None else None
     )
+    news_extractor = NewsExtractor(MockLLMProvider(response), _FakeFetcher()) if with_news else None
     return KnowledgePipeline(
         extractor=ConceptExtractor(MockLLMProvider(response)),
         builder=KnowledgeObjectBuilder(),
         planner=EducationalPlanner(MockLLMProvider(plan_response)),
         markdown_generator=MarkdownGenerator(),
         vault_writer=VaultWriter(vault),
+        news_extractor=news_extractor,
         illustration_writer=illustration_writer,
     )
 
@@ -116,11 +126,27 @@ def test_planning_failure_does_not_block_note_creation(tmp_path: Path) -> None:
     assert result.knowledge_object.educational_plan is None
 
 
-def test_url_input_is_unsupported(tmp_path: Path) -> None:
+def test_url_input_creates_news_note(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path, with_news=True).run("https://openai.com/news/")
+
+    assert result.status == "created"
+    assert result.path == tmp_path / "06 News" / "Transformer.md"
+    assert result.path.exists()
+    assert result.knowledge_object is not None
+    assert result.knowledge_object.source.type is SourceType.NEWS
+    assert result.knowledge_object.source.value == "https://openai.com/news/"
+
+
+def test_url_input_unsupported_without_news_extractor(tmp_path: Path) -> None:
     result = _pipeline(tmp_path).run("https://openai.com/news/")
     assert result.status == "unsupported"
-    assert "Phase 2" in result.message
     # Nothing should be written.
+    assert not any(tmp_path.iterdir())
+
+
+def test_malformed_url_is_unsupported(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path, with_news=True).run("http://")
+    assert result.status == "unsupported"
     assert not any(tmp_path.iterdir())
 
 

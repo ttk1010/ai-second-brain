@@ -264,9 +264,16 @@ push and pull request.
    saved under `Images/` (e.g. `Images/Transformer.png`) and embedded in the
    note. Use `--overwrite` to replace an existing note.
 
-> AI **concepts** are processed end to end (summary, Educational Plan, and
-> illustration). URL/News input is recognized but its processing is still a
-> Phase 2 work in progress.
+   You can also pass an article URL to capture AI news:
+
+   ```bash
+   uv run asb "https://openai.com/news/..."
+   ```
+
+   The article is fetched, summarized, illustrated, and saved under `06 News/`.
+
+> Both AI **concepts** and **news URLs** are processed end to end (summary,
+> Educational Plan, and illustration).
 
 ---
 

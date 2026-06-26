@@ -1,12 +1,13 @@
 """Knowledge pipeline orchestration.
 
-Wires the components together: classify -> extract -> build -> markdown -> vault.
-Components are injected so the pipeline can be unit-tested with a mock LLM
-provider and a temporary Vault.
+Wires the components together: classify -> extract -> build -> plan ->
+illustrate -> markdown -> vault. Components are injected so the pipeline can be
+unit-tested with a mock LLM provider and a temporary Vault.
 
-Phase 1 fully supports the Concept pipeline. URLs (News) require the News
-extractor, which is a Phase 2 deliverable (ROADMAP.md); for now URL input
-returns an ``unsupported`` result with a clear message instead of failing.
+Both the Concept and News pipelines produce the same canonical Knowledge Object
+and share the same finalization tail (ARCHITECTURE.md). The News extractor is
+optional: when it is not configured, URL input returns an ``unsupported`` result
+instead of failing.
 """
 
 import logging
@@ -19,7 +20,12 @@ from backend.llm.base import LLMError
 from backend.markdown import MarkdownGenerator
 from backend.models import KnowledgeObject, SourceType
 from backend.models.educational_plan import EducationalPlan
-from backend.parser import ConceptExtractor, KnowledgeObjectBuilder, classify
+from backend.parser import (
+    ConceptExtractor,
+    KnowledgeObjectBuilder,
+    NewsExtractor,
+    classify,
+)
 from backend.planner import EducationalPlanner
 from backend.storage import IllustrationWriter, VaultWriter
 
@@ -49,6 +55,7 @@ class KnowledgePipeline:
         markdown_generator: MarkdownGenerator,
         vault_writer: VaultWriter,
         *,
+        news_extractor: NewsExtractor | None = None,
         illustration_writer: IllustrationWriter | None = None,
         language: str = "ja",
     ) -> None:
@@ -57,6 +64,7 @@ class KnowledgePipeline:
         self._planner = planner
         self._markdown = markdown_generator
         self._vault = vault_writer
+        self._news = news_extractor
         self._illustrations = illustration_writer
         self._language = language
 
@@ -67,20 +75,28 @@ class KnowledgePipeline:
             ValueError: If the input is empty.
         """
         classification = classify(raw_input)
+        source_type = classification.source_type
+        value = classification.normalized_input
 
-        if classification.source_type is not SourceType.CONCEPT:
+        if source_type is SourceType.CONCEPT:
+            extraction = self._extractor.extract(value)
+            ko = self._builder.from_concept(value, extraction, language=self._language)
+        elif source_type is SourceType.NEWS and self._news is not None:
+            extraction = self._news.extract(value)
+            ko = self._builder.from_news(extraction, language=self._language)
+        else:
             return PipelineResult(
                 status="unsupported",
                 message=(
-                    f"Input classified as {classification.source_type.value}. "
-                    "URL/News processing is a Phase 2 feature; only AI concepts "
-                    "are supported in Phase 1."
+                    f"Could not process input (classified as {source_type.value}). "
+                    "Provide an AI concept keyword or a valid article URL."
                 ),
             )
 
-        concept = classification.normalized_input
-        extraction = self._extractor.extract(concept)
-        ko = self._builder.from_concept(concept, extraction, language=self._language)
+        return self._finalize(ko, overwrite=overwrite)
+
+    def _finalize(self, ko: KnowledgeObject, *, overwrite: bool) -> PipelineResult:
+        """Shared tail for every pipeline: plan, illustrate, render, store."""
         ko.educational_plan = self._plan(ko)
         self._illustrate(ko, overwrite=overwrite)
         markdown = self._markdown.generate(ko)

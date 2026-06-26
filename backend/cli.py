@@ -20,7 +20,12 @@ from backend.config import DEFAULT_SETTINGS_PATH, SettingsError, load_settings
 from backend.image import OpenAIImageProvider
 from backend.llm import OpenAIProvider
 from backend.markdown import MarkdownGenerator
-from backend.parser import ConceptExtractor, KnowledgeObjectBuilder
+from backend.parser import (
+    ConceptExtractor,
+    HttpArticleFetcher,
+    KnowledgeObjectBuilder,
+    NewsExtractor,
+)
 from backend.planner import EducationalPlanner
 from backend.services import KnowledgePipeline
 from backend.storage import IllustrationWriter, VaultWriter
@@ -53,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
         planner=EducationalPlanner(provider),
         markdown_generator=MarkdownGenerator(),
         vault_writer=VaultWriter(settings.vault_path),
+        news_extractor=NewsExtractor(provider, HttpArticleFetcher()),
         illustration_writer=illustration_writer,
         language=settings.default_language,
     )
@@ -83,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="asb",
-        description="Turn an AI concept into a structured note in your Obsidian Vault.",
+        description="Turn an AI concept or article URL into a structured Obsidian note.",
     )
     parser.add_argument("input", help="An AI concept (e.g. 'Transformer') or URL.")
     parser.add_argument(

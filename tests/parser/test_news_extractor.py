@@ -88,3 +88,20 @@ def test_extract_always_includes_source_url_in_references() -> None:
     response = json.dumps({"title": "t", "summary": "s", "references": []})
     extraction = NewsExtractor(MockLLMProvider(response), _FakeFetcher(ARTICLE)).extract("u")
     assert "https://example.com/news" in extraction.references
+
+
+def test_builder_produces_news_knowledge_object() -> None:
+    from backend.models import KnowledgeObject, SourceType
+    from backend.parser import KnowledgeObjectBuilder
+
+    extraction = NewsExtractor(MockLLMProvider(VALID_RESPONSE), _FakeFetcher(ARTICLE)).extract(
+        "https://example.com/news"
+    )
+    ko = KnowledgeObjectBuilder().from_news(extraction, language="ja")
+
+    assert isinstance(ko, KnowledgeObject)
+    assert ko.source.type is SourceType.NEWS
+    assert ko.source.value == "https://example.com/news"
+    assert ko.title == "OpenAI ships a new model"
+    assert "OpenAI" in ko.entities
+    assert ko.metadata.language == "ja"
