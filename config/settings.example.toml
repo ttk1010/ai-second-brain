@@ -10,6 +10,9 @@ default_aspect_ratio = "16:9"
 # Image generation model
 image_model = "gpt-image-2"
 
+# Image quality tier: low | medium | high (higher = more detail and higher cost)
+image_quality = "medium"
+
 # Language
 default_language = "ja"
 

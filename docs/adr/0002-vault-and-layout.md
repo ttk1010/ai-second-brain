@@ -41,6 +41,7 @@ backend/
     storage/     # 外部 Vault / Git 永続化
     services/    # パイプライン統合 (オーケストレーション)
     models/      # Knowledge Object / Node のデータ構造
+    config/      # 設定の読み込みと検証 (横断的関心事; Issue #5 で追加)
 ```
 
 CLAUDE.md のフラットなトップレベル構成（backend/ docs/ scripts/ tests/）はそのままに、「`backend/` 内部の構成は ARCHITECTURE.md で定義」と注記する。

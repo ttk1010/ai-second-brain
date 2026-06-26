@@ -42,3 +42,11 @@ class AspectRatio(StrEnum):
     STANDARD = "4:3"  # Hierarchical Structure
     SQUARE = "1:1"  # Single Concept
     TALL = "9:16"  # Step-by-step Guide
+
+
+class ImageQuality(StrEnum):
+    """Illustration quality tier. Cost differs widely across tiers (see ADR 0002)."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
