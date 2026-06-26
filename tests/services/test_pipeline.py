@@ -7,6 +7,7 @@ import pytest
 
 from backend.markdown import MarkdownGenerator
 from backend.parser import ConceptExtractor, KnowledgeObjectBuilder
+from backend.planner import EducationalPlanner
 from backend.services import KnowledgePipeline
 from backend.storage import VaultWriter
 from tests.conftest import MockLLMProvider
@@ -21,12 +22,26 @@ RESPONSE = json.dumps(
     }
 )
 
+PLAN_RESPONSE = json.dumps(
+    {
+        "learning_objective": "Understand self-attention.",
+        "target_audience": "Software engineers.",
+        "prerequisites": ["neural networks"],
+        "key_messages": ["Attention weighs tokens"],
+        "visualization": {"aspect_ratio": "16:9", "description": "Attention diagram."},
+    }
+)
 
-def _pipeline(vault: Path, response: str = RESPONSE) -> KnowledgePipeline:
-    provider = MockLLMProvider(response)
+
+def _pipeline(
+    vault: Path,
+    response: str = RESPONSE,
+    plan_response: str = PLAN_RESPONSE,
+) -> KnowledgePipeline:
     return KnowledgePipeline(
-        extractor=ConceptExtractor(provider),
+        extractor=ConceptExtractor(MockLLMProvider(response)),
         builder=KnowledgeObjectBuilder(),
+        planner=EducationalPlanner(MockLLMProvider(plan_response)),
         markdown_generator=MarkdownGenerator(),
         vault_writer=VaultWriter(vault),
     )
@@ -43,6 +58,20 @@ def test_concept_end_to_end(tmp_path: Path) -> None:
     assert "[[attention]]" in content
     assert result.knowledge_object is not None
     assert result.knowledge_object.outputs["markdown"] == "01 Concepts/Transformer.md"
+    # The Educational Plan is attached to the Knowledge Object.
+    plan = result.knowledge_object.educational_plan
+    assert plan is not None
+    assert plan.learning_objective == "Understand self-attention."
+
+
+def test_planning_failure_does_not_block_note_creation(tmp_path: Path) -> None:
+    # An unparsable plan response must not prevent the note from being written.
+    result = _pipeline(tmp_path, plan_response="not json").run("Transformer")
+
+    assert result.status == "created"
+    assert result.path is not None and result.path.exists()
+    assert result.knowledge_object is not None
+    assert result.knowledge_object.educational_plan is None
 
 
 def test_url_input_is_unsupported(tmp_path: Path) -> None:
