@@ -1,0 +1,31 @@
+"""Knowledge Object Builder — normalizes extractions into the canonical model.
+
+This is the single component that produces a Knowledge Object (ADR 0001). It is
+independent of how the input was obtained; downstream components consume only the
+resulting Knowledge Object.
+"""
+
+from backend.models import KnowledgeObject, Metadata, Source, SourceType
+from backend.parser.concept_extractor import ConceptExtraction
+
+
+class KnowledgeObjectBuilder:
+    """Builds Knowledge Objects from extraction results."""
+
+    def from_concept(
+        self,
+        concept: str,
+        extraction: ConceptExtraction,
+        *,
+        language: str = "ja",
+    ) -> KnowledgeObject:
+        """Normalize a concept extraction into a Knowledge Object."""
+        return KnowledgeObject(
+            source=Source(type=SourceType.CONCEPT, value=concept.strip()),
+            title=extraction.title,
+            summary=extraction.summary,
+            concepts=extraction.concepts,
+            entities=extraction.entities,
+            references=extraction.references,
+            metadata=Metadata(language=language),
+        )
