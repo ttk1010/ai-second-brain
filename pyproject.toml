@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "A personal knowledge operating system that turns AI information into structured, reusable knowledge."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pydantic>=2.13.4",
+]
 
 [dependency-groups]
 dev = [
