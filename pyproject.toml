@@ -5,6 +5,8 @@ description = "A personal knowledge operating system that turns AI information i
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "httpx>=0.28.1",
     "openai>=2.44.0",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",

@@ -3,11 +3,24 @@
 from backend.parser.builder import KnowledgeObjectBuilder
 from backend.parser.classifier import Classification, classify
 from backend.parser.concept_extractor import ConceptExtraction, ConceptExtractor
+from backend.parser.fetcher import (
+    ArticleFetcher,
+    FetchedArticle,
+    FetchError,
+    HttpArticleFetcher,
+)
+from backend.parser.news_extractor import NewsExtraction, NewsExtractor
 
 __all__ = [
+    "ArticleFetcher",
     "Classification",
     "ConceptExtraction",
     "ConceptExtractor",
+    "FetchError",
+    "FetchedArticle",
+    "HttpArticleFetcher",
     "KnowledgeObjectBuilder",
+    "NewsExtraction",
+    "NewsExtractor",
     "classify",
 ]
