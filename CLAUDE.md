@@ -105,7 +105,6 @@ backend/
 docs/
 scripts/
 tests/
-vault/
 ```
 
 Responsibilities:
@@ -113,8 +112,15 @@ Responsibilities:
 * backend/ → application code
 * docs/ → documentation
 * tests/ → automated tests
-* vault/ → Obsidian knowledge base
 * scripts/ → utility scripts
+
+The Obsidian Vault is **not** part of this repository. It lives in an external
+location configured via `vault_path`. This repository never tracks knowledge data
+(see ADR 0002).
+
+The internal layout of `backend/` (parser/, planner/, prompts/, image/, markdown/,
+linker/, storage/, services/, models/) is defined in `docs/ARCHITECTURE.md` and
+ADR 0002.
 
 Avoid unnecessary nesting.
 

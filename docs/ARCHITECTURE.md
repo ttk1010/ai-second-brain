@@ -276,6 +276,10 @@ This component transforms isolated notes into a connected knowledge graph.
 
 The Vault is the primary knowledge repository.
 
+It lives **outside this code repository**, in an external location configured via
+`vault_path` (see ADR 0002). The Storage Layer writes Knowledge Nodes into that
+external Vault; this code repository never contains the knowledge data itself.
+
 All generated knowledge should remain editable without AI.
 
 Folder organization is defined separately.
@@ -283,6 +287,10 @@ Folder organization is defined separately.
 ---
 
 ## Git
+
+Git here refers to the **external Vault's own optional version control** — distinct
+from this code repository's Git. When the external Vault is under Git and
+`auto_commit` is enabled, generated changes are committed there.
 
 Git provides:
 
@@ -375,9 +383,10 @@ docs/
 tests/
 
 scripts/
-
-vault/
 ```
+
+The Obsidian Vault is **not** part of this layout. It is external and referenced
+via `vault_path` (see ADR 0002).
 
 Each directory should have a clear and independent responsibility.
 

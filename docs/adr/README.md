@@ -25,3 +25,4 @@
 | ADR | Title | Status |
 | --- | ----- | ------ |
 | [0001](0001-design-baseline.md) | Design baseline: terminology, pipeline scope, data ownership | Accepted |
+| [0002](0002-vault-and-layout.md) | Vault location, Git tracking scope, and backend layout | Accepted |

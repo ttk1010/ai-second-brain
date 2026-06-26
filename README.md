@@ -81,6 +81,8 @@ GitHub
 
 The Knowledge Object is the canonical representation of knowledge within the system. All generated outputs originate from this single source of truth before being stored as interconnected Knowledge Nodes in the Second Brain.
 
+The Obsidian Vault lives outside this repository (configured via `vault_path`). The trailing `Git → GitHub` step refers to the **external Vault's own optional version control** — committed when `auto_commit` is enabled and the Vault is under Git — and is distinct from this code repository's Git (see ADR 0002).
+
 The long-term goal is to make knowledge accumulation almost effortless.
 
 ---
@@ -185,16 +187,17 @@ backend/
 docs/
 scripts/
 tests/
-vault/
 ```
 
 The repository intentionally keeps a simple structure.
 
-Knowledge lives inside the Vault.
-
 Implementation lives inside the backend.
 
 Documentation lives inside docs.
+
+Knowledge lives inside an **external** Obsidian Vault, located outside this
+repository and configured via `vault_path`. This repository tracks only code
+and documentation — never the knowledge data itself (see ADR 0002).
 
 ---
 

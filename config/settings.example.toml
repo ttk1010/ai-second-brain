@@ -8,7 +8,7 @@ image_output_dir = "Images"
 default_aspect_ratio = "16:9"
 
 # Image generation model
-image_model = "gpt-image-1"
+image_model = "gpt-image-2"
 
 # Language
 default_language = "ja"
