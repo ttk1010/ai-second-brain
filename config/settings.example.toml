@@ -1,0 +1,17 @@
+# Obsidian Vault
+vault_path = "/path/to/your/Obsidian/AI Second Brain"
+
+# Image output directory
+image_output_dir = "Images"
+
+# Default image aspect ratio
+default_aspect_ratio = "16:9"
+
+# Image generation model
+image_model = "gpt-image-1"
+
+# Language
+default_language = "ja"
+
+# Auto commit generated notes
+auto_commit = false
