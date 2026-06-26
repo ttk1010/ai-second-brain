@@ -33,8 +33,8 @@ class MarkdownGenerator:
             heading(ko.title),
             self._summary(ko),
             self._illustration(ko),
-            self._background(),
-            self._key_takeaways(),
+            self._background(ko),
+            self._key_takeaways(ko),
             self._related_notes(ko),
             self._references(ko),
             self._tags(ko),
@@ -70,11 +70,17 @@ class MarkdownGenerator:
         # Obsidian embed by Vault-relative path (robust to folder location).
         return f"{section('Illustration')}\n\n![[{path}]]"
 
-    def _background(self) -> str:
-        return f"{section('Background')}\n\n{PLACEHOLDER}"
+    def _background(self, ko: KnowledgeObject) -> str:
+        if not ko.background:
+            return f"{section('Background')}\n\n{PLACEHOLDER}"
+        return f"{section('Background')}\n\n{ko.background}"
 
-    def _key_takeaways(self) -> str:
-        return f"{section('Key Takeaways')}\n\n{PLACEHOLDER}"
+    def _key_takeaways(self, ko: KnowledgeObject) -> str:
+        takeaways = _unique(ko.key_takeaways)
+        if not takeaways:
+            return f"{section('Key Takeaways')}\n\n{PLACEHOLDER}"
+        items = "\n".join(f"- {item}" for item in takeaways)
+        return f"{section('Key Takeaways')}\n\n{items}"
 
     def _related_notes(self, ko: KnowledgeObject) -> str:
         targets = _unique(ko.concepts + [rel.target for rel in ko.relationships])

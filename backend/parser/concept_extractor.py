@@ -21,6 +21,8 @@ class ConceptExtraction:
 
     title: str
     summary: str
+    background: str = ""
+    key_takeaways: list[str] = field(default_factory=list)
     concepts: list[str] = field(default_factory=list)
     entities: list[str] = field(default_factory=list)
     references: list[str] = field(default_factory=list)
@@ -64,6 +66,8 @@ class ConceptExtractor:
         return ConceptExtraction(
             title=title,
             summary=summary,
+            background=str(data.get("background") or "").strip(),
+            key_takeaways=_string_list(data.get("key_takeaways")),
             concepts=_string_list(data.get("concepts")),
             entities=_string_list(data.get("entities")),
             references=_string_list(data.get("references")),

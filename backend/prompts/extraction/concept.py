@@ -28,6 +28,8 @@ Return a JSON object with exactly these fields:
 {
   "title": "string, the concept name",
   "summary": "string, 2-4 sentence explanation",
+  "background": "string, 2-4 sentences on why it matters and the context needed to understand it",
+  "key_takeaways": ["string, 3-5 points a reader should remember"],
   "concepts": ["string, closely related concept names"],
   "entities": ["string, relevant organizations, models, or people"],
   "references": ["string, well-known URLs if confidently known, else empty"]
