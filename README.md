@@ -215,6 +215,27 @@ Project documentation is intentionally separated.
 
 ---
 
+# Development Setup
+
+This project uses [uv](https://docs.astral.sh/uv/) and Python 3.12.
+
+```bash
+# Install dependencies (creates a virtual environment)
+uv sync --dev
+
+# Lint and format
+uv run ruff check .
+uv run ruff format .
+
+# Run tests
+uv run pytest
+```
+
+Continuous integration runs the same lint, format check, and tests on every
+push and pull request.
+
+---
+
 # Development Workflow
 
 This project follows an issue-driven development process.
