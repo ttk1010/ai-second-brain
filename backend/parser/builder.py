@@ -7,6 +7,7 @@ resulting Knowledge Object.
 
 from backend.models import KnowledgeObject, Metadata, Source, SourceType
 from backend.parser.concept_extractor import ConceptExtraction
+from backend.parser.news_extractor import NewsExtraction
 
 
 class KnowledgeObjectBuilder:
@@ -22,6 +23,27 @@ class KnowledgeObjectBuilder:
         """Normalize a concept extraction into a Knowledge Object."""
         return KnowledgeObject(
             source=Source(type=SourceType.CONCEPT, value=concept.strip()),
+            title=extraction.title,
+            summary=extraction.summary,
+            concepts=extraction.concepts,
+            entities=extraction.entities,
+            references=extraction.references,
+            metadata=Metadata(language=language),
+        )
+
+    def from_news(
+        self,
+        extraction: NewsExtraction,
+        *,
+        language: str = "ja",
+    ) -> KnowledgeObject:
+        """Normalize a news extraction into a Knowledge Object.
+
+        Both pipelines produce the same canonical model; only the source differs
+        (the URL), so downstream components stay input-agnostic (ARCHITECTURE.md).
+        """
+        return KnowledgeObject(
+            source=Source(type=SourceType.NEWS, value=extraction.url),
             title=extraction.title,
             summary=extraction.summary,
             concepts=extraction.concepts,
