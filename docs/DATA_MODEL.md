@@ -73,6 +73,8 @@ KnowledgeObject
 ├── source
 ├── title
 ├── summary
+├── background
+├── key_takeaways
 ├── concepts
 ├── entities
 ├── relationships
@@ -81,6 +83,12 @@ KnowledgeObject
 ├── metadata
 └── outputs (optional)
 ```
+
+`background` (context and why the topic matters) and `key_takeaways` (the few
+points a reader should remember) are reader-facing knowledge content, extracted
+alongside the summary. They are distinct from the Educational Plan's
+`key_messages`, which guide *how* to teach and illustrate rather than what the
+note presents to the reader.
 
 The `outputs` field holds **references only** — file paths or IDs pointing to
 generated artifacts (Markdown, illustration, etc.). It never stores the artifact

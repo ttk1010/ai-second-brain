@@ -34,6 +34,8 @@ Return a JSON object with exactly these fields:
   "title": "string, a concise title for the note",
   "summary": "string, 3-5 sentences covering what happened, the technology, the
     companies/people, and why it matters",
+  "background": "string, 2-4 sentences on the context behind this story and why it matters",
+  "key_takeaways": ["string, 3-5 points a reader should remember"],
   "concepts": ["string, AI technologies or topics involved"],
   "entities": ["string, organizations, models, or people involved"],
   "references": ["string, source URLs; include the article URL"]

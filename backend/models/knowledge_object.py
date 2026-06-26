@@ -38,6 +38,14 @@ class KnowledgeObject(BaseModel):
     source: Source
     title: str = Field(min_length=1)
     summary: str = Field(min_length=1)
+    background: str = Field(
+        default="",
+        description="Why the topic matters and the context to understand it.",
+    )
+    key_takeaways: list[str] = Field(
+        default_factory=list,
+        description="The few points a reader should remember.",
+    )
     concepts: list[str] = Field(default_factory=list)
     entities: list[str] = Field(default_factory=list)
     relationships: list[Relationship] = Field(default_factory=list)

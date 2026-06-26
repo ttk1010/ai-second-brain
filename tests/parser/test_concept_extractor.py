@@ -13,6 +13,8 @@ VALID_RESPONSE = json.dumps(
     {
         "title": "Transformer",
         "summary": "A neural network architecture based on self-attention.",
+        "background": "It replaced RNNs for many NLP tasks.",
+        "key_takeaways": ["Self-attention scales", "Parallelizable"],
         "concepts": ["attention", "self-attention"],
         "entities": ["Google"],
         "references": ["https://arxiv.org/abs/1706.03762"],
@@ -27,6 +29,8 @@ def test_extract_returns_structured_fields() -> None:
     assert extraction.title == "Transformer"
     assert "attention" in extraction.concepts
     assert extraction.entities == ["Google"]
+    assert extraction.background == "It replaced RNNs for many NLP tasks."
+    assert extraction.key_takeaways == ["Self-attention scales", "Parallelizable"]
     # The extractor requests a JSON response.
     assert provider.calls[0][2] == "json"
 

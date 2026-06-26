@@ -102,6 +102,22 @@ def test_illustration_embedded_when_present() -> None:
     assert "## Illustration\n\n![[Images/MCP.png]]" in md
 
 
+def test_background_and_takeaways_placeholder_when_absent() -> None:
+    md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
+    assert "## Background\n\n> _(To be generated)_" in md
+    assert "## Key Takeaways\n\n> _(To be generated)_" in md
+
+
+def test_background_and_takeaways_rendered_when_present() -> None:
+    ko = _minimal_ko()
+    ko.background = "MCP standardizes how tools connect to models."
+    ko.key_takeaways = ["Open protocol", "Reduces integration glue"]
+    md = MarkdownGenerator().generate(ko, created=FIXED_DATE)
+
+    assert "## Background\n\nMCP standardizes how tools connect to models." in md
+    assert "## Key Takeaways\n\n- Open protocol\n- Reduces integration glue" in md
+
+
 def test_tags_combine_metadata_and_concepts() -> None:
     md = MarkdownGenerator().generate(_full_ko(), created=FIXED_DATE)
     tags_section = md.split("## Tags")[1]
