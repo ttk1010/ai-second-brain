@@ -44,19 +44,22 @@ def resolve_target(
     stem: str,
     *,
     overwrite: bool,
+    suffix: str = ".md",
 ) -> Path:
     """Resolve the final file path inside ``folder`` for ``stem``.
 
     When ``overwrite`` is False and the file exists, append a numeric suffix
-    (``-2``, ``-3``, ...) instead of overwriting, to protect existing notes.
+    (``-2``, ``-3``, ...) instead of overwriting, to protect existing files.
+    ``suffix`` is the file extension (e.g. ``.md`` for notes, ``.png`` for
+    illustrations).
     """
-    candidate = folder / f"{stem}.md"
+    candidate = folder / f"{stem}{suffix}"
     if overwrite or not candidate.exists():
         return candidate
 
     counter = 2
     while True:
-        candidate = folder / f"{stem}-{counter}.md"
+        candidate = folder / f"{stem}-{counter}{suffix}"
         if not candidate.exists():
             return candidate
         counter += 1

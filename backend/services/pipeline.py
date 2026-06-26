@@ -14,13 +14,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from backend.image.base import ImageError
 from backend.llm.base import LLMError
 from backend.markdown import MarkdownGenerator
 from backend.models import KnowledgeObject, SourceType
 from backend.models.educational_plan import EducationalPlan
 from backend.parser import ConceptExtractor, KnowledgeObjectBuilder, classify
 from backend.planner import EducationalPlanner
-from backend.storage import VaultWriter
+from backend.storage import IllustrationWriter, VaultWriter
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class KnowledgePipeline:
         markdown_generator: MarkdownGenerator,
         vault_writer: VaultWriter,
         *,
+        illustration_writer: IllustrationWriter | None = None,
         language: str = "ja",
     ) -> None:
         self._extractor = extractor
@@ -55,6 +57,7 @@ class KnowledgePipeline:
         self._planner = planner
         self._markdown = markdown_generator
         self._vault = vault_writer
+        self._illustrations = illustration_writer
         self._language = language
 
     def run(self, raw_input: str, *, overwrite: bool = False) -> PipelineResult:
@@ -79,6 +82,7 @@ class KnowledgePipeline:
         extraction = self._extractor.extract(concept)
         ko = self._builder.from_concept(concept, extraction, language=self._language)
         ko.educational_plan = self._plan(ko)
+        self._illustrate(ko, overwrite=overwrite)
         markdown = self._markdown.generate(ko)
         path = self._vault.write(ko, markdown, overwrite=overwrite)
 
@@ -103,3 +107,19 @@ class KnowledgePipeline:
                 "Educational planning failed for %r; continuing without a plan.", ko.title
             )
             return None
+
+    def _illustrate(self, ko: KnowledgeObject, *, overwrite: bool) -> None:
+        """Generate and store the illustration, degrading gracefully on failure.
+
+        Like planning, the illustration enriches the note but must never block its
+        creation (AI-assisted, not AI-dependent). A generation failure is logged
+        and the note is still created without an illustration.
+        """
+        if self._illustrations is None:
+            return
+        try:
+            self._illustrations.write(ko, overwrite=overwrite)
+        except ImageError:
+            logger.warning(
+                "Illustration generation failed for %r; continuing without one.", ko.title
+            )

@@ -32,7 +32,7 @@ class MarkdownGenerator:
             self._frontmatter(ko, created),
             heading(ko.title),
             self._summary(ko),
-            self._illustration(),
+            self._illustration(ko),
             self._background(),
             self._key_takeaways(),
             self._related_notes(ko),
@@ -63,8 +63,12 @@ class MarkdownGenerator:
     def _summary(self, ko: KnowledgeObject) -> str:
         return f"{section('Summary')}\n\n{ko.summary}"
 
-    def _illustration(self) -> str:
-        return f"{section('Illustration')}\n\n{ILLUSTRATION_PLACEHOLDER}"
+    def _illustration(self, ko: KnowledgeObject) -> str:
+        path = ko.outputs.get("illustration")
+        if not path:
+            return f"{section('Illustration')}\n\n{ILLUSTRATION_PLACEHOLDER}"
+        # Obsidian embed by Vault-relative path (robust to folder location).
+        return f"{section('Illustration')}\n\n![[{path}]]"
 
     def _background(self) -> str:
         return f"{section('Background')}\n\n{PLACEHOLDER}"
