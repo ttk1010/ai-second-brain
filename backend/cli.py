@@ -20,6 +20,7 @@ from backend.config import DEFAULT_SETTINGS_PATH, SettingsError, load_settings
 from backend.llm import OpenAIProvider
 from backend.markdown import MarkdownGenerator
 from backend.parser import ConceptExtractor, KnowledgeObjectBuilder
+from backend.planner import EducationalPlanner
 from backend.services import KnowledgePipeline
 from backend.storage import VaultWriter
 from backend.storage.git import commit_note
@@ -41,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     pipeline = KnowledgePipeline(
         extractor=ConceptExtractor(provider),
         builder=KnowledgeObjectBuilder(),
+        planner=EducationalPlanner(provider),
         markdown_generator=MarkdownGenerator(),
         vault_writer=VaultWriter(settings.vault_path),
         language=settings.default_language,

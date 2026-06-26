@@ -9,14 +9,20 @@ extractor, which is a Phase 2 deliverable (ROADMAP.md); for now URL input
 returns an ``unsupported`` result with a clear message instead of failing.
 """
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from backend.llm.base import LLMError
 from backend.markdown import MarkdownGenerator
 from backend.models import KnowledgeObject, SourceType
+from backend.models.educational_plan import EducationalPlan
 from backend.parser import ConceptExtractor, KnowledgeObjectBuilder, classify
+from backend.planner import EducationalPlanner
 from backend.storage import VaultWriter
+
+logger = logging.getLogger(__name__)
 
 PipelineStatus = Literal["created", "unsupported"]
 
@@ -38,6 +44,7 @@ class KnowledgePipeline:
         self,
         extractor: ConceptExtractor,
         builder: KnowledgeObjectBuilder,
+        planner: EducationalPlanner,
         markdown_generator: MarkdownGenerator,
         vault_writer: VaultWriter,
         *,
@@ -45,6 +52,7 @@ class KnowledgePipeline:
     ) -> None:
         self._extractor = extractor
         self._builder = builder
+        self._planner = planner
         self._markdown = markdown_generator
         self._vault = vault_writer
         self._language = language
@@ -70,6 +78,7 @@ class KnowledgePipeline:
         concept = classification.normalized_input
         extraction = self._extractor.extract(concept)
         ko = self._builder.from_concept(concept, extraction, language=self._language)
+        ko.educational_plan = self._plan(ko)
         markdown = self._markdown.generate(ko)
         path = self._vault.write(ko, markdown, overwrite=overwrite)
 
@@ -79,3 +88,18 @@ class KnowledgePipeline:
             knowledge_object=ko,
             path=path,
         )
+
+    def _plan(self, ko: KnowledgeObject) -> EducationalPlan | None:
+        """Plan the education for ``ko``, degrading gracefully on failure.
+
+        The Educational Plan enriches outputs but should never block note
+        creation: the system is AI-assisted, not AI-dependent (ARCHITECTURE.md).
+        A planning failure is logged and the note is still created without a plan.
+        """
+        try:
+            return self._planner.plan(ko)
+        except LLMError:
+            logger.warning(
+                "Educational planning failed for %r; continuing without a plan.", ko.title
+            )
+            return None
