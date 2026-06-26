@@ -12,6 +12,7 @@ the Concept pipeline so downstream components stay input-agnostic (ARCHITECTURE.
 """
 
 from backend.parser.fetcher import FetchedArticle
+from backend.prompts.language import language_directive
 
 NEWS_SYSTEM_PROMPT = """\
 You are an educational knowledge extractor for an AI knowledge base.
@@ -43,11 +44,12 @@ Return a JSON object with exactly these fields:
 """
 
 
-def build_news_user_prompt(article: FetchedArticle) -> str:
+def build_news_user_prompt(article: FetchedArticle, *, language: str = "ja") -> str:
     """Build the user prompt for extracting knowledge from a news article."""
     return (
         f"Source URL: {article.url}\n"
         f"Article title: {article.title}\n\n"
         f"Article text:\n{article.text}\n\n"
-        f"{NEWS_OUTPUT_SCHEMA}"
+        f"{NEWS_OUTPUT_SCHEMA}\n"
+        f"{language_directive(language)}"
     )

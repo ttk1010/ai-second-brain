@@ -46,6 +46,12 @@ def test_plan_returns_structured_plan() -> None:
     assert provider.calls[0][2] == "json"
 
 
+def test_plan_passes_language_directive_from_metadata() -> None:
+    provider = MockLLMProvider(VALID_RESPONSE)
+    EducationalPlanner(provider).plan(_ko())  # metadata language defaults to ja
+    assert "Japanese" in provider.calls[0][1]
+
+
 def test_plan_rejects_invalid_json() -> None:
     with pytest.raises(LLMError, match="invalid JSON"):
         EducationalPlanner(MockLLMProvider("not json")).plan(_ko())

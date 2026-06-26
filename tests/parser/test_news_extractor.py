@@ -54,6 +54,12 @@ def test_extract_returns_structured_fields() -> None:
     assert "improves reasoning" in provider.calls[0][1]
 
 
+def test_extract_passes_language_directive() -> None:
+    provider = MockLLMProvider(VALID_RESPONSE)
+    NewsExtractor(provider, _FakeFetcher(ARTICLE)).extract("u", language="en")
+    assert "English" in provider.calls[0][1]
+
+
 def test_extract_rejects_empty_url() -> None:
     with pytest.raises(ValueError, match="must not be empty"):
         NewsExtractor(MockLLMProvider(VALID_RESPONSE), _FakeFetcher(ARTICLE)).extract("  ")

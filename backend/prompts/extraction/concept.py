@@ -11,6 +11,8 @@ Prompts are first-class assets and live here, never embedded in application code
 deterministic, structured JSON response.
 """
 
+from backend.prompts.language import language_directive
+
 CONCEPT_SYSTEM_PROMPT = """\
 You are an educational knowledge extractor for an AI knowledge base.
 Your job is to explain an AI concept clearly for a software engineer who is
@@ -37,6 +39,6 @@ Return a JSON object with exactly these fields:
 """
 
 
-def build_concept_user_prompt(concept: str) -> str:
+def build_concept_user_prompt(concept: str, *, language: str = "ja") -> str:
     """Build the user prompt for extracting a concept."""
-    return f"Concept: {concept}\n\n{CONCEPT_OUTPUT_SCHEMA}"
+    return f"Concept: {concept}\n\n{CONCEPT_OUTPUT_SCHEMA}\n{language_directive(language)}"

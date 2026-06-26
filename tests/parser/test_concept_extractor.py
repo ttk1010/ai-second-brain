@@ -35,6 +35,12 @@ def test_extract_returns_structured_fields() -> None:
     assert provider.calls[0][2] == "json"
 
 
+def test_extract_passes_language_directive() -> None:
+    provider = MockLLMProvider(VALID_RESPONSE)
+    ConceptExtractor(provider).extract("Transformer", language="ja")
+    assert "Japanese" in provider.calls[0][1]
+
+
 def test_extract_rejects_empty_concept() -> None:
     with pytest.raises(ValueError, match="must not be empty"):
         ConceptExtractor(MockLLMProvider(VALID_RESPONSE)).extract("  ")
