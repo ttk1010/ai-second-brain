@@ -35,6 +35,7 @@ backend/
     parser/      # 入力分類・抽出 (Concept / News)
     planner/     # Educational Plan の生成
     prompts/     # プロンプトテンプレート (コードに埋め込まない)
+    llm/         # LLM プロバイダ抽象と実装 (横断的; Issue #7 で追加)
     image/       # イラスト生成 (ImageProvider 抽象越し)
     markdown/    # Markdown 生成
     linker/      # 関係性の付与
