@@ -79,10 +79,10 @@ class KnowledgePipeline:
         value = classification.normalized_input
 
         if source_type is SourceType.CONCEPT:
-            extraction = self._extractor.extract(value)
+            extraction = self._extractor.extract(value, language=self._language)
             ko = self._builder.from_concept(value, extraction, language=self._language)
         elif source_type is SourceType.NEWS and self._news is not None:
-            extraction = self._news.extract(value)
+            extraction = self._news.extract(value, language=self._language)
             ko = self._builder.from_news(extraction, language=self._language)
         else:
             return PipelineResult(

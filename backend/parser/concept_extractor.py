@@ -34,8 +34,12 @@ class ConceptExtractor:
     def __init__(self, provider: LLMProvider) -> None:
         self._provider = provider
 
-    def extract(self, concept: str) -> ConceptExtraction:
+    def extract(self, concept: str, *, language: str = "ja") -> ConceptExtraction:
         """Extract structured fields for the given concept.
+
+        Args:
+            concept: The concept keyword.
+            language: Language for the natural-language fields (e.g. summary).
 
         Raises:
             ValueError: If the concept is empty.
@@ -46,7 +50,7 @@ class ConceptExtractor:
 
         raw = self._provider.complete(
             CONCEPT_SYSTEM_PROMPT,
-            build_concept_user_prompt(concept.strip()),
+            build_concept_user_prompt(concept.strip(), language=language),
             response_format="json",
         )
 
