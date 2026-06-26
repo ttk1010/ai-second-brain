@@ -7,6 +7,9 @@ image_output_dir = "Images"
 # Default image aspect ratio
 default_aspect_ratio = "16:9"
 
+# Text generation model (used for concept extraction)
+llm_model = "gpt-5.4"
+
 # Image generation model
 image_model = "gpt-image-2"
 

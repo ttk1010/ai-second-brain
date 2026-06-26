@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     vault_path: Path
     image_output_dir: str = "Images"
     default_aspect_ratio: AspectRatio = AspectRatio.WIDE
+    llm_model: str = "gpt-5.4"
     image_model: str = "gpt-image-2"
     image_quality: ImageQuality = ImageQuality.MEDIUM
     default_language: str = "ja"

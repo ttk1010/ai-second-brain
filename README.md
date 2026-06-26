@@ -236,6 +236,37 @@ push and pull request.
 
 ---
 
+# Usage
+
+1. Copy the example settings and point `vault_path` at your external Obsidian
+   Vault:
+
+   ```bash
+   cp config/settings.example.toml config/settings.toml
+   # then edit vault_path (and optionally llm_model, default_language)
+   ```
+
+2. Provide your OpenAI API key. Create a `.env` file in the repository root
+   (it is git-ignored):
+
+   ```bash
+   echo 'OPENAI_API_KEY=sk-...' > .env
+   ```
+
+3. Generate a note from an AI concept:
+
+   ```bash
+   uv run asb "Transformer"
+   ```
+
+   The structured Markdown note is written into your Vault (e.g.
+   `01 Concepts/Transformer.md`). Use `--overwrite` to replace an existing note.
+
+> Phase 1 supports AI **concepts**. URL/News input is recognized but its
+> processing is a Phase 2 feature.
+
+---
+
 # Development Workflow
 
 This project follows an issue-driven development process.
