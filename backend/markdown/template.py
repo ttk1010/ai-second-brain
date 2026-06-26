@@ -4,13 +4,14 @@ The standard note structure (CLAUDE.md, ARCHITECTURE.md). Kept separate from the
 generator so the template can evolve without touching generation logic. Markdown
 must stay valuable without AI tools (Markdown Rules).
 
-Sections whose content is not yet produced in Phase 1 (Background, Key Takeaways,
-Illustration) render a placeholder so the note structure stays stable while later
-issues fill them in.
+Sections whose content is not yet produced (Background, Key Takeaways) render a
+placeholder so the note structure stays stable while later issues fill them in.
+The Illustration section falls back to a placeholder only when no illustration
+was generated (e.g. generation failed or was not configured).
 """
 
 PLACEHOLDER = "> _(To be generated)_"
-ILLUSTRATION_PLACEHOLDER = "> _(Illustration will be generated in Phase 2.)_"
+ILLUSTRATION_PLACEHOLDER = "> _(No illustration available.)_"
 
 SECTION_ORDER = (
     "Summary",

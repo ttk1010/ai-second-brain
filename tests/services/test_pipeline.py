@@ -5,11 +5,12 @@ from pathlib import Path
 
 import pytest
 
+from backend.image.base import ImageError, ImageProvider
 from backend.markdown import MarkdownGenerator
 from backend.parser import ConceptExtractor, KnowledgeObjectBuilder
 from backend.planner import EducationalPlanner
 from backend.services import KnowledgePipeline
-from backend.storage import VaultWriter
+from backend.storage import IllustrationWriter, VaultWriter
 from tests.conftest import MockLLMProvider
 
 RESPONSE = json.dumps(
@@ -33,17 +34,33 @@ PLAN_RESPONSE = json.dumps(
 )
 
 
+class _FakeImageProvider(ImageProvider):
+    def __init__(self, *, error: Exception | None = None) -> None:
+        self.error = error
+
+    def generate(self, prompt, *, aspect_ratio, quality, output_path) -> Path:
+        if self.error is not None:
+            raise self.error
+        output_path.write_bytes(b"image-bytes")
+        return output_path
+
+
 def _pipeline(
     vault: Path,
     response: str = RESPONSE,
     plan_response: str = PLAN_RESPONSE,
+    image_provider: ImageProvider | None = None,
 ) -> KnowledgePipeline:
+    illustration_writer = (
+        IllustrationWriter(vault, image_provider) if image_provider is not None else None
+    )
     return KnowledgePipeline(
         extractor=ConceptExtractor(MockLLMProvider(response)),
         builder=KnowledgeObjectBuilder(),
         planner=EducationalPlanner(MockLLMProvider(plan_response)),
         markdown_generator=MarkdownGenerator(),
         vault_writer=VaultWriter(vault),
+        illustration_writer=illustration_writer,
     )
 
 
@@ -62,6 +79,31 @@ def test_concept_end_to_end(tmp_path: Path) -> None:
     plan = result.knowledge_object.educational_plan
     assert plan is not None
     assert plan.learning_objective == "Understand self-attention."
+
+
+def test_illustration_generated_and_embedded(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path, image_provider=_FakeImageProvider()).run("Transformer")
+
+    assert result.status == "created"
+    image = tmp_path / "Images" / "Transformer.png"
+    assert image.exists()
+    assert result.knowledge_object is not None
+    assert result.knowledge_object.outputs["illustration"] == "Images/Transformer.png"
+    # The note embeds the illustration.
+    content = result.path.read_text(encoding="utf-8")
+    assert "![[Images/Transformer.png]]" in content
+
+
+def test_illustration_failure_does_not_block_note_creation(tmp_path: Path) -> None:
+    provider = _FakeImageProvider(error=ImageError("boom"))
+    result = _pipeline(tmp_path, image_provider=provider).run("Transformer")
+
+    assert result.status == "created"
+    assert result.path is not None and result.path.exists()
+    assert result.knowledge_object is not None
+    assert "illustration" not in result.knowledge_object.outputs
+    # The note falls back to the placeholder.
+    assert "No illustration available" in result.path.read_text(encoding="utf-8")
 
 
 def test_planning_failure_does_not_block_note_creation(tmp_path: Path) -> None:

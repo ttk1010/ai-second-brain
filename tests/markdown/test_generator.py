@@ -90,9 +90,16 @@ def test_missing_data_renders_placeholders() -> None:
     assert "## References\n\n> _(To be generated)_" in md
 
 
-def test_illustration_placeholder_mentions_phase_2() -> None:
+def test_illustration_placeholder_when_absent() -> None:
     md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
-    assert "Phase 2" in md
+    assert "## Illustration\n\n> _(No illustration available.)_" in md
+
+
+def test_illustration_embedded_when_present() -> None:
+    ko = _minimal_ko()
+    ko.outputs = {"illustration": "Images/MCP.png"}
+    md = MarkdownGenerator().generate(ko, created=FIXED_DATE)
+    assert "## Illustration\n\n![[Images/MCP.png]]" in md
 
 
 def test_tags_combine_metadata_and_concepts() -> None:

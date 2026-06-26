@@ -260,10 +260,13 @@ push and pull request.
    ```
 
    The structured Markdown note is written into your Vault (e.g.
-   `01 Concepts/Transformer.md`). Use `--overwrite` to replace an existing note.
+   `01 Concepts/Transformer.md`), together with an educational illustration
+   saved under `Images/` (e.g. `Images/Transformer.png`) and embedded in the
+   note. Use `--overwrite` to replace an existing note.
 
-> Phase 1 supports AI **concepts**. URL/News input is recognized but its
-> processing is a Phase 2 feature.
+> AI **concepts** are processed end to end (summary, Educational Plan, and
+> illustration). URL/News input is recognized but its processing is still a
+> Phase 2 work in progress.
 
 ---
 
