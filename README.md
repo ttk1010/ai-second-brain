@@ -314,8 +314,12 @@ Ultimately, the system becomes a personal AI research assistant that grows toget
 
 ## Project Status
 
-🚧 Early Development
+🚧 Active Development
 
-The architecture has been designed.
-
-Implementation is beginning with the foundation of the knowledge pipeline.
+- **Phase 1 — Foundation:** ✅ complete. Concept input → Knowledge Object →
+  structured Markdown note saved to the external Vault.
+- **Phase 2 — Educational Content:** ✅ complete. Both concepts and news URLs are
+  processed end to end, with an Educational Plan, a generated illustration
+  (gpt-image-2), and full notes (summary, background, key takeaways).
+- **Phase 3 — Knowledge Organization:** ⏭️ next. Related-note detection,
+  backlinks, and concept relationships.
