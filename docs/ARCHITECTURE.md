@@ -108,7 +108,7 @@ Its only job is accepting input.
 
 Determine the input type.
 
-Possible categories include:
+Possible classification labels include:
 
 * Concept
 * News
@@ -116,7 +116,14 @@ Possible categories include:
 * Documentation
 * Unknown
 
-Future versions may support additional input sources.
+In Phase 1, these labels map onto only two processing pipelines (see ADR 0001):
+
+* Concept → Concept pipeline
+* News → News pipeline
+* Research Paper / Documentation → handled provisionally by the News pipeline (treated as URL input)
+* Unknown → falls back to the News pipeline if it parses as a URL; otherwise the system fails fast with an explicit error
+
+Dedicated pipelines for Research Paper and Documentation are deferred to a future issue.
 
 ---
 
@@ -158,24 +165,34 @@ Both pipelines eventually produce the same normalized structure.
 
 ---
 
-# Knowledge Normalizer
+# Knowledge Object Builder
 
-This component converts every input into a common internal representation.
+This component converts every input into the canonical internal representation:
+the **Knowledge Object**. It is the single component responsible for normalization.
 
-Example:
+The authoritative schema is defined in `DATA_MODEL.md`. A Knowledge Object is
+structured along these fields:
 
-```json
-{
-  "title": "...",
-  "type": "...",
-  "summary": "...",
-  "concepts": [],
-  "references": [],
-  "tags": []
-}
+```text
+KnowledgeObject
+├── id
+├── source
+├── title
+├── summary
+├── concepts
+├── entities
+├── relationships
+├── educational_plan
+├── references
+├── metadata
+└── outputs (optional)
 ```
 
 Downstream components should never care whether the original input was a keyword or a URL.
+
+> Note: an earlier draft called this component "Knowledge Normalizer". The name
+> has been unified to **Knowledge Object Builder** (ADR 0001). For data-structure
+> details, `DATA_MODEL.md` is the source of truth.
 
 ---
 

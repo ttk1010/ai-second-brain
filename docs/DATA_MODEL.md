@@ -82,6 +82,11 @@ KnowledgeObject
 └── outputs (optional)
 ```
 
+The `outputs` field holds **references only** — file paths or IDs pointing to
+generated artifacts (Markdown, illustration, etc.). It never stores the artifact
+bodies themselves. This keeps the Knowledge Object free of presentation data
+(see ADR 0001).
+
 ---
 
 ## Responsibilities
@@ -114,9 +119,15 @@ Typical fields may include:
 * target audience
 * prerequisite knowledge
 * key messages
-* visualization strategy
+* visualization strategy (including the chosen aspect ratio)
 
 The Educational Plan drives all educational outputs.
+
+The **aspect ratio** of an illustration is decided here, as part of the
+`visualization_strategy`. The Educational Planner chooses it (using the
+information-type → aspect-ratio mapping in PROJECT_CHARTER.md); the Illustration
+Generator only consumes it. Education decides *what* to show; the generator
+decides only *how* to render it (see ADR 0001).
 
 ---
 
@@ -194,7 +205,7 @@ Each component has a clear responsibility:
 | ------------------------ | ------------------ |
 | Extractors               | Raw input analysis |
 | Knowledge Object Builder | Knowledge Object   |
-| Educational Planner      | Educational Plan   |
+| Educational Planner      | Educational Plan (incl. aspect ratio) |
 | Markdown Generator       | Markdown           |
 | Illustration Generator   | Illustration       |
 | Metadata Generator       | Metadata           |
