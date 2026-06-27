@@ -110,20 +110,41 @@ Obsidian Graph View naturally reflects relationships between concepts.
 
 ## Goal
 
-Reduce friction when capturing knowledge.
+Reduce friction when capturing knowledge from mobile and PC, while keeping
+processing local and adding no fixed hosting cost.
+
+### Architecture
+
+Capture and processing are decoupled by a queue, and **all processing stays
+local** (no always-on server, no API key in the cloud, no abuse surface). The
+running cost stays "OpenAI per note" only — no fixed monthly hosting fee.
+
+- The Vault's `00 Inbox/` acts as the capture queue (synced via Obsidian
+  Sync / iCloud / git).
+- A local worker processes inbox items with the existing pipeline when the PC
+  is on (capture is always available; processing is deferred until then).
 
 ### Deliverables
 
-- FastAPI backend
-- REST API
-- CLI improvements
-- Browser extension
-- Mobile sharing
-- URL sharing workflow
+- **Inbox capture workflow:** drop a URL/keyword stub into `00 Inbox/`; a local
+  worker (file watcher or scheduled run) turns it into a full note.
+- **Chat capture via Claude Code Channels:** message a Telegram bot; Claude Code
+  (running locally, under the existing Claude Pro subscription) runs `asb` on the
+  input and writes to the Vault. No custom server; reuses the CLI. A thin ASB
+  skill/command and a pre-approved `asb` command let Claude act without remote
+  permission prompts.
+- **iOS/macOS Share Sheet (Shortcut):** share an article straight into the Inbox.
+- CLI improvements as needed.
+
+> A cloud/FastAPI service (processing even when the PC is off) is intentionally
+> out of scope: it adds fixed hosting cost, cloud-key security concerns, and an
+> abuse surface. Revisit only if always-on processing becomes a hard
+> requirement.
 
 ### Success Criteria
 
-Capturing a new AI article takes less than one minute.
+Capturing a new AI article from a phone or PC takes under a minute, with no
+fixed monthly cost beyond per-note OpenAI usage.
 
 ---
 
