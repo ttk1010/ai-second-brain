@@ -275,6 +275,27 @@ push and pull request.
 > Both AI **concepts** and **news URLs** are processed end to end (summary,
 > Educational Plan, and illustration).
 
+## Connecting notes
+
+As your Vault grows, connect the notes into a knowledge graph. Two layers:
+
+- **`asb-link`** (deterministic, free): indexes the Vault and safely rewrites a
+  note's "Related Notes" section.
+
+  ```bash
+  uv run asb-link index                       # list all notes as JSON
+  uv run asb-link apply "<vault>/01 Concepts/Transformer.md" \
+    --link "Neural Network:prerequisite" --link "Attention:related"
+  ```
+
+  `apply` only touches the Related Notes section and is idempotent. Reverse
+  links appear automatically via Obsidian's native backlinks.
+
+- **`asb-relink` Claude Code skill** (smart, no OpenAI cost): in Claude Code, run
+  the `asb-relink` skill to read the whole Vault, decide which notes are related
+  (including spelling variants and conceptual closeness), and apply the links for
+  you. It uses your Claude subscription only — it makes **no OpenAI API calls**.
+
 ---
 
 # Development Workflow
