@@ -48,6 +48,18 @@ def test_cli_creates_note(tmp_path: Path, vault: Path, monkeypatch, capsys) -> N
     assert "Created note" in capsys.readouterr().out
 
 
+def test_cli_no_image_skips_illustration(tmp_path: Path, vault: Path, monkeypatch, capsys) -> None:
+    _patch_providers(monkeypatch)
+    cfg = _write_config(tmp_path, vault)
+
+    code = cli.main(["Transformer", "--no-image", "--config", str(cfg)])
+
+    assert code == 0
+    assert (vault / "01 Concepts" / "Transformer.md").exists()
+    # No illustration is generated.
+    assert not (vault / "Images").exists()
+
+
 def test_cli_reports_unsupported_for_malformed_url(
     tmp_path: Path, vault: Path, monkeypatch, capsys
 ) -> None:
