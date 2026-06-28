@@ -10,6 +10,8 @@ import logging
 from pathlib import Path
 
 from backend.models import KnowledgeObject
+from backend.models.enums import SourceType
+from backend.storage.frontmatter import parse_frontmatter
 from backend.storage.paths import folder_for, resolve_target, slugify_title
 
 logger = logging.getLogger(__name__)
@@ -20,6 +22,23 @@ class VaultWriter:
 
     def __init__(self, vault_path: Path) -> None:
         self._vault_path = vault_path
+
+    def find_existing(self, source_type: SourceType, source: str) -> Path | None:
+        """Return an existing note whose frontmatter ``source`` matches, if any.
+
+        Used for idempotent generation: the same concept/URL is not regenerated.
+        The match is on the canonical ``source`` value, not the (short_title-based)
+        filename.
+        """
+        folder = self._vault_path / folder_for(source_type)
+        if not folder.is_dir():
+            return None
+        wanted = source.strip()
+        for note in sorted(folder.glob("*.md")):
+            frontmatter = parse_frontmatter(note.read_text(encoding="utf-8"))
+            if str(frontmatter.get("source") or "").strip() == wanted:
+                return note
+        return None
 
     def write(
         self,

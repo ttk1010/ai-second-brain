@@ -10,7 +10,7 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import yaml
+from backend.storage.frontmatter import parse_frontmatter
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ def _read_record(note_path: Path, vault_path: Path) -> NoteRecord | None:
         return None
 
     relative = note_path.relative_to(vault_path).as_posix()
-    frontmatter = _parse_frontmatter(text)
+    frontmatter = parse_frontmatter(text)
 
     title = str(frontmatter.get("title") or "").strip() or _title_from_body(text, note_path)
     tags = _string_list(frontmatter.get("tags"))
@@ -86,25 +86,6 @@ def _read_record(note_path: Path, vault_path: Path) -> NoteRecord | None:
         source_type=source_type,
         id=note_id,
     )
-
-
-def _parse_frontmatter(text: str) -> dict:
-    """Parse the leading YAML frontmatter block, returning {} when absent/invalid."""
-    if not text.startswith("---"):
-        return {}
-    # Frontmatter is the block between the first two '---' fences.
-    parts = text.split("\n", 1)
-    if len(parts) < 2:
-        return {}
-    end = parts[1].find("\n---")
-    if end == -1:
-        return {}
-    block = parts[1][:end]
-    try:
-        data = yaml.safe_load(block)
-    except yaml.YAMLError:
-        return {}
-    return data if isinstance(data, dict) else {}
 
 
 def _title_from_body(text: str, note_path: Path) -> str:

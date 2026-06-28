@@ -72,7 +72,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Failed to generate note: {exc}", file=sys.stderr)
         return 1
 
-    if result.status == "unsupported":
+    if result.status in ("unsupported", "exists"):
         print(result.message)
         return 0
 

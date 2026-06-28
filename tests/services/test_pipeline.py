@@ -155,6 +155,27 @@ def test_empty_input_raises(tmp_path: Path) -> None:
         _pipeline(tmp_path).run("   ")
 
 
+def test_rerun_skips_existing_source(tmp_path: Path) -> None:
+    pipeline = _pipeline(tmp_path)
+    first = pipeline.run("Transformer")
+    second = pipeline.run("Transformer")
+
+    assert first.status == "created"
+    assert second.status == "exists"
+    assert second.path == first.path
+    # No duplicate note is created.
+    assert len(list((tmp_path / "01 Concepts").glob("*.md"))) == 1
+
+
+def test_overwrite_regenerates_existing(tmp_path: Path) -> None:
+    pipeline = _pipeline(tmp_path)
+    pipeline.run("Transformer")
+    again = pipeline.run("Transformer", overwrite=True)
+
+    assert again.status == "created"
+    assert len(list((tmp_path / "01 Concepts").glob("*.md"))) == 1
+
+
 def test_overwrite_is_passed_through(tmp_path: Path) -> None:
     pipeline = _pipeline(tmp_path)
     first = pipeline.run("Transformer")
