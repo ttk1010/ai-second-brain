@@ -326,10 +326,14 @@ Setup:
 
 1. Enable Claude Code Channels and connect a Telegram bot (per the Channels
    docs). A terminal/session must stay running on your machine.
-2. **Pre-approve the capture command.** Channels cannot approve permission
-   prompts remotely, so add a Claude Code permission allow-rule for running the
-   `asb` (and `asb-inbox`) command ahead of time, in your Claude Code settings.
-   See the Claude Code permissions/settings documentation for the exact format.
+2. **Pre-approve the actions so it runs unattended.** Channels cannot approve
+   permission prompts remotely, so register the capture command and the Telegram
+   reply tools in your Claude Code permissions ahead of time. Add them to the
+   `permissions.allow` list in your personal `.claude/settings.local.json`
+   (gitignored — keep Telegram-related rules here, not in shared settings), then
+   restart Claude Code. The exact tool identifiers (e.g. the
+   `mcp__…telegram…__reply` reply tool) and a ready-to-merge list are in
+   [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 3. Message the bot an AI concept or an article URL. The bundled `asb-capture`
    skill runs `asb` on it and reports the result.
 

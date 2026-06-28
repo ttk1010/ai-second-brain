@@ -60,6 +60,22 @@ the design rationale in `docs/adr/`.
   その後 Claude Code を再起動すると `bun server.ts` が起動し `telegram channel: polling as @<botname>` がログに出る
 - **Notes:** bun インストール後はシェルを再起動してから Claude Code を起動すること（PATH が引き継がれないと channels プロセスが bun を見つけられない）。動作確認は `ps aux | grep "bun"` でプロセスの存在を確認する
 
+### DM の返信・コマンド実行のたびに承認プロンプトが出る
+
+- **Symptom:** Telegram DM でメッセージが届くたびに、返信送信・コマンド実行など各ツール呼び出しで承認プロンプトが表示され、処理が止まる。対象は Telegram プラグインの MCP ツール（`mcp__plugin_telegram_telegram__reply` / `edit_message` / `react` / `download_attachment`）と `Bash(uv run asb ...)` など
+- **Cause:** Channels 経由のセッションはリモート起点で、承認プロンプトにその場で応答できない。Claude Code は未登録のツール/コマンドに対しデフォルトで対話的承認を求めるため、すべてブロックされる
+- **Fix:** `permissions.allow` に使うツール/コマンドを事前登録する。**個人設定 `.claude/settings.local.json`**（gitignore 済み）の `allow` 配列に、既存エントリを残したまま以下をマージする：
+  ```json
+  "mcp__plugin_telegram_telegram__reply",
+  "mcp__plugin_telegram_telegram__edit_message",
+  "mcp__plugin_telegram_telegram__react",
+  "mcp__plugin_telegram_telegram__download_attachment",
+  "Bash(uv run asb *)",
+  "Bash(uv run asb-inbox *)"
+  ```
+  保存後、**Claude Code セッションを再起動**すると反映される（現行セッションには反映されない）。`defaultMode` / `bypassPermissions` は使わず、個別 allow 方式が安全
+- **Notes:** Telegram プラグインのサーバ名は `plugin_telegram_telegram`（アンダースコア区切り、ダッシュではない）。正確な識別子は承認プロンプトの文面 `mcp__<サーバ名>__<ツール名>` で確認できる。**Telegram 関連の許可・パス（`Read(//Users/<user>/.claude/...)` 等）は必ず `settings.local.json` 側に書く**（共有の `.claude/settings.json` に書くと個人パスや設定が git に乗るリスク）。`bypassPermissions` で全許可も可能だが、外部入力なので乗っ取り時のリスクが高く非推奨
+
 ### (add more Channels entries here)
 
 ---
