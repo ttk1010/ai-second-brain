@@ -20,6 +20,7 @@ class NoteRecord:
     """A single note's structured data, as read from disk."""
 
     title: str
+    name: str  # filename stem — the wikilink target ([[name]])
     path: str  # Vault-relative, POSIX
     tags: list[str] = field(default_factory=list)
     source_type: str = ""
@@ -28,6 +29,7 @@ class NoteRecord:
     def to_dict(self) -> dict:
         return {
             "title": self.title,
+            "name": self.name,
             "path": self.path,
             "tags": self.tags,
             "source_type": self.source_type,
@@ -78,6 +80,7 @@ def _read_record(note_path: Path, vault_path: Path) -> NoteRecord | None:
 
     return NoteRecord(
         title=title,
+        name=note_path.stem,
         path=relative,
         tags=tags,
         source_type=source_type,

@@ -30,20 +30,22 @@ paid API from this skill.
    uv run asb-link index
    ```
 
-   This prints a JSON array of every note: `title`, `path` (Vault-relative),
-   `tags`, `source_type`, `id`. (If the console script fails, use
-   `uv run python -m backend.linker.cli index`.)
+   This prints a JSON array of every note: `title` (full, for judgment),
+   `name` (the filename stem — **use this as the wikilink target**), `path`
+   (Vault-relative), `tags`, `source_type`, `id`. (If the console script fails,
+   use `uv run python -m backend.linker.cli index`.)
 
 2. **Find the Vault path.** Read `vault_path` from `config/settings.toml`. You
    will join it with each note's `path` to get an absolute path for step 4.
 
 3. **Decide the links.** For each note, choose the *other existing* notes it is
-   genuinely related to, using their **exact titles from the index**. Judge
-   relatedness from shared tags/topics and your own knowledge — including near
-   synonyms and spelling variants the deterministic layer would miss.
+   genuinely related to. Judge relatedness from each note's `title` and `tags`
+   and your own knowledge (including near synonyms and spelling variants the
+   deterministic layer would miss), but **link using the target note's `name`**
+   (the filename stem) — wikilinks resolve by filename, not by the full title.
 
-   - Only link notes that **exist in the index**. Never invent titles or create
-     dangling links.
+   - Only link notes that **exist in the index** (use their `name`). Never invent
+     names or create dangling links.
    - Be selective: link the few most relevant notes (roughly 2–6), not everything
      that is loosely on-topic. Over-linking makes the graph noisy.
    - You do **not** need to add reverse links — Obsidian shows backlinks
@@ -56,9 +58,11 @@ paid API from this skill.
 
    ```bash
    uv run asb-link apply "<vault_path>/<note path>" \
-     --link "Other Note:prerequisite" \
-     --link "Another Note"
+     --link "Other Note name:prerequisite" \
+     --link "Another Note name"
    ```
+
+   (`--link` values are target note **names** — filename stems from the index.)
 
    `apply` rewrites **only** that note's "Related Notes" section; everything else
    (frontmatter, summary, illustration, references, tags) is left untouched, and

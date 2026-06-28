@@ -24,6 +24,7 @@ class KnowledgeObjectBuilder:
         return KnowledgeObject(
             source=Source(type=SourceType.CONCEPT, value=concept.strip()),
             title=extraction.title,
+            short_title=extraction.short_title,
             summary=extraction.summary,
             background=extraction.background,
             key_takeaways=extraction.key_takeaways,
@@ -47,6 +48,7 @@ class KnowledgeObjectBuilder:
         return KnowledgeObject(
             source=Source(type=SourceType.NEWS, value=extraction.url),
             title=extraction.title,
+            short_title=extraction.short_title,
             summary=extraction.summary,
             background=extraction.background,
             key_takeaways=extraction.key_takeaways,

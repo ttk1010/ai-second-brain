@@ -27,12 +27,21 @@ Follow these rules:
   models, or people named.
 - Prefer conceptual clarity over jargon.
 - Respond with a single JSON object only. Do not include prose outside the JSON.
+
+For "short_title", give a concise note filename: the key entity and the core
+topic, dropping marketing words and secondary details, keeping product/version
+names. Examples (full title -> short_title):
+- "Sakana AI、…「Sakana Fugu」提供開始 一部…" -> "Sakana Fugu"
+- "画像生成AIのMidjourney、医療ハードウェアに参入 …" -> "Midjourney、医療ハードウェアに参入"
+- "IBM、1nm未満世代のチップ技術を発表 …" -> "IBM、1nm未満世代のチップ"
+- "OpenAI、GPT-5.6を発表 最上位「Sol」…" -> "GPT-5.6"
 """
 
 NEWS_OUTPUT_SCHEMA = """\
 Return a JSON object with exactly these fields:
 {
-  "title": "string, a concise title for the note",
+  "title": "string, the article's full descriptive title",
+  "short_title": "string, concise filename: key entity + core topic (see rules above)",
   "summary": "string, 3-5 sentences covering what happened, the technology, the
     companies/people, and why it matters",
   "background": "string, 2-4 sentences on the context behind this story and why it matters",

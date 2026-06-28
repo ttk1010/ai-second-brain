@@ -12,6 +12,7 @@ from tests.conftest import MockLLMProvider
 VALID_RESPONSE = json.dumps(
     {
         "title": "Transformer",
+        "short_title": "Transformer",
         "summary": "A neural network architecture based on self-attention.",
         "background": "It replaced RNNs for many NLP tasks.",
         "key_takeaways": ["Self-attention scales", "Parallelizable"],
@@ -31,6 +32,7 @@ def test_extract_returns_structured_fields() -> None:
     assert extraction.entities == ["Google"]
     assert extraction.background == "It replaced RNNs for many NLP tasks."
     assert extraction.key_takeaways == ["Self-attention scales", "Parallelizable"]
+    assert extraction.short_title == "Transformer"
     # The extractor requests a JSON response.
     assert provider.calls[0][2] == "json"
 

@@ -72,6 +72,7 @@ KnowledgeObject
 ├── id
 ├── source
 ├── title
+├── short_title
 ├── summary
 ├── background
 ├── key_takeaways
@@ -83,6 +84,12 @@ KnowledgeObject
 ├── metadata
 └── outputs (optional)
 ```
+
+`short_title` is a concise label used for the note's filename (and illustration
+filename); the full descriptive `title` stays in the frontmatter and heading. It
+falls back to `title` when empty. For concepts it is just the concept name (e.g.
+`Neural Network`); for news it is the key entity and core topic (e.g.
+`Midjourney、医療ハードウェアに参入`).
 
 `background` (context and why the topic matters) and `key_takeaways` (the few
 points a reader should remember) are reader-facing knowledge content, extracted

@@ -37,6 +37,10 @@ class KnowledgeObject(BaseModel):
     id: str = Field(default_factory=lambda: uuid4().hex)
     source: Source
     title: str = Field(min_length=1)
+    short_title: str = Field(
+        default="",
+        description="Concise label for the filename; falls back to title when empty.",
+    )
     summary: str = Field(min_length=1)
     background: str = Field(
         default="",

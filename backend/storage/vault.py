@@ -42,7 +42,9 @@ class VaultWriter:
         folder = self._vault_path / folder_for(ko.source.type)
         folder.mkdir(parents=True, exist_ok=True)
 
-        target = resolve_target(folder, slugify_title(ko.title), overwrite=overwrite)
+        target = resolve_target(
+            folder, slugify_title(ko.short_title or ko.title), overwrite=overwrite
+        )
         target.write_text(markdown, encoding="utf-8")
 
         relative = target.relative_to(self._vault_path)

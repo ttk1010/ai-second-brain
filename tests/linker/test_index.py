@@ -77,6 +77,7 @@ def test_to_list_is_serializable(tmp_path: Path) -> None:
     assert data == [
         {
             "title": "Transformer",
+            "name": "Transformer",
             "path": "01 Concepts/Transformer.md",
             "tags": ["attention", "self-attention"],
             "source_type": "concept",

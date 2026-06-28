@@ -64,6 +64,24 @@ def test_overwrite_replaces_existing(tmp_path: Path) -> None:
     assert again.read_text(encoding="utf-8") == "second"
 
 
+def test_short_title_drives_filename(tmp_path: Path) -> None:
+    ko = KnowledgeObject(
+        source=Source(type=SourceType.NEWS, value="https://ledge.ai/x"),
+        title="Sakana AI、複数AIモデルの集合知を活用する「Sakana Fugu」提供開始",
+        short_title="Sakana Fugu",
+        summary="A summary.",
+    )
+    target = VaultWriter(tmp_path).write(ko, "x")
+    # Filename uses the concise short_title; the full title stays in the object.
+    assert target == tmp_path / "06 News" / "Sakana Fugu.md"
+    assert ko.title.startswith("Sakana AI")
+
+
+def test_falls_back_to_title_without_short_title(tmp_path: Path) -> None:
+    target = VaultWriter(tmp_path).write(_ko("Transformer"), "x")
+    assert target.name == "Transformer.md"
+
+
 def test_records_relative_path_in_outputs(tmp_path: Path) -> None:
     ko = _ko()
     VaultWriter(tmp_path).write(ko, "x")
