@@ -18,9 +18,11 @@ class _MockImageProvider:
 
 
 def _patch_providers(monkeypatch) -> None:
-    """Replace the network-backed providers so the CLI runs offline."""
-    monkeypatch.setattr(cli, "OpenAIProvider", lambda model: _MockProvider())
-    monkeypatch.setattr(cli, "OpenAIImageProvider", lambda model: _MockImageProvider())
+    """Replace the network-backed providers (built in the factory) so the CLI runs offline."""
+    from backend.services import factory
+
+    monkeypatch.setattr(factory, "OpenAIProvider", lambda model: _MockProvider())
+    monkeypatch.setattr(factory, "OpenAIImageProvider", lambda model: _MockImageProvider())
 
 
 @pytest.fixture

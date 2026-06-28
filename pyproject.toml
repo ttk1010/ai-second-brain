@@ -17,6 +17,7 @@ dependencies = [
 [project.scripts]
 asb = "backend.cli:main"
 asb-link = "backend.linker.cli:main"
+asb-inbox = "backend.inbox.cli:main"
 
 [dependency-groups]
 dev = [
