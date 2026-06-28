@@ -296,6 +296,43 @@ As your Vault grows, connect the notes into a knowledge graph. Two layers:
   (including spelling variants and conceptual closeness), and apply the links for
   you. It uses your Claude subscription only — it makes **no OpenAI API calls**.
 
+## Capture from anywhere
+
+Capture is decoupled from processing by a queue, so everything runs locally with
+no fixed hosting cost (see ADR 0006). Re-running is safe — an existing
+concept/URL is skipped, not regenerated.
+
+### Inbox queue
+
+Drop a stub note containing a URL or concept into your Vault's `00 Inbox/` (e.g.
+from Obsidian on your phone). When your machine is on, process the queue:
+
+```bash
+uv run asb-inbox            # turns each 00 Inbox stub into a note, then clears it
+```
+
+Run it manually, or schedule it (cron / launchd). `--no-image` and `--overwrite`
+are supported.
+
+### Chat capture via Claude Code Channels
+
+Capture from your phone by messaging a Telegram bot, using
+[Claude Code Channels](https://code.claude.com/docs/en/channels). A message is
+routed to Claude Code running on your machine, which runs `asb` and replies. No
+server to host; it uses your Claude subscription (OpenAI cost is only the usual
+per-note generation).
+
+Setup:
+
+1. Enable Claude Code Channels and connect a Telegram bot (per the Channels
+   docs). A terminal/session must stay running on your machine.
+2. **Pre-approve the capture command.** Channels cannot approve permission
+   prompts remotely, so add a Claude Code permission allow-rule for running the
+   `asb` (and `asb-inbox`) command ahead of time, in your Claude Code settings.
+   See the Claude Code permissions/settings documentation for the exact format.
+3. Message the bot an AI concept or an article URL. The bundled `asb-capture`
+   skill runs `asb` on it and reports the result.
+
 ---
 
 # Development Workflow
