@@ -333,6 +333,8 @@ Setup:
 3. Message the bot an AI concept or an article URL. The bundled `asb-capture`
    skill runs `asb` on it and reports the result.
 
+Hitting setup snags? See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
 ---
 
 # Development Workflow
