@@ -18,6 +18,7 @@ ARTICLE = FetchedArticle(
 VALID_RESPONSE = json.dumps(
     {
         "title": "OpenAI ships a new model",
+        "short_title": "GPT-5.6",
         "summary": "OpenAI released a model that improves reasoning.",
         "concepts": ["reasoning", "large language models"],
         "entities": ["OpenAI"],
@@ -48,6 +49,7 @@ def test_extract_returns_structured_fields() -> None:
     assert "OpenAI" in extraction.entities
     assert "reasoning" in extraction.concepts
     assert extraction.url == "https://example.com/news"
+    assert extraction.short_title == "GPT-5.6"
     # The extractor requests a JSON response.
     assert provider.calls[0][2] == "json"
     # The article body is included in the prompt.

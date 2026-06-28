@@ -53,7 +53,9 @@ class IllustrationWriter:
         folder = self._vault_path / self._image_output_dir
         folder.mkdir(parents=True, exist_ok=True)
 
-        target = resolve_target(folder, slugify_title(ko.title), overwrite=overwrite, suffix=".png")
+        target = resolve_target(
+            folder, slugify_title(ko.short_title or ko.title), overwrite=overwrite, suffix=".png"
+        )
         prompt = build_illustration_prompt(ko)
 
         self._provider.generate(

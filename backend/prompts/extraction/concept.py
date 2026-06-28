@@ -29,6 +29,7 @@ CONCEPT_OUTPUT_SCHEMA = """\
 Return a JSON object with exactly these fields:
 {
   "title": "string, the concept name",
+  "short_title": "string, concise filename — for a concept, the concept name",
   "summary": "string, 2-4 sentence explanation",
   "background": "string, 2-4 sentences on why it matters and the context needed to understand it",
   "key_takeaways": ["string, 3-5 points a reader should remember"],
