@@ -17,18 +17,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from backend.config import DEFAULT_SETTINGS_PATH, SettingsError, load_settings
-from backend.image import OpenAIImageProvider
-from backend.llm import OpenAIProvider
-from backend.markdown import MarkdownGenerator
-from backend.parser import (
-    ConceptExtractor,
-    HttpArticleFetcher,
-    KnowledgeObjectBuilder,
-    NewsExtractor,
-)
-from backend.planner import EducationalPlanner
-from backend.services import KnowledgePipeline
-from backend.storage import IllustrationWriter, VaultWriter
+from backend.services import build_pipeline
 from backend.storage.git import commit_note
 
 
@@ -44,26 +33,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
 
-    provider = OpenAIProvider(model=settings.llm_model)
-    illustration_writer = None
-    if not args.no_image:
-        illustration_writer = IllustrationWriter(
-            settings.vault_path,
-            OpenAIImageProvider(model=settings.image_model),
-            image_output_dir=settings.image_output_dir,
-            quality=settings.image_quality,
-            default_aspect_ratio=settings.default_aspect_ratio,
-        )
-    pipeline = KnowledgePipeline(
-        extractor=ConceptExtractor(provider),
-        builder=KnowledgeObjectBuilder(),
-        planner=EducationalPlanner(provider),
-        markdown_generator=MarkdownGenerator(),
-        vault_writer=VaultWriter(settings.vault_path),
-        news_extractor=NewsExtractor(provider, HttpArticleFetcher()),
-        illustration_writer=illustration_writer,
-        language=settings.default_language,
-    )
+    pipeline = build_pipeline(settings, no_image=args.no_image)
 
     try:
         result = pipeline.run(args.input, overwrite=args.overwrite)
