@@ -379,5 +379,11 @@ Ultimately, the system becomes a personal AI research assistant that grows toget
 - **Phase 2 — Educational Content:** ✅ complete. Both concepts and news URLs are
   processed end to end, with an Educational Plan, a generated illustration
   (gpt-image-2), and full notes (summary, background, key takeaways).
-- **Phase 3 — Knowledge Organization:** ⏭️ next. Related-note detection,
-  backlinks, and concept relationships.
+- **Phase 3 — Knowledge Organization:** ✅ complete. A deterministic vault index
+  and safe Related-Notes updater, plus the `asb-relink` Claude Code skill that
+  connects notes with no OpenAI cost. Backlinks via Obsidian.
+- **Phase 4 — Automation:** ✅ complete. Local-first capture with no fixed cost:
+  the `00 Inbox` queue worker (`asb-inbox`) and Claude Code Channels (Telegram)
+  chat capture. Idempotent generation and a `--no-image` cost switch.
+- **Phase 5 — AI Research Assistant:** ⏭️ next. Recommendations, similar/duplicate
+  detection, knowledge-gap detection, and a daily digest.
