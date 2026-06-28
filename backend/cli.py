@@ -45,13 +45,15 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     provider = OpenAIProvider(model=settings.llm_model)
-    illustration_writer = IllustrationWriter(
-        settings.vault_path,
-        OpenAIImageProvider(model=settings.image_model),
-        image_output_dir=settings.image_output_dir,
-        quality=settings.image_quality,
-        default_aspect_ratio=settings.default_aspect_ratio,
-    )
+    illustration_writer = None
+    if not args.no_image:
+        illustration_writer = IllustrationWriter(
+            settings.vault_path,
+            OpenAIImageProvider(model=settings.image_model),
+            image_output_dir=settings.image_output_dir,
+            quality=settings.image_quality,
+            default_aspect_ratio=settings.default_aspect_ratio,
+        )
     pipeline = KnowledgePipeline(
         extractor=ConceptExtractor(provider),
         builder=KnowledgeObjectBuilder(),
@@ -95,7 +97,12 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser.add_argument(
         "--overwrite",
         action="store_true",
-        help="Overwrite an existing note instead of creating a numbered copy.",
+        help="Regenerate and replace an existing note instead of skipping it.",
+    )
+    parser.add_argument(
+        "--no-image",
+        action="store_true",
+        help="Skip illustration generation (saves cost; the note is still created).",
     )
     parser.add_argument(
         "--config",
