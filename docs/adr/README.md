@@ -26,3 +26,7 @@
 | --- | ----- | ------ |
 | [0001](0001-design-baseline.md) | Design baseline: terminology, pipeline scope, data ownership | Accepted |
 | [0002](0002-vault-and-layout.md) | Vault location, Git tracking scope, and backend layout | Accepted |
+| [0003](0003-graceful-degradation-of-enrichment.md) | Graceful degradation of enrichment (Educational Plan / Illustration) | Accepted |
+| [0004](0004-news-ingestion-structured-extraction.md) | News ingestion: structured-source extraction, no headless browser | Accepted |
+| [0005](0005-knowledge-organization-cost-model.md) | Knowledge organization: cost model, linker design, KO non-persistence | Accepted |
+| [0006](0006-capture-interface-local-first.md) | Capture interface: local-first (Inbox queue + Claude Code Channels) | Accepted |
