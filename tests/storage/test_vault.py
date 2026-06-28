@@ -88,6 +88,32 @@ def test_records_relative_path_in_outputs(tmp_path: Path) -> None:
     assert ko.outputs["markdown"] == "01 Concepts/Transformer.md"
 
 
+def test_find_existing_matches_by_source(tmp_path: Path) -> None:
+    writer = VaultWriter(tmp_path)
+    ko = _ko("Transformer")
+    ko.source.value = "Transformer"
+    from backend.markdown import MarkdownGenerator
+
+    writer.write(ko, MarkdownGenerator().generate(ko))
+
+    found = writer.find_existing(SourceType.CONCEPT, "Transformer")
+    assert found is not None and found.name == "Transformer.md"
+
+
+def test_find_existing_returns_none_when_absent(tmp_path: Path) -> None:
+    assert VaultWriter(tmp_path).find_existing(SourceType.CONCEPT, "Nope") is None
+
+
+def test_find_existing_is_source_type_scoped(tmp_path: Path) -> None:
+    writer = VaultWriter(tmp_path)
+    ko = _ko("Transformer")
+    from backend.markdown import MarkdownGenerator
+
+    writer.write(ko, MarkdownGenerator().generate(ko))
+    # Same value but a different source type does not match (different folder).
+    assert writer.find_existing(SourceType.NEWS, "Transformer") is None
+
+
 def test_missing_vault_raises(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError, match="Vault path does not exist"):
         VaultWriter(tmp_path / "nope").write(_ko(), "x")

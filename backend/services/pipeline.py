@@ -31,7 +31,7 @@ from backend.storage import IllustrationWriter, VaultWriter
 
 logger = logging.getLogger(__name__)
 
-PipelineStatus = Literal["created", "unsupported"]
+PipelineStatus = Literal["created", "exists", "unsupported"]
 
 
 @dataclass(frozen=True)
@@ -78,13 +78,10 @@ class KnowledgePipeline:
         source_type = classification.source_type
         value = classification.normalized_input
 
-        if source_type is SourceType.CONCEPT:
-            extraction = self._extractor.extract(value, language=self._language)
-            ko = self._builder.from_concept(value, extraction, language=self._language)
-        elif source_type is SourceType.NEWS and self._news is not None:
-            extraction = self._news.extract(value, language=self._language)
-            ko = self._builder.from_news(extraction, language=self._language)
-        else:
+        supported = source_type is SourceType.CONCEPT or (
+            source_type is SourceType.NEWS and self._news is not None
+        )
+        if not supported:
             return PipelineResult(
                 status="unsupported",
                 message=(
@@ -92,6 +89,25 @@ class KnowledgePipeline:
                     "Provide an AI concept keyword or a valid article URL."
                 ),
             )
+
+        # Idempotency: skip (and avoid all API calls) if this source already exists.
+        if not overwrite:
+            existing = self._vault.find_existing(source_type, value)
+            if existing is not None:
+                return PipelineResult(
+                    status="exists",
+                    message=(
+                        f"Note already exists: {existing.name}. Use --overwrite to regenerate."
+                    ),
+                    path=existing,
+                )
+
+        if source_type is SourceType.CONCEPT:
+            extraction = self._extractor.extract(value, language=self._language)
+            ko = self._builder.from_concept(value, extraction, language=self._language)
+        else:  # NEWS (supported implies the news extractor is present)
+            extraction = self._news.extract(value, language=self._language)
+            ko = self._builder.from_news(extraction, language=self._language)
 
         return self._finalize(ko, overwrite=overwrite)
 
