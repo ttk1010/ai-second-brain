@@ -62,9 +62,20 @@ tags: [Transformer, Generative AI, Foundation Model, RAG, Attention, ...]
 
 (Notes are generated in the language you configure; the default is Japanese.)
 
+## Requirements
+
+- **Python 3.12** and [uv](https://docs.astral.sh/uv/).
+- **An OpenAI API key — required.** Generating a note calls the OpenAI API (text
+  with `gpt-5.4`, illustrations with `gpt-image-2`), so it is **billable per
+  note**. Image generation is the dominant cost — re-running the same input is
+  skipped (no re-charge), and `--no-image` skips the illustration to save cost.
+- **A Claude subscription + [Claude Code](https://www.claude.com/product/claude-code) — optional.**
+  Only needed for the `asb-relink` linking skill and Telegram capture (Claude
+  Code Channels); the core `asb` commands do not require it.
+
 ## Quickstart
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.12.
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.12 (see Requirements above).
 
 ```bash
 # 1. Install dependencies
