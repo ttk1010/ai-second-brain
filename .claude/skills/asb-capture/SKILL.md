@@ -20,16 +20,15 @@ When the user (or an incoming Channels message) gives you an AI **concept** or a
 2. From the repo root, run:
 
    ```bash
-   uv run asb "<input>"
+   uv run python -m backend.cli "<input>"
    ```
 
    - For a comparison request (e.g. "compare Claude, GPT and Gemini"), extract the
-     items and run `uv run asb --compare "Claude, GPT, Gemini"` instead. The note
-     is saved under `04 Comparisons/` with a comparison table.
+     items and run `uv run python -m backend.cli --compare "Claude, GPT, Gemini"` instead.
+     The note is saved under `04 Comparisons/` with a comparison table.
    - Add `--no-image` to skip the illustration (saves cost).
    - Add `--overwrite` only if the user explicitly wants to regenerate an
      existing note.
-   - If the console script fails, use `uv run python -m backend.cli "<input>"`.
 3. Report back concisely: the created note path, or that it already existed, or
    the error. Keep replies short — they may be read in a chat app.
 
