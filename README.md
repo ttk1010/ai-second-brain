@@ -1,404 +1,196 @@
+<p align="center">
+  <img src="docs/assets/asb-icon.png" alt="AI Second Brain" width="140">
+</p>
+
 # AI Second Brain
 
 > Capture. Understand. Visualize. Remember.
 
-AI Second Brain is a personal knowledge system that transforms AI news, research papers, and technical concepts into a structured, visual, and continuously evolving knowledge base.
+[![CI](https://github.com/ttk1010/ai-second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/ttk1010/ai-second-brain/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 
-Instead of simply reading AI content, the goal is to build a **Second Brain** that grows over time—helping both humans and AI understand, connect, and reuse knowledge.
+<!-- Overview illustration (input → Knowledge Object → outputs) is added in issue #21. -->
 
----
+## What is this?
 
-# Vision
+AI Second Brain turns AI-related information into a **structured, visual, and
+continuously evolving knowledge base**. Give it a concept (`Transformer`), an
+article URL, or a comparison (`GPT, Claude, Gemini`) — it generates a structured,
+illustrated Markdown note in your [Obsidian](https://obsidian.md/) vault and
+links it into your knowledge graph.
 
-Artificial Intelligence evolves every day.
+The real product isn't notes or images; it's **organized, reusable knowledge**.
+Every output is generated from a single canonical [Knowledge
+Object](docs/DATA_MODEL.md), so notes stay consistent and the vault remains
+valuable even without AI tools.
 
-New models, new frameworks, new research papers, new APIs, and new regulations appear faster than anyone can remember.
-
-Reading is no longer enough.
-
-The purpose of AI Second Brain is to convert fragmented information into long-term knowledge assets.
-
-Every article, concept, and paper should become something that can be understood today and rediscovered years later.
-
----
-
-# Core Philosophy
-
-This project is **not** an image generation tool.
-
-It is **not** a note-taking application.
-
-It is a **knowledge operating system**.
-
-Images are outputs.
-
-Markdown is an output.
-
-Git is an output.
-
-The real product is **organized knowledge**.
-
----
-
-# What Happens
-
-Given only a URL or an AI-related keyword, the system automatically:
-
-```
-URL / Keyword
-        │
-        ▼
-Knowledge Extraction
-        │
-        ▼
-Knowledge Object
-        │
-        ▼
-Educational Planning
-        │
-        ▼
-┌──────────────────────────┐
-│    Output Generation     │
-├──────────────────────────┤
-│ • Markdown               │
-│ • Illustration           │
-│ • Metadata               │
-│ • Related Notes          │
-└──────────────────────────┘
-        │
-        ▼
-Knowledge Node
-        │
-        ▼
-Obsidian Vault
-        │
-        ▼
-Git
-        │
-        ▼
-GitHub
-```
-
-The Knowledge Object is the canonical representation of knowledge within the system. All generated outputs originate from this single source of truth before being stored as interconnected Knowledge Nodes in the Second Brain.
-
-The Obsidian Vault lives outside this repository (configured via `vault_path`). The trailing `Git → GitHub` step refers to the **external Vault's own optional version control** — committed when `auto_commit` is enabled and the Vault is under Git — and is distinct from this code repository's Git (see ADR 0002).
-
-The long-term goal is to make knowledge accumulation almost effortless.
-
----
-
-# Example Inputs
-
-```
-Transformer
-```
-
-```
-MCP
-```
-
-```
-https://ledge.ai/...
-```
-
-```
-https://openai.com/news/...
-```
-
----
-
-# Example Outputs
-
-For every input, the system generates:
-
-- Educational illustration
-- Structured Markdown note
-- Metadata
-- Related knowledge links
-- Obsidian note
-- Git history
-
-Every output should be reusable.
-
----
-
-# Design Principles
-
-The project follows a few simple principles.
-
-## Knowledge over Content
-
-Do not create content.
-
-Create reusable knowledge.
-
----
-
-## Consistency over Creativity
-
-Educational materials should look and feel consistent.
-
-The same concept should always be explained using the same visual language.
-
----
-
-## Automation with Human Control
-
-The system automates repetitive work.
-
-Humans remain responsible for reviewing knowledge quality.
-
----
-
-## Long-term Maintainability
-
-Every design decision should still make sense years later.
-
-Avoid unnecessary complexity.
-
----
-
-# Current Scope
-
-The first milestone focuses on building a Minimum Viable Pipeline.
-
-- Accept URL or keyword input
-- Understand AI concepts or news
-- Generate educational illustrations
-- Generate Markdown
-- Save to an Obsidian Vault
-- Track changes with Git
-
-Future versions will introduce:
-
-- Knowledge graph generation
-- Automatic related-note discovery
-- AI-assisted knowledge recommendations
-- Mobile capture workflows
-- Browser extensions
-- Daily AI digest generation
-
----
-
-# Repository Structure
-
-```
-backend/
-docs/
-scripts/
-tests/
-```
-
-The repository intentionally keeps a simple structure.
-
-Implementation lives inside the backend.
-
-Documentation lives inside docs.
-
-Knowledge lives inside an **external** Obsidian Vault, located outside this
-repository and configured via `vault_path`. This repository tracks only code
-and documentation — never the knowledge data itself (see ADR 0002).
-
----
-
-# Documentation
-
-Project documentation is intentionally separated.
-
-| Document | Purpose |
-|----------|---------|
-| README.md | Project overview |
-| docs/PROJECT_CHARTER.md | Vision and long-term goals |
-| CLAUDE.md | Development guide for AI coding agents |
-| docs/ARCHITECTURE.md | System architecture *(planned)* |
-| docs/ROADMAP.md | Development roadmap *(planned)* |
-
----
-
-# Development Setup
-
-This project uses [uv](https://docs.astral.sh/uv/) and Python 3.12.
+## Example
 
 ```bash
-# Install dependencies (creates a virtual environment)
-uv sync --dev
-
-# Lint and format
-uv run ruff check .
-uv run ruff format .
-
-# Run tests
-uv run pytest
+uv run asb "LLM"
 ```
 
-Continuous integration runs the same lint, format check, and tests on every
-push and pull request.
+produces `01 Concepts/大規模言語モデル.md` in your vault — a full note with an
+embedded illustration and resolved links:
 
+```markdown
+---
+title: "大規模言語モデル"
+source_type: concept
+tags: [Transformer, Generative AI, Foundation Model, RAG, Attention, ...]
 ---
 
-# Usage
+# 大規模言語モデル
 
-1. Copy the example settings and point `vault_path` at your external Obsidian
-   Vault:
+## Summary
+大規模言語モデル（LLM）は、大量のテキストを学習して、自然言語のパターンを
+予測・生成するAIモデルです。…
 
-   ```bash
-   cp config/settings.example.toml config/settings.toml
-   # then edit vault_path (and optionally llm_model, default_language)
-   ```
+## Illustration
+![[Images/LLM.png]]
 
-2. Provide your OpenAI API key. Create a `.env` file in the repository root
-   (it is git-ignored):
+## Key Takeaways
+- LLMは大量のテキストから言語の統計的パターンを学び、次の語を予測する…
+- 高い汎用性があり、プロンプトや追加学習によって多様なタスクに適応できる…
 
-   ```bash
-   echo 'OPENAI_API_KEY=sk-...' > .env
-   ```
+## Related Notes
+- [[AIエージェント]] — application
+- [[RAG]] — application
+- [[埋め込み]] — related
+```
 
-3. Generate a note from an AI concept:
+(Notes are generated in the language you configure; the default is Japanese.)
 
-   ```bash
-   uv run asb "Transformer"
-   ```
+## Quickstart
 
-   The structured Markdown note is written into your Vault (e.g.
-   `01 Concepts/Transformer.md`), together with an educational illustration
-   saved under `Images/` (e.g. `Images/Transformer.png`) and embedded in the
-   note. Use `--overwrite` to replace an existing note.
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.12.
 
-   You can also pass an article URL to capture AI news:
+```bash
+# 1. Install dependencies
+uv sync --dev
 
-   ```bash
-   uv run asb "https://openai.com/news/..."
-   ```
+# 2. Configure: point vault_path at your Obsidian vault, set your API key
+cp config/settings.example.toml config/settings.toml   # then edit vault_path
+echo 'OPENAI_API_KEY=sk-...' > .env
 
-   The article is fetched, summarized, illustrated, and saved under `06 News/`.
+# 3. Generate a note
+uv run asb "Transformer"                 # a concept
+uv run asb "https://ledge.ai/..."        # a news article
+uv run asb --compare "GPT, Claude, Gemini"   # a comparison
+```
 
-   Or compare several things in one note with `--compare`:
+Each note is written into your vault with an educational illustration. Re-running
+the same input is a no-op (use `--overwrite` to regenerate, `--no-image` to skip
+the illustration).
 
-   ```bash
-   uv run asb --compare "GPT, Claude, Gemini"
-   ```
+## Features
 
-   This produces a structured comparison note (with a comparison table) under
-   `04 Comparisons/`, linked to each item's own note.
+- **Three knowledge types:** AI **concepts**, **news URLs** (fetched &
+  summarized — including JS-rendered sites), and **comparisons** (with a table).
+- **Educational illustrations:** a consistent, hand-drawn visual per note
+  (gpt-image-2).
+- **Structured Markdown notes:** summary, background, key takeaways, related
+  notes, references, tags — readable without any AI tool.
+- **Automatic linking:** the `asb-relink` Claude Code skill connects notes into a
+  graph at no OpenAI cost; backlinks come from Obsidian.
+- **Capture from anywhere:** a local `00 Inbox` queue (`asb-inbox`) and chat
+  capture via Claude Code Channels (Telegram) — local-first, no fixed hosting
+  cost.
 
-> AI **concepts**, **news URLs**, and **comparisons** are processed end to end
-> (summary, Educational Plan, and illustration).
+## How it works
+
+```
+URL / Concept / Comparison
+        │
+        ▼
+  Input Classifier ──▶ Extractor (LLM)
+        │
+        ▼
+  Knowledge Object  ← the single source of truth
+        │
+        ▼
+ Educational Planner
+        │
+        ├──▶ Markdown Generator
+        ├──▶ Illustration Generator (gpt-image-2)
+        └──▶ Knowledge Linker
+        │
+        ▼
+   Obsidian Vault (external)
+```
+
+Everything flows through the Knowledge Object, so new output formats consume the
+same canonical representation. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+and [docs/DATA_MODEL.md](docs/DATA_MODEL.md) for details.
+
+The Obsidian vault lives **outside** this repository (configured via
+`vault_path`); this repo tracks only code and docs, never knowledge data
+(see [ADR 0002](docs/adr/0002-vault-and-layout.md)).
 
 ## Connecting notes
 
-As your Vault grows, connect the notes into a knowledge graph. Two layers:
+As your vault grows, connect notes into a knowledge graph:
 
-- **`asb-link`** (deterministic, free): indexes the Vault and safely rewrites a
+- **`asb-link`** (deterministic, free): index the vault and safely rewrite a
   note's "Related Notes" section.
-
-  ```bash
-  uv run asb-link index                       # list all notes as JSON
-  uv run asb-link apply "<vault>/01 Concepts/Transformer.md" \
-    --link "Neural Network:prerequisite" --link "Attention:related"
-  ```
-
-  `apply` only touches the Related Notes section and is idempotent. Reverse
-  links appear automatically via Obsidian's native backlinks.
-
-- **`asb-relink` Claude Code skill** (smart, no OpenAI cost): in Claude Code, run
-  the `asb-relink` skill to read the whole Vault, decide which notes are related
-  (including spelling variants and conceptual closeness), and apply the links for
-  you. It uses your Claude subscription only — it makes **no OpenAI API calls**.
+- **`asb-relink` Claude Code skill** (smart, no OpenAI cost): reads the whole
+  vault, decides which notes relate (and how), and applies the links — using your
+  Claude subscription, not the OpenAI API.
 
 ## Capture from anywhere
 
 Capture is decoupled from processing by a queue, so everything runs locally with
-no fixed hosting cost (see ADR 0006). Re-running is safe — an existing
-concept/URL is skipped, not regenerated.
+no fixed hosting cost ([ADR 0006](docs/adr/0006-capture-interface-local-first.md)).
 
-### Inbox queue
+- **Inbox queue:** drop a stub note (a URL or concept) into `00 Inbox/` from
+  Obsidian; run `uv run asb-inbox` to turn the queue into notes.
+- **Chat capture (Telegram):** message a bot via
+  [Claude Code Channels](https://code.claude.com/docs/en/channels); Claude Code
+  on your machine runs `asb` and replies. See
+  [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for setup (including
+  pre-approving the command so it runs unattended).
 
-Drop a stub note containing a URL or concept into your Vault's `00 Inbox/` (e.g.
-from Obsidian on your phone). When your machine is on, process the queue:
+## Philosophy
 
-```bash
-uv run asb-inbox            # turns each 00 Inbox stub into a note, then clears it
-```
+This project is **not** an image generator and **not** a note-taking app — it is
+a **knowledge operating system**. Images, Markdown, and Git are outputs; the
+product is organized knowledge. The guiding principles:
 
-Run it manually, or schedule it (cron / launchd). `--no-image` and `--overwrite`
-are supported.
+- **Knowledge over content** — create reusable knowledge, not posts.
+- **Consistency over creativity** — the same concept is always explained and
+  drawn the same way.
+- **Automation with human control** — the system automates the repetitive work;
+  humans own knowledge quality.
+- **Long-term maintainability** — every decision should still make sense years
+  from now.
 
-### Chat capture via Claude Code Channels
+The full vision and long-term goals live in
+[docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md).
 
-Capture from your phone by messaging a Telegram bot, using
-[Claude Code Channels](https://code.claude.com/docs/en/channels). A message is
-routed to Claude Code running on your machine, which runs `asb` and replies. No
-server to host; it uses your Claude subscription (OpenAI cost is only the usual
-per-note generation).
+## Documentation
 
-Setup:
+| Document | Purpose |
+|----------|---------|
+| [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md) | Vision and long-term goals |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture |
+| [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | The Knowledge Object schema |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Development roadmap |
+| [docs/adr/](docs/adr/) | Architecture Decision Records |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Setup & runtime troubleshooting |
+| [CLAUDE.md](CLAUDE.md) | Engineering guide for AI-assisted development |
 
-1. Enable Claude Code Channels and connect a Telegram bot (per the Channels
-   docs). A terminal/session must stay running on your machine.
-2. **Pre-approve the actions so it runs unattended.** Channels cannot approve
-   permission prompts remotely, so register the capture command and the Telegram
-   reply tools in your Claude Code permissions ahead of time. Add them to the
-   `permissions.allow` list in your personal `.claude/settings.local.json`
-   (gitignored — keep Telegram-related rules here, not in shared settings), then
-   restart Claude Code. The exact tool identifiers (e.g. the
-   `mcp__…telegram…__reply` reply tool) and a ready-to-merge list are in
-   [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
-3. Message the bot an AI concept or an article URL. The bundled `asb-capture`
-   skill runs `asb` on it and reports the result.
+## Roadmap & status
 
-Hitting setup snags? See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+🚧 Active development. **Phases 1–4 complete** (foundation, educational content,
+knowledge organization, local-first capture). **Phase 5 — AI Research Assistant**
+is next. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
----
+## Contributing
 
-# Development Workflow
+Contributions are welcome — this project prefers small, reviewable, issue-driven
+changes. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-This project follows an issue-driven development process.
+## License
 
-Every feature starts as a GitHub Issue.
-
-Each Issue should include:
-
-- Why
-- Goal
-- Tasks
-- Definition of Done
-
-Small, reviewable changes are preferred over large implementations.
-
----
-
-# Long-term Vision
-
-The final objective is not simply to collect notes.
-
-It is to create a personal AI research environment where knowledge continuously evolves.
-
-In the future, AI Second Brain should be able to:
-
-- understand new AI news,
-- connect it with existing knowledge,
-- identify missing concepts,
-- recommend what to learn next,
-- and continuously improve the user's understanding of AI.
-
-Ultimately, the system becomes a personal AI research assistant that grows together with its owner.
-
----
-
-## Project Status
-
-🚧 Active Development
-
-- **Phase 1 — Foundation:** ✅ complete. Concept input → Knowledge Object →
-  structured Markdown note saved to the external Vault.
-- **Phase 2 — Educational Content:** ✅ complete. Both concepts and news URLs are
-  processed end to end, with an Educational Plan, a generated illustration
-  (gpt-image-2), and full notes (summary, background, key takeaways).
-- **Phase 3 — Knowledge Organization:** ✅ complete. A deterministic vault index
-  and safe Related-Notes updater, plus the `asb-relink` Claude Code skill that
-  connects notes with no OpenAI cost. Backlinks via Obsidian.
-- **Phase 4 — Automation:** ✅ complete. Local-first capture with no fixed cost:
-  the `00 Inbox` queue worker (`asb-inbox`) and Claude Code Channels (Telegram)
-  chat capture. Idempotent generation and a `--no-image` cost switch.
-- **Phase 5 — AI Research Assistant:** ⏭️ next. Recommendations, similar/duplicate
-  detection, knowledge-gap detection, and a daily digest.
+[MIT](LICENSE) © 2026 ttk1010
