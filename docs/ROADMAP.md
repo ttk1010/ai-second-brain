@@ -226,6 +226,26 @@ Potential future capabilities include:
 
 These are intentionally outside the current scope.
 
+## Long-term: from OSS to an app with shared knowledge
+
+The near-term distribution plan is open source. Further out, a packaged **app**
+is envisioned, whose defining idea is a **shared knowledge layer** that addresses
+the system's main running cost — paying an API every time a Knowledge Object is
+created:
+
+- **Import existing notes.** When someone else has already created a note for the
+  same concept or news, import it instead of regenerating it. This cuts API cost
+  (no duplicate generation) and speeds up capture.
+- **Popularity & trends.** By counting how many users have added a given concept
+  or news to their Second Brain, surface **trending** (rapidly rising) and
+  **popular** concepts/news — turning the collective activity into a signal for
+  what to learn next.
+
+Open considerations for this vision: note quality/trust when importing,
+attribution and licensing of shared notes, privacy (what is shared vs private),
+deduplication/identity of "the same concept or news," and moderation. To be
+revisited when the app phase is planned.
+
 ---
 
 # Success Metrics
