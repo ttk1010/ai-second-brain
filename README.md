@@ -10,7 +10,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 
-<!-- Overview illustration (input → Knowledge Object → outputs) is added in issue #21. -->
+<p align="center">
+  <img src="docs/assets/overview.png" width="820"
+       alt="Inputs (a concept, a news URL, or a comparison) become one Knowledge Object, which generates a structured Markdown note, an educational illustration, and an Obsidian-style graph of linked notes.">
+</p>
 
 ## What is this?
 
