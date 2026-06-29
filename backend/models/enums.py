@@ -15,6 +15,7 @@ class SourceType(StrEnum):
 
     CONCEPT = "concept"
     NEWS = "news"
+    COMPARISON = "comparison"
     PAPER = "paper"
     DOCUMENTATION = "documentation"
     UNKNOWN = "unknown"

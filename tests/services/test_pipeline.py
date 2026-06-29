@@ -8,7 +8,12 @@ import pytest
 from backend.image.base import ImageError, ImageProvider
 from backend.markdown import MarkdownGenerator
 from backend.models import SourceType
-from backend.parser import ConceptExtractor, KnowledgeObjectBuilder, NewsExtractor
+from backend.parser import (
+    ComparisonExtractor,
+    ConceptExtractor,
+    KnowledgeObjectBuilder,
+    NewsExtractor,
+)
 from backend.parser.fetcher import ArticleFetcher, FetchedArticle
 from backend.planner import EducationalPlanner
 from backend.services import KnowledgePipeline
@@ -36,6 +41,18 @@ PLAN_RESPONSE = json.dumps(
 )
 
 
+COMPARISON_RESPONSE = json.dumps(
+    {
+        "title": "GPT・Claude・Gemini の比較",
+        "short_title": "LLM比較",
+        "summary": "3モデルを比較する。",
+        "items": ["GPT", "Claude", "Gemini"],
+        "rows": [{"dimension": "強み", "cells": ["汎用", "コード", "長文"]}],
+        "recommendation": "用途で選ぶ。",
+    }
+)
+
+
 class _FakeImageProvider(ImageProvider):
     def __init__(self, *, error: Exception | None = None) -> None:
         self.error = error
@@ -58,11 +75,15 @@ def _pipeline(
     plan_response: str = PLAN_RESPONSE,
     image_provider: ImageProvider | None = None,
     with_news: bool = False,
+    with_comparison: bool = False,
 ) -> KnowledgePipeline:
     illustration_writer = (
         IllustrationWriter(vault, image_provider) if image_provider is not None else None
     )
     news_extractor = NewsExtractor(MockLLMProvider(response), _FakeFetcher()) if with_news else None
+    comparison_extractor = (
+        ComparisonExtractor(MockLLMProvider(COMPARISON_RESPONSE)) if with_comparison else None
+    )
     return KnowledgePipeline(
         extractor=ConceptExtractor(MockLLMProvider(response)),
         builder=KnowledgeObjectBuilder(),
@@ -70,6 +91,7 @@ def _pipeline(
         markdown_generator=MarkdownGenerator(),
         vault_writer=VaultWriter(vault),
         news_extractor=news_extractor,
+        comparison_extractor=comparison_extractor,
         illustration_writer=illustration_writer,
     )
 
@@ -142,6 +164,24 @@ def test_url_input_unsupported_without_news_extractor(tmp_path: Path) -> None:
     assert result.status == "unsupported"
     # Nothing should be written.
     assert not any(tmp_path.iterdir())
+
+
+def test_comparison_input_creates_comparison_note(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path, with_comparison=True).run("compare: GPT, Claude, Gemini")
+
+    assert result.status == "created"
+    assert result.path == tmp_path / "04 Comparisons" / "LLM比較.md"
+    assert result.path.exists()
+    assert result.knowledge_object is not None
+    assert result.knowledge_object.source.type is SourceType.COMPARISON
+    content = result.path.read_text(encoding="utf-8")
+    assert "## Comparison" in content
+    assert "| 観点 | GPT | Claude | Gemini |" in content
+
+
+def test_comparison_unsupported_without_extractor(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path).run("compare: GPT, Claude")
+    assert result.status == "unsupported"
 
 
 def test_malformed_url_is_unsupported(tmp_path: Path) -> None:

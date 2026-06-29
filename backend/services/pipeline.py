@@ -21,6 +21,7 @@ from backend.markdown import MarkdownGenerator
 from backend.models import KnowledgeObject, SourceType
 from backend.models.educational_plan import EducationalPlan
 from backend.parser import (
+    ComparisonExtractor,
     ConceptExtractor,
     KnowledgeObjectBuilder,
     NewsExtractor,
@@ -56,6 +57,7 @@ class KnowledgePipeline:
         vault_writer: VaultWriter,
         *,
         news_extractor: NewsExtractor | None = None,
+        comparison_extractor: ComparisonExtractor | None = None,
         illustration_writer: IllustrationWriter | None = None,
         language: str = "ja",
     ) -> None:
@@ -65,6 +67,7 @@ class KnowledgePipeline:
         self._markdown = markdown_generator
         self._vault = vault_writer
         self._news = news_extractor
+        self._comparison = comparison_extractor
         self._illustrations = illustration_writer
         self._language = language
 
@@ -78,8 +81,10 @@ class KnowledgePipeline:
         source_type = classification.source_type
         value = classification.normalized_input
 
-        supported = source_type is SourceType.CONCEPT or (
-            source_type is SourceType.NEWS and self._news is not None
+        supported = (
+            source_type is SourceType.CONCEPT
+            or (source_type is SourceType.NEWS and self._news is not None)
+            or (source_type is SourceType.COMPARISON and self._comparison is not None)
         )
         if not supported:
             return PipelineResult(
@@ -105,6 +110,9 @@ class KnowledgePipeline:
         if source_type is SourceType.CONCEPT:
             extraction = self._extractor.extract(value, language=self._language)
             ko = self._builder.from_concept(value, extraction, language=self._language)
+        elif source_type is SourceType.COMPARISON:  # supported implies the extractor is present
+            comparison = self._comparison.extract(value, language=self._language)
+            ko = self._builder.from_comparison(value, comparison, language=self._language)
         else:  # NEWS (supported implies the news extractor is present)
             extraction = self._news.extract(value, language=self._language)
             ko = self._builder.from_news(extraction, language=self._language)

@@ -31,11 +31,11 @@ Labels: enhancement, parser, models, markdown
 - 各対象が既存ノートへリンクされる
 - 外部API非依存でテストが通る
 
-## Open questions（実装前に決める）
-1. トリガー UX：`--compare` フラグ / `asb compare` サブコマンド / 入力中の「vs」自動判定 のどれにするか
-2. KO の比較スキーマの形（items / dimensions / cells の構造、ADR の要否）
-3. Vault フォルダ名・番号（`04 Comparisons` で良いか）
-4. 比較表をどこまで詳細にするか（◎○△× 記号 / 短文セル / 自由記述）
+## 決定事項（ADR 0007 に記録）
+1. トリガー UX：**`compare:` 接頭辞を `classify()` で処理＝中核**（全経路で透過）。`--compare` はそれへ正規化する薄い糖衣。Telegram は `asb-capture` スキルが自然文を変換
+2. スキーマ：**items / rows(dimension+cells) / recommendation**（表ネイティブ）。DATA_MODEL 更新＋ADR 0007
+3. フォルダ：**`04 Comparisons`**。番号体系を ADR 0007 に明文化
+4. 比較表：**短い事実セル**（記号評価は既定にしない）
 
 ## Notes
 - マイルストーン無しの単独 enhancement。将来「論文深掘り」「チュートリアル」等の知識タイプが増えるなら、まとめて1テーマに再編する案もある。

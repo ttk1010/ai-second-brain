@@ -15,6 +15,26 @@ def test_keywords_classify_as_concept(concept: str) -> None:
 
 
 @pytest.mark.parametrize(
+    ("raw", "items"),
+    [
+        ("compare: GPT, Claude, Gemini", "GPT, Claude, Gemini"),
+        ("Compare: A vs B", "A vs B"),
+        ("  compare:   X, Y  ", "X, Y"),
+    ],
+)
+def test_compare_prefix_classifies_as_comparison(raw: str, items: str) -> None:
+    result = classify(raw)
+    assert result.source_type is SourceType.COMPARISON
+    assert result.is_url is False
+    assert result.normalized_input == items
+
+
+def test_compare_prefix_without_items_raises() -> None:
+    with pytest.raises(ValueError, match="must list the items"):
+        classify("compare:   ")
+
+
+@pytest.mark.parametrize(
     "url",
     [
         "https://openai.com/news/",

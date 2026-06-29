@@ -17,6 +17,10 @@ from backend.models.enums import SourceType
 
 _URL_SCHEMES = ("http", "https")
 
+# Explicit prefix routing input to the Comparison pipeline. Plain text, so it
+# works across every capture path (CLI, Inbox stub, Telegram) — ADR 0007.
+_COMPARE_PREFIX = "compare:"
+
 
 @dataclass(frozen=True)
 class Classification:
@@ -49,6 +53,12 @@ def classify(raw_input: str) -> Classification:
         raise ValueError("Input must not be empty.")
 
     normalized = raw_input.strip()
+
+    if normalized.lower().startswith(_COMPARE_PREFIX):
+        items = normalized[len(_COMPARE_PREFIX) :].strip()
+        if not items:
+            raise ValueError("Comparison input must list the items to compare.")
+        return Classification(SourceType.COMPARISON, items, is_url=False)
 
     if _looks_like_url(normalized):
         if _is_valid_url(normalized):

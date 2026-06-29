@@ -50,3 +50,6 @@ package.json
 # Claude Code local settings (plugin state / personal)
 .claude/settings.json
 .claude/settings.local.json
+
+# Python build metadata
+*.egg-info/

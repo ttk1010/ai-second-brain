@@ -15,13 +15,17 @@ When the user (or an incoming Channels message) gives you an AI **concept** or a
 
 ## Steps
 
-1. Identify the input: the concept text (e.g. `Transformer`) or the URL.
+1. Identify the input: the concept text (e.g. `Transformer`), the URL, or — if the
+   message asks to **compare** several things — the list of items.
 2. From the repo root, run:
 
    ```bash
    uv run asb "<input>"
    ```
 
+   - For a comparison request (e.g. "compare Claude, GPT and Gemini"), extract the
+     items and run `uv run asb --compare "Claude, GPT, Gemini"` instead. The note
+     is saved under `04 Comparisons/` with a comparison table.
    - Add `--no-image` to skip the illustration (saves cost).
    - Add `--overwrite` only if the user explicitly wants to regenerate an
      existing note.

@@ -35,8 +35,14 @@ def main(argv: list[str] | None = None) -> int:
 
     pipeline = build_pipeline(settings, no_image=args.no_image)
 
+    # --compare is sugar: normalize to the canonical "compare:" form so there is
+    # a single classification path (ADR 0007).
+    raw_input = args.input
+    if args.compare and not raw_input.lower().startswith("compare:"):
+        raw_input = f"compare: {raw_input}"
+
     try:
-        result = pipeline.run(args.input, overwrite=args.overwrite)
+        result = pipeline.run(raw_input, overwrite=args.overwrite)
     except ValueError as exc:
         print(f"Input error: {exc}", file=sys.stderr)
         return 2
@@ -73,6 +79,11 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--no-image",
         action="store_true",
         help="Skip illustration generation (saves cost; the note is still created).",
+    )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="Treat the input as a list of items to compare (e.g. 'GPT, Claude, Gemini').",
     )
     parser.add_argument(
         "--config",
