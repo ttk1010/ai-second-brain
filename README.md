@@ -272,8 +272,17 @@ push and pull request.
 
    The article is fetched, summarized, illustrated, and saved under `06 News/`.
 
-> Both AI **concepts** and **news URLs** are processed end to end (summary,
-> Educational Plan, and illustration).
+   Or compare several things in one note with `--compare`:
+
+   ```bash
+   uv run asb --compare "GPT, Claude, Gemini"
+   ```
+
+   This produces a structured comparison note (with a comparison table) under
+   `04 Comparisons/`, linked to each item's own note.
+
+> AI **concepts**, **news URLs**, and **comparisons** are processed end to end
+> (summary, Educational Plan, and illustration).
 
 ## Connecting notes
 

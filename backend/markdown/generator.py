@@ -33,13 +33,15 @@ class MarkdownGenerator:
             heading(ko.title),
             self._summary(ko),
             self._illustration(ko),
+            self._comparison(ko),
             self._background(ko),
             self._key_takeaways(ko),
             self._related_notes(ko),
             self._references(ko),
             self._tags(ko),
         ]
-        return "\n\n".join(parts) + "\n"
+        # _comparison returns None when the note is not a comparison.
+        return "\n\n".join(p for p in parts if p is not None) + "\n"
 
     def _frontmatter(self, ko: KnowledgeObject, created: date) -> str:
         tags = _unique(ko.metadata.tags + ko.concepts)
@@ -69,6 +71,22 @@ class MarkdownGenerator:
             return f"{section('Illustration')}\n\n{ILLUSTRATION_PLACEHOLDER}"
         # Obsidian embed by Vault-relative path (robust to folder location).
         return f"{section('Illustration')}\n\n![[{path}]]"
+
+    def _comparison(self, ko: KnowledgeObject) -> str | None:
+        comp = ko.comparison
+        if comp is None or not comp.items:
+            return None
+        header = "| 観点 | " + " | ".join(_cell(i) for i in comp.items) + " |"
+        separator = "| --- | " + " | ".join(["---"] * len(comp.items)) + " |"
+        lines = [header, separator]
+        for row in comp.rows:
+            cells = (row.cells + [""] * len(comp.items))[: len(comp.items)]
+            rendered = " | ".join(_cell(c) for c in cells)
+            lines.append(f"| {_cell(row.dimension)} | {rendered} |")
+        table = "\n".join(lines)
+        if comp.recommendation:
+            table = f"{table}\n\n{comp.recommendation}"
+        return f"{section('Comparison')}\n\n{table}"
 
     def _background(self, ko: KnowledgeObject) -> str:
         if not ko.background:
@@ -113,6 +131,11 @@ def _unique(items: list[str]) -> list[str]:
             seen.add(cleaned)
             result.append(cleaned)
     return result
+
+
+def _cell(value: str) -> str:
+    """Make a string safe for a Markdown table cell (escape pipes, flatten newlines)."""
+    return value.replace("\\", "\\\\").replace("|", "\\|").replace("\n", " ").strip()
 
 
 def _yaml_str(value: str) -> str:

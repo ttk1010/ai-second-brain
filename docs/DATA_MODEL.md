@@ -80,10 +80,18 @@ KnowledgeObject
 ├── entities
 ├── relationships
 ├── educational_plan
+├── comparison (optional)
 ├── references
 ├── metadata
 └── outputs (optional)
 ```
+
+`comparison` is set only for Comparison notes (e.g. "GPT vs Claude vs Gemini").
+It holds the compared `items`, the `rows` (one comparison dimension and a short
+cell per item, aligned to `items`), and a `recommendation` (which to choose
+when). The Markdown comparison table is rendered deterministically from it (see
+ADR 0007). The compared items are also added to `concepts` so the note links to
+each item's own note.
 
 `short_title` is a concise label used for the note's filename (and illustration
 filename); the full descriptive `title` stays in the frontmatter and heading. It

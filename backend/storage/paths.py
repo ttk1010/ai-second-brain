@@ -13,6 +13,7 @@ INBOX_FOLDER = "00 Inbox"
 
 _FOLDER_BY_SOURCE: dict[SourceType, str] = {
     SourceType.CONCEPT: "01 Concepts",
+    SourceType.COMPARISON: "04 Comparisons",
     SourceType.NEWS: "06 News",
     SourceType.PAPER: "07 Papers",
     SourceType.DOCUMENTATION: INBOX_FOLDER,

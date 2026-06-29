@@ -5,7 +5,15 @@ independent of how the input was obtained; downstream components consume only th
 resulting Knowledge Object.
 """
 
-from backend.models import KnowledgeObject, Metadata, Source, SourceType
+from backend.models import (
+    ComparisonData,
+    ComparisonRow,
+    KnowledgeObject,
+    Metadata,
+    Source,
+    SourceType,
+)
+from backend.parser.comparison_extractor import ComparisonExtraction
 from backend.parser.concept_extractor import ConceptExtraction
 from backend.parser.news_extractor import NewsExtraction
 
@@ -57,3 +65,47 @@ class KnowledgeObjectBuilder:
             references=extraction.references,
             metadata=Metadata(language=language),
         )
+
+    def from_comparison(
+        self,
+        items_input: str,
+        extraction: ComparisonExtraction,
+        *,
+        language: str = "ja",
+    ) -> KnowledgeObject:
+        """Normalize a comparison extraction into a Knowledge Object.
+
+        The compared items go into both the structured ``comparison`` and the
+        ``concepts`` list, so the note links to each item's own concept note.
+        """
+        comparison = ComparisonData(
+            items=extraction.items,
+            rows=[ComparisonRow(dimension=r.dimension, cells=r.cells) for r in extraction.rows],
+            recommendation=extraction.recommendation,
+        )
+        concepts = _unique(extraction.concepts + extraction.items)
+        return KnowledgeObject(
+            source=Source(type=SourceType.COMPARISON, value=items_input.strip()),
+            title=extraction.title,
+            short_title=extraction.short_title,
+            summary=extraction.summary,
+            background=extraction.background,
+            key_takeaways=extraction.key_takeaways,
+            concepts=concepts,
+            entities=extraction.entities,
+            comparison=comparison,
+            references=extraction.references,
+            metadata=Metadata(language=language),
+        )
+
+
+def _unique(items: list[str]) -> list[str]:
+    """Preserve order while removing duplicates and blanks."""
+    seen: set[str] = set()
+    result: list[str] = []
+    for item in items:
+        cleaned = item.strip()
+        if cleaned and cleaned not in seen:
+            seen.add(cleaned)
+            result.append(cleaned)
+    return result

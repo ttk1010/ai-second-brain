@@ -108,6 +108,32 @@ def test_background_and_takeaways_placeholder_when_absent() -> None:
     assert "## Key Takeaways\n\n> _(To be generated)_" in md
 
 
+def test_comparison_table_rendered_when_present() -> None:
+    from backend.models import ComparisonData, ComparisonRow
+
+    ko = _minimal_ko()
+    ko.comparison = ComparisonData(
+        items=["GPT", "Claude"],
+        rows=[
+            ComparisonRow(dimension="context", cells=["400K", "500K"]),
+            ComparisonRow(dimension="strength", cells=["general", "code"]),
+        ],
+        recommendation="Use Claude for code.",
+    )
+    md = MarkdownGenerator().generate(ko, created=FIXED_DATE)
+
+    assert "## Comparison" in md
+    assert "| 観点 | GPT | Claude |" in md
+    assert "| context | 400K | 500K |" in md
+    assert "| strength | general | code |" in md
+    assert "Use Claude for code." in md
+
+
+def test_no_comparison_section_for_normal_notes() -> None:
+    md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
+    assert "## Comparison" not in md
+
+
 def test_background_and_takeaways_rendered_when_present() -> None:
     ko = _minimal_ko()
     ko.background = "MCP standardizes how tools connect to models."

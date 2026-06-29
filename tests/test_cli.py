@@ -7,7 +7,17 @@ import pytest
 
 from backend import cli
 
-RESPONSE = json.dumps({"title": "Transformer", "summary": "A summary."})
+# Superset response: satisfies the concept extractor and the comparison extractor
+# (which also needs "items"), so one mock works for both CLI paths.
+RESPONSE = json.dumps(
+    {
+        "title": "Transformer",
+        "short_title": "Transformer",
+        "summary": "A summary.",
+        "items": ["GPT", "Claude"],
+        "rows": [{"dimension": "strength", "cells": ["general", "code"]}],
+    }
+)
 
 
 class _MockImageProvider:
@@ -48,6 +58,21 @@ def test_cli_creates_note(tmp_path: Path, vault: Path, monkeypatch, capsys) -> N
     assert (vault / "01 Concepts" / "Transformer.md").exists()
     assert (vault / "Images" / "Transformer.png").exists()
     assert "Created note" in capsys.readouterr().out
+
+
+def test_cli_compare_creates_comparison_note(
+    tmp_path: Path, vault: Path, monkeypatch, capsys
+) -> None:
+    _patch_providers(monkeypatch)
+    cfg = _write_config(tmp_path, vault)
+
+    code = cli.main(["GPT, Claude", "--compare", "--no-image", "--config", str(cfg)])
+
+    assert code == 0
+    # --compare routes to the Comparison pipeline -> 04 Comparisons.
+    assert list((vault / "04 Comparisons").glob("*.md"))
+    content = next((vault / "04 Comparisons").glob("*.md")).read_text(encoding="utf-8")
+    assert "## Comparison" in content
 
 
 def test_cli_no_image_skips_illustration(tmp_path: Path, vault: Path, monkeypatch, capsys) -> None:

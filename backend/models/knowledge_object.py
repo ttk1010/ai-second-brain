@@ -14,6 +14,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.models.comparison import ComparisonData
 from backend.models.educational_plan import EducationalPlan
 from backend.models.enums import SourceType
 from backend.models.metadata import Metadata
@@ -54,6 +55,10 @@ class KnowledgeObject(BaseModel):
     entities: list[str] = Field(default_factory=list)
     relationships: list[Relationship] = Field(default_factory=list)
     educational_plan: EducationalPlan | None = None
+    comparison: ComparisonData | None = Field(
+        default=None,
+        description="Structured comparison; set only for comparison notes.",
+    )
     references: list[str] = Field(default_factory=list)
     metadata: Metadata = Field(default_factory=Metadata)
     outputs: dict[str, str] = Field(

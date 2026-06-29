@@ -16,6 +16,7 @@ ILLUSTRATION_PLACEHOLDER = "> _(No illustration available.)_"
 SECTION_ORDER = (
     "Summary",
     "Illustration",
+    "Comparison",  # only for comparison notes
     "Background",
     "Key Takeaways",
     "Related Notes",

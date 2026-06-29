@@ -10,6 +10,7 @@ from backend.image import OpenAIImageProvider
 from backend.llm import OpenAIProvider
 from backend.markdown import MarkdownGenerator
 from backend.parser import (
+    ComparisonExtractor,
     ConceptExtractor,
     HttpArticleFetcher,
     KnowledgeObjectBuilder,
@@ -46,6 +47,7 @@ def build_pipeline(settings: Settings, *, no_image: bool = False) -> KnowledgePi
         markdown_generator=MarkdownGenerator(),
         vault_writer=VaultWriter(settings.vault_path),
         news_extractor=NewsExtractor(provider, HttpArticleFetcher()),
+        comparison_extractor=ComparisonExtractor(provider),
         illustration_writer=illustration_writer,
         language=settings.default_language,
     )
