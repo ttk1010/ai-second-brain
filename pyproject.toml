@@ -4,6 +4,16 @@ version = "0.1.0"
 description = "A personal knowledge operating system that turns AI information into structured, reusable knowledge."
 readme = "README.md"
 requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "ttk1010" }]
+keywords = ["ai", "knowledge-management", "obsidian", "second-brain", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "beautifulsoup4>=4.15.0",
     "httpx>=0.28.1",
@@ -13,6 +23,10 @@ dependencies = [
     "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ttk1010/ai-second-brain"
+Repository = "https://github.com/ttk1010/ai-second-brain"
 
 [project.scripts]
 asb = "backend.cli:main"
