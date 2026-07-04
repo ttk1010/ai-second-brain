@@ -1,8 +1,8 @@
 """Educational planning prompt.
 
-- Version: 1
-- Purpose: Turn a Knowledge Object into an Educational Plan that decides *how*
-  the knowledge should be taught and visualized.
+- Version: 2
+- Purpose: Turn a Knowledge Object (any field, AI by default) into an Educational
+  Plan that decides *how* the knowledge should be taught and visualized.
 - Expected input: the Knowledge Object's title, summary, concepts and entities.
 - Expected output: a JSON object with learning_objective, target_audience,
   prerequisites, key_messages and a visualization strategy (aspect_ratio +
@@ -14,12 +14,14 @@ deterministic, structured JSON response.
 """
 
 from backend.models import KnowledgeObject
+from backend.prompts.domain import DEFAULT_READER
 from backend.prompts.language import language_directive
 
-PLAN_SYSTEM_PROMPT = """\
-You are an educational planner for an AI knowledge base.
-Your job is not to summarize, but to decide how a concept should be *taught* to a
-software engineer who knows general programming but not necessarily this topic.
+PLAN_SYSTEM_PROMPT = f"""\
+You are an educational planner for a personal knowledge base.
+Your job is not to summarize, but to decide how the knowledge should be *taught*.
+Adapt to the field it belongs to; do not assume it is about AI or software.
+{DEFAULT_READER}
 
 Decide:
 - the single learning objective (what the reader should understand afterwards),

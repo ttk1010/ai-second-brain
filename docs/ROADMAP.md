@@ -48,11 +48,11 @@ Build the minimum infrastructure required to create knowledge notes.
 
 A user can input:
 
-- an AI concept
+- a concept
 
 or
 
-- an AI-related URL
+- an article URL
 
 and receive a Markdown note saved inside the Vault.
 

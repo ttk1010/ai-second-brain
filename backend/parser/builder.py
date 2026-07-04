@@ -41,7 +41,7 @@ class KnowledgeObjectBuilder:
             concepts=extraction.concepts,
             entities=extraction.entities,
             references=extraction.references,
-            metadata=Metadata(language=language),
+            metadata=Metadata(language=language, domain=_clean_domain(extraction.domain)),
         )
 
     def from_news(
@@ -66,7 +66,9 @@ class KnowledgeObjectBuilder:
             entities=extraction.entities,
             references=extraction.references,
             metadata=Metadata(
-                language=language, published_date=_parse_date(extraction.published_date)
+                language=language,
+                domain=_clean_domain(extraction.domain),
+                published_date=_parse_date(extraction.published_date),
             ),
         )
 
@@ -99,8 +101,14 @@ class KnowledgeObjectBuilder:
             entities=extraction.entities,
             comparison=comparison,
             references=extraction.references,
-            metadata=Metadata(language=language),
+            metadata=Metadata(language=language, domain=_clean_domain(extraction.domain)),
         )
+
+
+def _clean_domain(value: str) -> str | None:
+    """Normalize the extracted domain, returning None when the model left it blank."""
+    cleaned = value.strip()
+    return cleaned or None
 
 
 def _parse_date(value: str) -> date | None:

@@ -163,6 +163,7 @@ Examples:
 * source URL
 * publication date
 * author
+* domain (the field the knowledge belongs to, e.g. "AI"; AI is the default focus — ADR 0008)
 * tags
 * categories
 * confidence

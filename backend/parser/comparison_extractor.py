@@ -30,6 +30,7 @@ class ComparisonExtraction:
     title: str
     summary: str
     short_title: str = ""
+    domain: str = ""
     background: str = ""
     key_takeaways: list[str] = field(default_factory=list)
     items: list[str] = field(default_factory=list)
@@ -84,6 +85,7 @@ class ComparisonExtractor:
             title=title,
             summary=summary,
             short_title=str(data.get("short_title") or "").strip(),
+            domain=str(data.get("domain") or "").strip(),
             background=str(data.get("background") or "").strip(),
             key_takeaways=_string_list(data.get("key_takeaways")),
             items=items,

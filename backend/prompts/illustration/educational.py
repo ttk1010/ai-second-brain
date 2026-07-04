@@ -18,7 +18,7 @@ from backend.models import KnowledgeObject
 # System layer: the long-term visual language. This rarely changes so that the
 # same concept is always drawn in the same style (PROMPT_STYLE_GUIDE.md).
 ILLUSTRATION_STYLE = """\
-Create an educational illustration for a technical knowledge base.
+Create an educational illustration for a personal knowledge base.
 The illustration must teach, not decorate: simplify complexity, reveal
 relationships, explain processes, and emphasize the important concepts.
 
