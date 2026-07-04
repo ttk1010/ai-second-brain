@@ -123,9 +123,7 @@ def test_builder_parses_published_date() -> None:
 
     from backend.parser import KnowledgeObjectBuilder
 
-    extraction = NewsExtraction(
-        title="t", summary="s", url="u", published_date="2026-07-04"
-    )
+    extraction = NewsExtraction(title="t", summary="s", url="u", published_date="2026-07-04")
     ko = KnowledgeObjectBuilder().from_news(extraction)
     assert ko.metadata.published_date == date(2026, 7, 4)
 
