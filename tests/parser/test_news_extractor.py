@@ -7,6 +7,7 @@ import pytest
 from backend.llm.base import LLMError
 from backend.parser import NewsExtractor
 from backend.parser.fetcher import ArticleFetcher, FetchedArticle, FetchError
+from backend.parser.news_extractor import NewsExtraction
 from tests.conftest import MockLLMProvider
 
 ARTICLE = FetchedArticle(
@@ -19,6 +20,7 @@ VALID_RESPONSE = json.dumps(
     {
         "title": "OpenAI ships a new model",
         "short_title": "GPT-5.6",
+        "published_date": "2026-07-04",
         "summary": "OpenAI released a model that improves reasoning.",
         "concepts": ["reasoning", "large language models"],
         "entities": ["OpenAI"],
@@ -50,6 +52,7 @@ def test_extract_returns_structured_fields() -> None:
     assert "reasoning" in extraction.concepts
     assert extraction.url == "https://example.com/news"
     assert extraction.short_title == "GPT-5.6"
+    assert extraction.published_date == "2026-07-04"
     # The extractor requests a JSON response.
     assert provider.calls[0][2] == "json"
     # The article body is included in the prompt.
@@ -113,3 +116,22 @@ def test_builder_produces_news_knowledge_object() -> None:
     assert ko.title == "OpenAI ships a new model"
     assert "OpenAI" in ko.entities
     assert ko.metadata.language == "ja"
+
+
+def test_builder_parses_published_date() -> None:
+    from datetime import date
+
+    from backend.parser import KnowledgeObjectBuilder
+
+    extraction = NewsExtraction(title="t", summary="s", url="u", published_date="2026-07-04")
+    ko = KnowledgeObjectBuilder().from_news(extraction)
+    assert ko.metadata.published_date == date(2026, 7, 4)
+
+
+@pytest.mark.parametrize("value", ["", "   ", "not-a-date", "2026-13-40"])
+def test_builder_omits_unparseable_published_date(value: str) -> None:
+    from backend.parser import KnowledgeObjectBuilder
+
+    extraction = NewsExtraction(title="t", summary="s", url="u", published_date=value)
+    ko = KnowledgeObjectBuilder().from_news(extraction)
+    assert ko.metadata.published_date is None

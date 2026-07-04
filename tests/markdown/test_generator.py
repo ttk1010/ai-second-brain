@@ -168,3 +168,19 @@ def test_note_ends_with_single_newline(ko_factory) -> None:
     md = MarkdownGenerator().generate(ko_factory(), created=FIXED_DATE)
     assert md.endswith("\n")
     assert not md.endswith("\n\n")
+
+
+def test_published_date_in_frontmatter_and_body_when_present() -> None:
+    ko = _minimal_ko()
+    ko.metadata.published_date = date(2026, 7, 4)
+    md = MarkdownGenerator().generate(ko, created=FIXED_DATE)
+
+    assert "published_date: 2026-07-04" in md
+    # A visible line sits directly under the title, above the summary.
+    assert "# MCP\n\n📅 2026-07-04\n\n## Summary" in md
+
+
+def test_no_published_date_when_absent() -> None:
+    md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
+    assert "published_date:" not in md
+    assert "📅" not in md
