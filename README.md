@@ -17,11 +17,13 @@
 
 ## What is this?
 
-AI Second Brain turns AI-related information into a **structured, visual, and
+AI Second Brain turns what you learn into a **structured, visual, and
 continuously evolving knowledge base**. Give it a concept (`Transformer`), an
 article URL, or a comparison (`GPT, Claude, Gemini`) — it generates a structured,
 illustrated Markdown note in your [Obsidian](https://obsidian.md/) vault and
-links it into your knowledge graph.
+links it into your knowledge graph. AI is its default focus, but it handles any
+field of knowledge (biology, economics, cooking…), tagging each note with its
+domain (ADR 0008).
 
 The real product isn't notes or images; it's **organized, reusable knowledge**.
 Every output is generated from a single canonical [Knowledge

@@ -184,3 +184,19 @@ def test_no_published_date_when_absent() -> None:
     md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
     assert "published_date:" not in md
     assert "📅" not in md
+
+
+def test_domain_in_frontmatter_and_tags_when_present() -> None:
+    ko = _full_ko()
+    ko.metadata.domain = "生物学"
+    md = MarkdownGenerator().generate(ko, created=FIXED_DATE)
+
+    assert 'domain: "生物学"' in md
+    # The domain also becomes the leading tag, in frontmatter and the Tags section.
+    assert "  - 生物学" in md
+    assert "#生物学" in md.split("## Tags")[1]
+
+
+def test_no_domain_line_when_absent() -> None:
+    md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
+    assert "domain:" not in md

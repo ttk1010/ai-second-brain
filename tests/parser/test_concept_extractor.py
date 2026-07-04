@@ -13,6 +13,7 @@ VALID_RESPONSE = json.dumps(
     {
         "title": "Transformer",
         "short_title": "Transformer",
+        "domain": "AI",
         "summary": "A neural network architecture based on self-attention.",
         "background": "It replaced RNNs for many NLP tasks.",
         "key_takeaways": ["Self-attention scales", "Parallelizable"],
@@ -33,6 +34,7 @@ def test_extract_returns_structured_fields() -> None:
     assert extraction.background == "It replaced RNNs for many NLP tasks."
     assert extraction.key_takeaways == ["Self-attention scales", "Parallelizable"]
     assert extraction.short_title == "Transformer"
+    assert extraction.domain == "AI"
     # The extractor requests a JSON response.
     assert provider.calls[0][2] == "json"
 
@@ -80,4 +82,12 @@ def test_builder_produces_valid_knowledge_object() -> None:
     assert ko.source.value == "Transformer"
     assert ko.title == "Transformer"
     assert ko.metadata.language == "ja"
+    assert ko.metadata.domain == "AI"
     assert ko.id  # auto-generated
+
+
+def test_builder_omits_blank_domain() -> None:
+    response = json.dumps({"title": "MCP", "summary": "A protocol."})
+    extraction = ConceptExtractor(MockLLMProvider(response)).extract("MCP")
+    ko = KnowledgeObjectBuilder().from_concept("MCP", extraction)
+    assert ko.metadata.domain is None

@@ -13,6 +13,7 @@ VALID_RESPONSE = json.dumps(
     {
         "title": "GPT・Claude・Gemini の比較",
         "short_title": "LLM比較",
+        "domain": "AI",
         "summary": "代表的な3モデルを比較する。",
         "background": "用途で選択が変わる。",
         "key_takeaways": ["長文ならGemini", "コードならClaude"],
@@ -85,6 +86,7 @@ def test_builder_produces_comparison_knowledge_object() -> None:
     assert ko.comparison is not None
     assert ko.comparison.items == ["GPT", "Claude", "Gemini"]
     assert ko.comparison.rows[0].dimension == "コンテキスト長"
+    assert ko.metadata.domain == "AI"
     # Items are also added to concepts so the note links to each item's note.
     for item in ["GPT", "Claude", "Gemini"]:
         assert item in ko.concepts

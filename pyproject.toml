@@ -1,7 +1,7 @@
 [project]
 name = "ai-second-brain"
-version = "0.1.0"
-description = "A personal knowledge operating system that turns AI information into structured, reusable knowledge."
+version = "0.2.0"
+description = "A personal knowledge operating system that turns information from any field (AI by default) into structured, reusable knowledge."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"

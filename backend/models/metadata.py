@@ -16,6 +16,10 @@ class Metadata(BaseModel):
     source_url: str | None = None
     published_date: date | None = None
     author: str | None = None
+    domain: str | None = Field(
+        default=None,
+        description="Field this knowledge belongs to (e.g. 'AI'); AI is the default focus.",
+    )
     tags: list[str] = Field(default_factory=list)
     categories: list[str] = Field(default_factory=list)
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)

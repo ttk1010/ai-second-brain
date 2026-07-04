@@ -45,7 +45,7 @@ class MarkdownGenerator:
         return "\n\n".join(p for p in parts if p is not None) + "\n"
 
     def _frontmatter(self, ko: KnowledgeObject, created: date) -> str:
-        tags = _unique(ko.metadata.tags + ko.concepts)
+        tags = _tags_for(ko)
         lines = [
             "---",
             f"id: {ko.id}",
@@ -55,6 +55,8 @@ class MarkdownGenerator:
             f"created: {created.isoformat()}",
             f"language: {ko.metadata.language}",
         ]
+        if ko.metadata.domain:
+            lines.append(f"domain: {_yaml_str(ko.metadata.domain)}")
         if ko.metadata.published_date is not None:
             lines.append(f"published_date: {ko.metadata.published_date.isoformat()}")
         lines.append("tags:")
@@ -124,11 +126,17 @@ class MarkdownGenerator:
         return f"{section('References')}\n\n{refs}"
 
     def _tags(self, ko: KnowledgeObject) -> str:
-        tags = _unique(ko.metadata.tags + ko.concepts)
+        tags = _tags_for(ko)
         if not tags:
             return f"{section('Tags')}\n\n{PLACEHOLDER}"
         rendered = " ".join(f"#{tag.replace(' ', '-')}" for tag in tags)
         return f"{section('Tags')}\n\n{rendered}"
+
+
+def _tags_for(ko: KnowledgeObject) -> list[str]:
+    """The note's tags: the domain (when known) first, then metadata tags and concepts."""
+    domain = [ko.metadata.domain] if ko.metadata.domain else []
+    return _unique(domain + ko.metadata.tags + ko.concepts)
 
 
 def _unique(items: list[str]) -> list[str]:

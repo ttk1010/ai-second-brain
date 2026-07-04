@@ -8,7 +8,7 @@ Status: Active
 
 # Mission
 
-Build a personal AI-powered Second Brain that transforms AI-related information into structured, visual, and reusable knowledge.
+Build a personal AI-powered Second Brain that transforms information from any field—with AI as its default focus—into structured, visual, and reusable knowledge.
 
 The system should enable continuous learning by turning articles, research papers, technical concepts, and news into a long-term knowledge base that evolves together with its owner.
 
@@ -30,9 +30,9 @@ This ensures consistency, extensibility, and long-term maintainability.
 
 Artificial Intelligence is evolving faster than any individual can keep up with.
 
-Instead of repeatedly searching for the same information, AI Second Brain aims to create an environment where knowledge is continuously accumulated, connected, and refined.
+Instead of repeatedly searching for the same information, AI Second Brain aims to create an environment where knowledge is continuously accumulated, connected, and refined. It starts with AI as its default focus, but the same pipeline handles any field of knowledge the owner wants to keep (ADR 0008).
 
-The long-term vision is to make learning AI feel less like collecting notes and more like growing an intelligent research companion.
+The long-term vision is to make learning feel less like collecting notes and more like growing an intelligent research companion.
 
 ---
 

@@ -41,7 +41,7 @@ Do not change product philosophy without explicit approval.
 
 # Mission
 
-Build software that helps transform AI-related information into structured, reusable knowledge.
+Build software that helps transform information from any field—with AI as its default focus—into structured, reusable knowledge (ADR 0008).
 
 Always optimize for knowledge quality rather than feature count.
 

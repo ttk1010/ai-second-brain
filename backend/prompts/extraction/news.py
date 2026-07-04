@@ -1,7 +1,8 @@
 """News extraction prompt.
 
-- Version: 1
-- Purpose: Turn a fetched AI news article into structured knowledge fields.
+- Version: 2
+- Purpose: Turn a fetched news article (any field, AI by default) into structured
+  knowledge fields.
 - Expected input: an article's title and body text (already fetched).
 - Expected output: a JSON object with title, summary, concepts, entities,
   references (see NEWS_OUTPUT_SCHEMA).
@@ -9,22 +10,26 @@
 Prompts are first-class assets and live here, never embedded in application code
 (PROMPT_STYLE_GUIDE.md). The News pipeline produces the same normalized fields as
 the Concept pipeline so downstream components stay input-agnostic (ARCHITECTURE.md).
+It is domain-independent: it handles any field, with AI as the default focus
+(ADR 0008).
 """
 
 from backend.parser.fetcher import FetchedArticle
+from backend.prompts.domain import DEFAULT_READER
 from backend.prompts.language import language_directive
 
-NEWS_SYSTEM_PROMPT = """\
-You are an educational knowledge extractor for an AI knowledge base.
-You are given an AI-related news article. Turn it into reusable knowledge for a
-software engineer who follows AI but may not know this specific story.
+NEWS_SYSTEM_PROMPT = f"""\
+You are an educational knowledge extractor for a personal knowledge base.
+You are given a news article. Turn it into reusable knowledge for a reader who
+may not know this specific story. {DEFAULT_READER}
 
 Follow these rules:
+- Infer the field/domain the story belongs to; do not assume it is about AI.
 - Be factual; rely only on the article, do not invent details.
-- The summary must cover what happened, the technology involved, the companies or
-  people involved, and why it matters (its impact).
-- "concepts" are the AI technologies/topics; "entities" are the organizations,
-  models, or people named.
+- The summary must cover what happened, what it involves (the technology, method,
+  or subject), the organizations or people involved, and why it matters (its impact).
+- "concepts" are the topics/technologies involved; "entities" are the
+  organizations, products, or people named.
 - Prefer conceptual clarity over jargon.
 - Respond with a single JSON object only. Do not include prose outside the JSON.
 
@@ -42,12 +47,13 @@ Return a JSON object with exactly these fields:
 {
   "title": "string, the article's full descriptive title",
   "short_title": "string, concise filename: key entity + core topic (see rules above)",
+  "domain": "string, the field this belongs to (e.g. 'AI', '政治'); use 'AI' if AI-related",
   "published_date": "string, the article's publication date as YYYY-MM-DD, or empty if unknown",
   "summary": "string, 3-5 sentences covering what happened, the technology, the
     companies/people, and why it matters",
   "background": "string, 2-4 sentences on the context behind this story and why it matters",
   "key_takeaways": ["string, 3-5 points a reader should remember"],
-  "concepts": ["string, AI technologies or topics involved"],
+  "concepts": ["string, technologies or topics involved"],
   "entities": ["string, organizations, models, or people involved"],
   "references": ["string, source URLs; include the article URL"]
 }

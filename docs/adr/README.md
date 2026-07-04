@@ -31,3 +31,4 @@
 | [0005](0005-knowledge-organization-cost-model.md) | Knowledge organization: cost model, linker design, KO non-persistence | Accepted |
 | [0006](0006-capture-interface-local-first.md) | Capture interface: local-first (Inbox queue + Claude Code Channels) | Accepted |
 | [0007](0007-comparison-knowledge-type.md) | Comparison knowledge type: trigger, schema, folder, table granularity | Accepted |
+| [0008](0008-domain-independence.md) | Domain-independence: AI as the default focus, `domain` metadata, default reader | Accepted |
