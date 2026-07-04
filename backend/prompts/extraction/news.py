@@ -42,6 +42,7 @@ Return a JSON object with exactly these fields:
 {
   "title": "string, the article's full descriptive title",
   "short_title": "string, concise filename: key entity + core topic (see rules above)",
+  "published_date": "string, the article's publication date as YYYY-MM-DD, or empty if unknown",
   "summary": "string, 3-5 sentences covering what happened, the technology, the
     companies/people, and why it matters",
   "background": "string, 2-4 sentences on the context behind this story and why it matters",

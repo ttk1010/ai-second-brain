@@ -25,6 +25,7 @@ class NewsExtraction:
     summary: str
     url: str
     short_title: str = ""
+    published_date: str = ""
     background: str = ""
     key_takeaways: list[str] = field(default_factory=list)
     concepts: list[str] = field(default_factory=list)
@@ -84,6 +85,7 @@ class NewsExtractor:
             summary=summary,
             url=article.url,
             short_title=str(data.get("short_title") or "").strip(),
+            published_date=str(data.get("published_date") or "").strip(),
             background=str(data.get("background") or "").strip(),
             key_takeaways=_string_list(data.get("key_takeaways")),
             concepts=_string_list(data.get("concepts")),

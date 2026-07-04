@@ -5,6 +5,8 @@ independent of how the input was obtained; downstream components consume only th
 resulting Knowledge Object.
 """
 
+from datetime import date
+
 from backend.models import (
     ComparisonData,
     ComparisonRow,
@@ -63,7 +65,9 @@ class KnowledgeObjectBuilder:
             concepts=extraction.concepts,
             entities=extraction.entities,
             references=extraction.references,
-            metadata=Metadata(language=language),
+            metadata=Metadata(
+                language=language, published_date=_parse_date(extraction.published_date)
+            ),
         )
 
     def from_comparison(
@@ -97,6 +101,14 @@ class KnowledgeObjectBuilder:
             references=extraction.references,
             metadata=Metadata(language=language),
         )
+
+
+def _parse_date(value: str) -> date | None:
+    """Parse an ISO ``YYYY-MM-DD`` string, returning None when empty or invalid."""
+    try:
+        return date.fromisoformat(value.strip())
+    except (ValueError, TypeError):
+        return None
 
 
 def _unique(items: list[str]) -> list[str]:

@@ -31,6 +31,7 @@ class MarkdownGenerator:
         parts = [
             self._frontmatter(ko, created),
             heading(ko.title),
+            self._published_date(ko),
             self._summary(ko),
             self._illustration(ko),
             self._comparison(ko),
@@ -54,6 +55,8 @@ class MarkdownGenerator:
             f"created: {created.isoformat()}",
             f"language: {ko.metadata.language}",
         ]
+        if ko.metadata.published_date is not None:
+            lines.append(f"published_date: {ko.metadata.published_date.isoformat()}")
         lines.append("tags:")
         if tags:
             lines.extend(f"  - {tag}" for tag in tags)
@@ -61,6 +64,13 @@ class MarkdownGenerator:
             lines[-1] = "tags: []"
         lines.append("---")
         return "\n".join(lines)
+
+    def _published_date(self, ko: KnowledgeObject) -> str | None:
+        """A visible publication-date line under the title, when known."""
+        published = ko.metadata.published_date
+        if published is None:
+            return None
+        return f"📅 {published.isoformat()}"
 
     def _summary(self, ko: KnowledgeObject) -> str:
         return f"{section('Summary')}\n\n{ko.summary}"
