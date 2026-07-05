@@ -164,8 +164,8 @@ no fixed hosting cost ([ADR 0006](docs/adr/0006-capture-interface-local-first.md
 - **Chat capture (Telegram):** message a bot via
   [Claude Code Channels](https://code.claude.com/docs/en/channels); Claude Code
   on your machine runs `asb` and replies. See
-  [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for setup (including
-  pre-approving the command so it runs unattended).
+  [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md) for the step-by-step setup
+  (bot token, plugin, pairing, and pre-approving commands so it runs unattended).
 
 ## Philosophy
 

@@ -19,6 +19,9 @@ the design rationale in `docs/adr/`.
 
 ## Claude Code Channels (Telegram)
 
+> セットアップを最初から行う場合は [docs/TELEGRAM_SETUP.md](TELEGRAM_SETUP.md) の
+> 手順に従ってください。以下は各症状への個別対処です。
+
 ### `/reload-plugins` → `zsh: no such file or directory`
 
 - **Symptom:** ターミナル（zsh）で `/reload-plugins` を打つと `zsh: no such file or directory` になる
