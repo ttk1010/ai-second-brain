@@ -47,7 +47,9 @@ class ComparisonExtractor:
     def __init__(self, provider: LLMProvider) -> None:
         self._provider = provider
 
-    def extract(self, items_input: str, *, language: str = "ja") -> ComparisonExtraction:
+    def extract(
+        self, items_input: str, *, language: str = "ja", guidance: str = ""
+    ) -> ComparisonExtraction:
         """Extract a structured comparison for the given items.
 
         Raises:
@@ -60,7 +62,7 @@ class ComparisonExtractor:
 
         raw = self._provider.complete(
             COMPARISON_SYSTEM_PROMPT,
-            build_comparison_user_prompt(items_input.strip(), language=language),
+            build_comparison_user_prompt(items_input.strip(), language=language, guidance=guidance),
             response_format="json",
         )
 

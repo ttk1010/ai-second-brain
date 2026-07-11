@@ -40,11 +40,12 @@ class IllustrationWriter:
         self._quality = quality
         self._default_aspect_ratio = default_aspect_ratio
 
-    def write(self, ko: KnowledgeObject, *, overwrite: bool = False) -> Path:
+    def write(self, ko: KnowledgeObject, *, overwrite: bool = False, guidance: str = "") -> Path:
         """Generate and store the illustration for ``ko``.
 
         Returns the absolute path written and records the Vault-relative path in
-        ``ko.outputs['illustration']``.
+        ``ko.outputs['illustration']``. ``guidance`` is the user's optional
+        generation-time instruction (Issue #32).
 
         Raises:
             ImageError: If image generation fails (the caller decides whether to
@@ -56,7 +57,7 @@ class IllustrationWriter:
         target = resolve_target(
             folder, slugify_title(ko.short_title or ko.title), overwrite=overwrite, suffix=".png"
         )
-        prompt = build_illustration_prompt(ko)
+        prompt = build_illustration_prompt(ko, guidance=guidance)
 
         self._provider.generate(
             prompt,

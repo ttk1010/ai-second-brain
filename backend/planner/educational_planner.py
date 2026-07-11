@@ -35,8 +35,10 @@ class EducationalPlanner:
     def __init__(self, provider: LLMProvider) -> None:
         self._provider = provider
 
-    def plan(self, ko: KnowledgeObject) -> EducationalPlan:
+    def plan(self, ko: KnowledgeObject, *, guidance: str = "") -> EducationalPlan:
         """Produce an Educational Plan for the given Knowledge Object.
+
+        ``guidance`` is the user's optional generation-time instruction (Issue #32).
 
         Raises:
             LLMError: If the LLM response is missing or not valid JSON, or if
@@ -44,7 +46,7 @@ class EducationalPlanner:
         """
         raw = self._provider.complete(
             PLAN_SYSTEM_PROMPT,
-            build_plan_user_prompt(ko),
+            build_plan_user_prompt(ko, guidance=guidance),
             response_format="json",
         )
 

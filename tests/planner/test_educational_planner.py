@@ -52,6 +52,12 @@ def test_plan_passes_language_directive_from_metadata() -> None:
     assert "Japanese" in provider.calls[0][1]
 
 
+def test_plan_passes_guidance_to_prompt() -> None:
+    provider = MockLLMProvider(VALID_RESPONSE)
+    EducationalPlanner(provider).plan(_ko(), guidance="高校生向けに")
+    assert "高校生向けに" in provider.calls[0][1]
+
+
 def test_plan_rejects_invalid_json() -> None:
     with pytest.raises(LLMError, match="invalid JSON"):
         EducationalPlanner(MockLLMProvider("not json")).plan(_ko())

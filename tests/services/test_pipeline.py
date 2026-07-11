@@ -113,6 +113,23 @@ def test_concept_end_to_end(tmp_path: Path) -> None:
     assert plan.learning_objective == "Understand self-attention."
 
 
+def test_guidance_is_recorded_in_metadata_and_frontmatter(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path).run("Transformer", guidance="高校生向けに")
+
+    assert result.knowledge_object is not None
+    assert result.knowledge_object.metadata.guidance == "高校生向けに"
+    content = result.path.read_text(encoding="utf-8")
+    assert 'guidance: "高校生向けに"' in content
+
+
+def test_no_guidance_leaves_metadata_none(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path).run("Transformer")
+
+    assert result.knowledge_object is not None
+    assert result.knowledge_object.metadata.guidance is None
+    assert "guidance:" not in result.path.read_text(encoding="utf-8")
+
+
 def test_illustration_generated_and_embedded(tmp_path: Path) -> None:
     result = _pipeline(tmp_path, image_provider=_FakeImageProvider()).run("Transformer")
 

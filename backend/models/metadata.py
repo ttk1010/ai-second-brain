@@ -20,6 +20,10 @@ class Metadata(BaseModel):
         default=None,
         description="Field this knowledge belongs to (e.g. 'AI'); AI is the default focus.",
     )
+    guidance: str | None = Field(
+        default=None,
+        description="Generation-time user instruction that steered this note (Issue #32).",
+    )
     tags: list[str] = Field(default_factory=list)
     categories: list[str] = Field(default_factory=list)
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)

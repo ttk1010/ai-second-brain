@@ -87,6 +87,21 @@ def test_cli_no_image_skips_illustration(tmp_path: Path, vault: Path, monkeypatc
     assert not (vault / "Images").exists()
 
 
+def test_cli_guidance_is_recorded_in_the_note(
+    tmp_path: Path, vault: Path, monkeypatch, capsys
+) -> None:
+    _patch_providers(monkeypatch)
+    cfg = _write_config(tmp_path, vault)
+
+    code = cli.main(
+        ["Transformer", "--guidance", "高校生向けに", "--no-image", "--config", str(cfg)]
+    )
+
+    assert code == 0
+    note = (vault / "01 Concepts" / "Transformer.md").read_text(encoding="utf-8")
+    assert 'guidance: "高校生向けに"' in note
+
+
 def test_cli_reports_unsupported_for_malformed_url(
     tmp_path: Path, vault: Path, monkeypatch, capsys
 ) -> None:

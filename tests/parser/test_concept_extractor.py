@@ -45,6 +45,12 @@ def test_extract_passes_language_directive() -> None:
     assert "Japanese" in provider.calls[0][1]
 
 
+def test_extract_passes_guidance_to_prompt() -> None:
+    provider = MockLLMProvider(VALID_RESPONSE)
+    ConceptExtractor(provider).extract("Transformer", guidance="高校生向けに")
+    assert "高校生向けに" in provider.calls[0][1]
+
+
 def test_extract_rejects_empty_concept() -> None:
     with pytest.raises(ValueError, match="must not be empty"):
         ConceptExtractor(MockLLMProvider(VALID_RESPONSE)).extract("  ")

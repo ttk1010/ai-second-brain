@@ -15,6 +15,7 @@ deterministic, structured JSON response.
 
 from backend.models import KnowledgeObject
 from backend.prompts.domain import DEFAULT_READER
+from backend.prompts.guidance import guidance_directive
 from backend.prompts.language import language_directive
 
 PLAN_SYSTEM_PROMPT = f"""\
@@ -56,7 +57,7 @@ Return a JSON object with exactly these fields:
 """
 
 
-def build_plan_user_prompt(ko: KnowledgeObject) -> str:
+def build_plan_user_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str:
     """Build the user prompt for planning the education of a Knowledge Object.
 
     The output language follows the Knowledge Object's metadata language.
@@ -70,4 +71,5 @@ def build_plan_user_prompt(ko: KnowledgeObject) -> str:
         f"Entities: {entities}\n\n"
         f"{PLAN_OUTPUT_SCHEMA}\n"
         f"{language_directive(ko.metadata.language)}"
+        f"{guidance_directive(guidance)}"
     )

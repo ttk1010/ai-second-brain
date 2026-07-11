@@ -41,12 +41,13 @@ class NewsExtractor:
         self._provider = provider
         self._fetcher = fetcher
 
-    def extract(self, url: str, *, language: str = "ja") -> NewsExtraction:
+    def extract(self, url: str, *, language: str = "ja", guidance: str = "") -> NewsExtraction:
         """Fetch ``url`` and extract structured fields.
 
         Args:
             url: The article URL.
             language: Language for the natural-language fields (e.g. summary).
+            guidance: Optional user instruction steering tone/audience (Issue #32).
 
         Raises:
             ValueError: If the URL is empty.
@@ -60,7 +61,7 @@ class NewsExtractor:
 
         raw = self._provider.complete(
             NEWS_SYSTEM_PROMPT,
-            build_news_user_prompt(article, language=language),
+            build_news_user_prompt(article, language=language, guidance=guidance),
             response_format="json",
         )
 

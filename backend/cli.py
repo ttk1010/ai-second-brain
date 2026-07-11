@@ -42,7 +42,7 @@ def main(argv: list[str] | None = None) -> int:
         raw_input = f"compare: {raw_input}"
 
     try:
-        result = pipeline.run(raw_input, overwrite=args.overwrite)
+        result = pipeline.run(raw_input, overwrite=args.overwrite, guidance=args.guidance)
     except ValueError as exc:
         print(f"Input error: {exc}", file=sys.stderr)
         return 2
@@ -84,6 +84,16 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--compare",
         action="store_true",
         help="Treat the input as a list of items to compare (e.g. 'GPT, Claude, Gemini').",
+    )
+    parser.add_argument(
+        "--guidance",
+        default="",
+        metavar="TEXT",
+        help=(
+            "Free-text instruction to steer this note's tone, audience, and emphasis "
+            "(e.g. '高校生向けに、歴史的背景を含めて'). Applies to the body and the "
+            "illustration. Recorded in the note's frontmatter."
+        ),
     )
     parser.add_argument(
         "--config",

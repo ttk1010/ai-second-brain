@@ -200,3 +200,18 @@ def test_domain_in_frontmatter_and_tags_when_present() -> None:
 def test_no_domain_line_when_absent() -> None:
     md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
     assert "domain:" not in md
+
+
+def test_guidance_in_frontmatter_when_present() -> None:
+    ko = _minimal_ko()
+    ko.metadata.guidance = "高校生向けに"
+    md = MarkdownGenerator().generate(ko, created=FIXED_DATE)
+
+    assert 'guidance: "高校生向けに"' in md
+    # Guidance is provenance, not a tag.
+    assert "#高校生向けに" not in md
+
+
+def test_no_guidance_line_when_absent() -> None:
+    md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
+    assert "guidance:" not in md

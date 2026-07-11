@@ -14,6 +14,7 @@ field of knowledge, with AI as the default focus (ADR 0008).
 """
 
 from backend.prompts.domain import DEFAULT_READER
+from backend.prompts.guidance import guidance_directive
 from backend.prompts.language import language_directive
 
 CONCEPT_SYSTEM_PROMPT = f"""\
@@ -45,6 +46,11 @@ Return a JSON object with exactly these fields:
 """
 
 
-def build_concept_user_prompt(concept: str, *, language: str = "ja") -> str:
+def build_concept_user_prompt(concept: str, *, language: str = "ja", guidance: str = "") -> str:
     """Build the user prompt for extracting a concept."""
-    return f"Concept: {concept}\n\n{CONCEPT_OUTPUT_SCHEMA}\n{language_directive(language)}"
+    return (
+        f"Concept: {concept}\n\n"
+        f"{CONCEPT_OUTPUT_SCHEMA}\n"
+        f"{language_directive(language)}"
+        f"{guidance_directive(guidance)}"
+    )

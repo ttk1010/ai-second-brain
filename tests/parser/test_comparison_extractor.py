@@ -76,6 +76,12 @@ def test_extract_passes_language_directive() -> None:
     assert "Japanese" in provider.calls[0][1]
 
 
+def test_extract_passes_guidance_to_prompt() -> None:
+    provider = MockLLMProvider(VALID_RESPONSE)
+    ComparisonExtractor(provider).extract("A, B", guidance="発行モデルの違いを主軸に")
+    assert "発行モデルの違いを主軸に" in provider.calls[0][1]
+
+
 def test_builder_produces_comparison_knowledge_object() -> None:
     extraction = ComparisonExtractor(MockLLMProvider(VALID_RESPONSE)).extract("GPT, Claude, Gemini")
     ko = KnowledgeObjectBuilder().from_comparison("GPT, Claude, Gemini", extraction, language="ja")

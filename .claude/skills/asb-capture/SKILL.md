@@ -26,9 +26,13 @@ When the user (or an incoming Channels message) gives you an AI **concept** or a
    - For a comparison request (e.g. "compare Claude, GPT and Gemini"), extract the
      items and run `uv run python -m backend.cli --compare "Claude, GPT, Gemini"` instead.
      The note is saved under `04 Comparisons/` with a comparison table.
+   - If the message adds a **style/audience/emphasis instruction** (e.g. "高校生向けに",
+     "歴史的背景を含めて", "発行モデルの違いを主軸に"), pass it separately via
+     `--guidance "<その指示>"`. Keep the concept/URL/items as the input, and put the
+     "how to write it" part in `--guidance`. It steers the body and the illustration.
    - Add `--no-image` to skip the illustration (saves cost).
    - Add `--overwrite` only if the user explicitly wants to regenerate an
-     existing note.
+     existing note (e.g. to re-run with different `--guidance`).
 3. Report back concisely: the created note path, or that it already existed, or
    the error. Keep replies short — they may be read in a chat app.
 

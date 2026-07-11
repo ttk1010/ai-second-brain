@@ -71,8 +71,13 @@ class KnowledgePipeline:
         self._illustrations = illustration_writer
         self._language = language
 
-    def run(self, raw_input: str, *, overwrite: bool = False) -> PipelineResult:
+    def run(self, raw_input: str, *, overwrite: bool = False, guidance: str = "") -> PipelineResult:
         """Process ``raw_input`` end to end.
+
+        ``guidance`` is the user's optional generation-time instruction (Issue #32):
+        a free-text steer (tone, audience, emphasis) applied to extraction,
+        planning, and illustration. It does not affect idempotency — the same
+        source is still skipped unless ``overwrite`` is set (decision A).
 
         Raises:
             ValueError: If the input is empty.
@@ -108,21 +113,28 @@ class KnowledgePipeline:
                 )
 
         if source_type is SourceType.CONCEPT:
-            extraction = self._extractor.extract(value, language=self._language)
+            extraction = self._extractor.extract(value, language=self._language, guidance=guidance)
             ko = self._builder.from_concept(value, extraction, language=self._language)
         elif source_type is SourceType.COMPARISON:  # supported implies the extractor is present
-            comparison = self._comparison.extract(value, language=self._language)
+            comparison = self._comparison.extract(value, language=self._language, guidance=guidance)
             ko = self._builder.from_comparison(value, comparison, language=self._language)
         else:  # NEWS (supported implies the news extractor is present)
-            extraction = self._news.extract(value, language=self._language)
+            extraction = self._news.extract(value, language=self._language, guidance=guidance)
             ko = self._builder.from_news(extraction, language=self._language)
 
-        return self._finalize(ko, overwrite=overwrite)
+        # Record the guidance as provenance (decision A): it shows how the note was
+        # generated and is reused when regenerating with --overwrite.
+        if guidance.strip():
+            ko.metadata.guidance = guidance.strip()
 
-    def _finalize(self, ko: KnowledgeObject, *, overwrite: bool) -> PipelineResult:
+        return self._finalize(ko, overwrite=overwrite, guidance=guidance)
+
+    def _finalize(
+        self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = ""
+    ) -> PipelineResult:
         """Shared tail for every pipeline: plan, illustrate, render, store."""
-        ko.educational_plan = self._plan(ko)
-        self._illustrate(ko, overwrite=overwrite)
+        ko.educational_plan = self._plan(ko, guidance=guidance)
+        self._illustrate(ko, overwrite=overwrite, guidance=guidance)
         markdown = self._markdown.generate(ko)
         path = self._vault.write(ko, markdown, overwrite=overwrite)
 
@@ -133,7 +145,7 @@ class KnowledgePipeline:
             path=path,
         )
 
-    def _plan(self, ko: KnowledgeObject) -> EducationalPlan | None:
+    def _plan(self, ko: KnowledgeObject, *, guidance: str = "") -> EducationalPlan | None:
         """Plan the education for ``ko``, degrading gracefully on failure.
 
         The Educational Plan enriches outputs but should never block note
@@ -141,14 +153,14 @@ class KnowledgePipeline:
         A planning failure is logged and the note is still created without a plan.
         """
         try:
-            return self._planner.plan(ko)
+            return self._planner.plan(ko, guidance=guidance)
         except LLMError:
             logger.warning(
                 "Educational planning failed for %r; continuing without a plan.", ko.title
             )
             return None
 
-    def _illustrate(self, ko: KnowledgeObject, *, overwrite: bool) -> None:
+    def _illustrate(self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = "") -> None:
         """Generate and store the illustration, degrading gracefully on failure.
 
         Like planning, the illustration enriches the note but must never block its
@@ -158,7 +170,7 @@ class KnowledgePipeline:
         if self._illustrations is None:
             return
         try:
-            self._illustrations.write(ko, overwrite=overwrite)
+            self._illustrations.write(ko, overwrite=overwrite, guidance=guidance)
         except ImageError:
             logger.warning(
                 "Illustration generation failed for %r; continuing without one.", ko.title
