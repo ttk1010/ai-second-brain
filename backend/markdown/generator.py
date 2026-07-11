@@ -57,6 +57,8 @@ class MarkdownGenerator:
         ]
         if ko.metadata.domain:
             lines.append(f"domain: {_yaml_str(ko.metadata.domain)}")
+        if ko.metadata.guidance:
+            lines.append(f"guidance: {_yaml_str(ko.metadata.guidance)}")
         if ko.metadata.published_date is not None:
             lines.append(f"published_date: {ko.metadata.published_date.isoformat()}")
         lines.append("tags:")

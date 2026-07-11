@@ -94,11 +94,19 @@ echo 'OPENAI_API_KEY=sk-...' > .env
 uv run asb "Transformer"                 # a concept
 uv run asb "https://ledge.ai/..."        # a news article
 uv run asb --compare "GPT, Claude, Gemini"   # a comparison
+
+# Steer tone / audience / emphasis with --guidance
+uv run asb "Transformer" --guidance "高校生向けに、歴史的背景を含めて"
 ```
 
 Each note is written into your vault with an educational illustration. Re-running
 the same input is a no-op (use `--overwrite` to regenerate, `--no-image` to skip
 the illustration).
+
+`--guidance "<自然文>"` adds a free-text instruction that steers the note body **and**
+the illustration (tone, target audience, which angle to emphasize). It is recorded
+in the note's frontmatter. Guidance does not change idempotency — the same input is
+still skipped unless you pass `--overwrite` (so you can re-run with new guidance).
 
 ## Features
 

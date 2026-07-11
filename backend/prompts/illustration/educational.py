@@ -30,13 +30,16 @@ Visual style (keep consistent across every illustration):
 Do not include photorealistic imagery, logos, or marketing aesthetics."""
 
 
-def build_illustration_prompt(ko: KnowledgeObject) -> str:
+def build_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str:
     """Build the illustration prompt for a Knowledge Object.
 
     Uses the Educational Plan when present (its learning objective, key messages
     and visualization description drive the illustration). Falls back to the
     Knowledge Object's own fields when no plan is available, so an illustration
     can still be produced after a planning failure.
+
+    ``guidance`` is the user's optional generation-time instruction (Issue #32);
+    it steers the illustration so it stays consistent with the note body.
     """
     lines = [ILLUSTRATION_STYLE, "", f"Subject: {ko.title}"]
 
@@ -55,5 +58,8 @@ def build_illustration_prompt(ko: KnowledgeObject) -> str:
         if ko.concepts:
             lines.append("Emphasize these points:")
             lines.extend(f"- {concept}" for concept in ko.concepts)
+
+    if guidance.strip():
+        lines.append(f"Additional guidance (tone/audience/emphasis): {guidance.strip()}")
 
     return "\n".join(lines)

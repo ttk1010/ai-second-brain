@@ -164,6 +164,7 @@ Examples:
 * publication date
 * author
 * domain (the field the knowledge belongs to, e.g. "AI"; AI is the default focus — ADR 0008)
+* guidance (the generation-time instruction that steered the note, if any — Issue #32)
 * tags
 * categories
 * confidence

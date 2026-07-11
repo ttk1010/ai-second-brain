@@ -16,6 +16,7 @@ the default focus (ADR 0008).
 """
 
 from backend.prompts.domain import DEFAULT_READER
+from backend.prompts.guidance import guidance_directive
 from backend.prompts.language import language_directive
 
 COMPARISON_SYSTEM_PROMPT = f"""\
@@ -57,11 +58,12 @@ Return a JSON object with exactly these fields:
 """
 
 
-def build_comparison_user_prompt(items: str, *, language: str = "ja") -> str:
+def build_comparison_user_prompt(items: str, *, language: str = "ja", guidance: str = "") -> str:
     """Build the user prompt for extracting a comparison."""
     return (
         f"Compare: {items}\n\n"
         f"{COMPARISON_OUTPUT_SCHEMA}\n"
         f"Every row's cells must be in the same order and count as items.\n"
         f"{language_directive(language)}"
+        f"{guidance_directive(guidance)}"
     )

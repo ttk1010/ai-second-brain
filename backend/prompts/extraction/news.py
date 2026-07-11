@@ -16,6 +16,7 @@ It is domain-independent: it handles any field, with AI as the default focus
 
 from backend.parser.fetcher import FetchedArticle
 from backend.prompts.domain import DEFAULT_READER
+from backend.prompts.guidance import guidance_directive
 from backend.prompts.language import language_directive
 
 NEWS_SYSTEM_PROMPT = f"""\
@@ -60,7 +61,9 @@ Return a JSON object with exactly these fields:
 """
 
 
-def build_news_user_prompt(article: FetchedArticle, *, language: str = "ja") -> str:
+def build_news_user_prompt(
+    article: FetchedArticle, *, language: str = "ja", guidance: str = ""
+) -> str:
     """Build the user prompt for extracting knowledge from a news article."""
     return (
         f"Source URL: {article.url}\n"
@@ -68,4 +71,5 @@ def build_news_user_prompt(article: FetchedArticle, *, language: str = "ja") -> 
         f"Article text:\n{article.text}\n\n"
         f"{NEWS_OUTPUT_SCHEMA}\n"
         f"{language_directive(language)}"
+        f"{guidance_directive(guidance)}"
     )
