@@ -53,3 +53,8 @@ package.json
 
 # Python build metadata
 *.egg-info/
+
+# Other-agent config duplicates (this project standardizes on Claude Code /
+# CLAUDE.md + .claude/skills). Ignore files some non-Claude tools regenerate.
+/AGENTS.md
+/.agents/
