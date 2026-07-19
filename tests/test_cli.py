@@ -102,6 +102,31 @@ def test_cli_guidance_is_recorded_in_the_note(
     assert 'guidance: "高校生向けに"' in note
 
 
+def test_cli_captured_from_creates_news_note(
+    tmp_path: Path, vault: Path, monkeypatch, capsys
+) -> None:
+    _patch_providers(monkeypatch)
+    cfg = _write_config(tmp_path, vault)
+    body = tmp_path / "article.txt"
+    body.write_text("ログイン必須サイトの記事本文。", encoding="utf-8")
+
+    code = cli.main(
+        [
+            "--captured-from",
+            "https://atmarkit.itmedia.co.jp/ait/articles/x.html",
+            "--text-file",
+            str(body),
+            "--no-image",
+            "--config",
+            str(cfg),
+        ]
+    )
+
+    assert code == 0
+    assert (vault / "06 News" / "Transformer.md").exists()
+    assert "Created note" in capsys.readouterr().out
+
+
 def test_cli_reports_unsupported_for_malformed_url(
     tmp_path: Path, vault: Path, monkeypatch, capsys
 ) -> None:

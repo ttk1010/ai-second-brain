@@ -67,6 +67,22 @@ def test_extract_passes_language_directive() -> None:
     assert "English" in provider.calls[0][1]
 
 
+def test_extract_from_article_skips_the_fetcher() -> None:
+    """Captured content is extracted from the given body, with no fetch (Issue #38)."""
+    provider = MockLLMProvider(VALID_RESPONSE)
+    # A fetcher that would explode if called, proving no network access happens.
+    extractor = NewsExtractor(provider, _FakeFetcher(error=FetchError("must not fetch")))
+    captured = FetchedArticle(
+        url="https://atmarkit.itmedia.co.jp/x", title="記事", text="ログイン必須記事の本文。"
+    )
+
+    extraction = extractor.extract_from_article(captured)
+
+    assert extraction.url == "https://atmarkit.itmedia.co.jp/x"
+    assert "ログイン必須記事の本文。" in provider.calls[0][1]
+    assert "https://atmarkit.itmedia.co.jp/x" in extraction.references
+
+
 def test_extract_rejects_empty_url() -> None:
     with pytest.raises(ValueError, match="must not be empty"):
         NewsExtractor(MockLLMProvider(VALID_RESPONSE), _FakeFetcher(ARTICLE)).extract("  ")

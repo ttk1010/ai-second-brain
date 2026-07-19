@@ -130,6 +130,44 @@ def test_no_guidance_leaves_metadata_none(tmp_path: Path) -> None:
     assert "guidance:" not in result.path.read_text(encoding="utf-8")
 
 
+CAPTURED_URL = "https://atmarkit.itmedia.co.jp/ait/articles/x.html"
+
+
+def test_run_captured_creates_news_note(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path, with_news=True).run_captured(
+        CAPTURED_URL, "ログイン必須記事の本文テキスト。", title="元記事"
+    )
+
+    assert result.status == "created"
+    assert result.path.parent.name == "06 News"
+    assert result.knowledge_object is not None
+    # Stored as News with the source URL, so idempotency matches the URL path.
+    assert result.knowledge_object.source.value == CAPTURED_URL
+
+
+def test_run_captured_is_idempotent(tmp_path: Path) -> None:
+    pipeline = _pipeline(tmp_path, with_news=True)
+    pipeline.run_captured(CAPTURED_URL, "本文。")
+    second = pipeline.run_captured(CAPTURED_URL, "本文。")
+
+    assert second.status == "exists"
+
+
+def test_run_captured_requires_text(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="text must not be empty"):
+        _pipeline(tmp_path, with_news=True).run_captured(CAPTURED_URL, "   ")
+
+
+def test_run_captured_requires_url(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="source URL is required"):
+        _pipeline(tmp_path, with_news=True).run_captured("  ", "body")
+
+
+def test_run_captured_unsupported_without_news_extractor(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path).run_captured(CAPTURED_URL, "body")
+    assert result.status == "unsupported"
+
+
 def test_illustration_generated_and_embedded(tmp_path: Path) -> None:
     result = _pipeline(tmp_path, image_provider=_FakeImageProvider()).run("Transformer")
 

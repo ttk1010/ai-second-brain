@@ -27,6 +27,7 @@ from backend.parser import (
     NewsExtractor,
     classify,
 )
+from backend.parser.fetcher import FetchedArticle
 from backend.planner import EducationalPlanner
 from backend.storage import IllustrationWriter, VaultWriter
 
@@ -122,12 +123,65 @@ class KnowledgePipeline:
             extraction = self._news.extract(value, language=self._language, guidance=guidance)
             ko = self._builder.from_news(extraction, language=self._language)
 
-        # Record the guidance as provenance (decision A): it shows how the note was
-        # generated and is reused when regenerating with --overwrite.
+        self._record_guidance(ko, guidance)
+        return self._finalize(ko, overwrite=overwrite, guidance=guidance)
+
+    def run_captured(
+        self,
+        url: str,
+        text: str,
+        *,
+        title: str = "",
+        overwrite: bool = False,
+        guidance: str = "",
+    ) -> PipelineResult:
+        """Process an article whose body text was captured by the user (Issue #38).
+
+        For login-required sites, the user brings the already-rendered body text
+        (from their own logged-in browser) plus the source ``url``; the fetch step
+        is skipped entirely. The note is stored as News (source = ``url``), so
+        idempotency and folder routing match the URL path.
+
+        Raises:
+            ValueError: If ``url`` or ``text`` is empty.
+        """
+        if not url or not url.strip():
+            raise ValueError("A source URL is required for captured content.")
+        if not text or not text.strip():
+            raise ValueError("Captured article text must not be empty.")
+
+        source = url.strip()
+        if self._news is None:
+            return PipelineResult(
+                status="unsupported",
+                message="Captured content needs the News pipeline, which is not configured.",
+            )
+
+        if not overwrite:
+            existing = self._vault.find_existing(SourceType.NEWS, source)
+            if existing is not None:
+                return PipelineResult(
+                    status="exists",
+                    message=(
+                        f"Note already exists: {existing.name}. Use --overwrite to regenerate."
+                    ),
+                    path=existing,
+                )
+
+        article = FetchedArticle(url=source, title=title.strip() or source, text=text.strip())
+        extraction = self._news.extract_from_article(
+            article, language=self._language, guidance=guidance
+        )
+        ko = self._builder.from_news(extraction, language=self._language)
+
+        self._record_guidance(ko, guidance)
+        return self._finalize(ko, overwrite=overwrite, guidance=guidance)
+
+    @staticmethod
+    def _record_guidance(ko: KnowledgeObject, guidance: str) -> None:
+        """Record the guidance as provenance (Issue #32): how the note was generated."""
         if guidance.strip():
             ko.metadata.guidance = guidance.strip()
-
-        return self._finalize(ko, overwrite=overwrite, guidance=guidance)
 
     def _finalize(
         self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = ""

@@ -20,6 +20,16 @@ class _FakePipeline:
             raise RuntimeError("boom")
         return PipelineResult(status=status, message="", path=None)
 
+    def run_captured(
+        self, url: str, text: str, *, title: str = "", overwrite: bool = False
+    ) -> PipelineResult:
+        self.captured: list[tuple[str, str, str]] = getattr(self, "captured", [])
+        self.captured.append((url, text, title))
+        status = self.behavior.get(url, "created")
+        if status == "raise":
+            raise RuntimeError("boom")
+        return PipelineResult(status=status, message="", path=None)
+
 
 def _stub(inbox: Path, name: str, content: str) -> Path:
     inbox.mkdir(parents=True, exist_ok=True)
@@ -40,6 +50,40 @@ def test_processes_and_consumes_stubs(tmp_path: Path) -> None:
     assert sorted(pipeline.calls) == ["Transformer", "https://example.com/news"]
     # Consumed: stubs removed on success.
     assert list(inbox.glob("*.md")) == []
+
+
+def test_processes_captured_stub_via_run_captured(tmp_path: Path) -> None:
+    inbox = tmp_path / "00 Inbox"
+    content = (
+        "---\n"
+        "source: https://atmarkit.itmedia.co.jp/x\n"
+        "title: 記事タイトル\n"
+        "---\n\n"
+        "記事本文のテキスト。\n"
+    )
+    _stub(inbox, "captured.md", content)
+    pipeline = _FakePipeline()
+
+    summary = InboxWorker(pipeline, inbox).process_all()
+
+    assert summary.created == 1
+    # Routed to run_captured (not run) with the URL, body, and title.
+    assert pipeline.calls == []
+    assert pipeline.captured == [
+        ("https://atmarkit.itmedia.co.jp/x", "記事本文のテキスト。", "記事タイトル")
+    ]
+    assert list(inbox.glob("*.md")) == []  # consumed on success
+
+
+def test_stub_without_source_is_not_captured(tmp_path: Path) -> None:
+    inbox = tmp_path / "00 Inbox"
+    # A URL on the first line is a normal fetch stub, not captured content.
+    _stub(inbox, "u.md", "https://example.com/news")
+    pipeline = _FakePipeline()
+
+    InboxWorker(pipeline, inbox).process_all()
+    assert pipeline.calls == ["https://example.com/news"]
+    assert getattr(pipeline, "captured", []) == []
 
 
 def test_extracts_first_meaningful_line(tmp_path: Path) -> None:

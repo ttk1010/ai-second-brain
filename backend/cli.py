@@ -35,14 +35,26 @@ def main(argv: list[str] | None = None) -> int:
 
     pipeline = build_pipeline(settings, no_image=args.no_image)
 
-    # --compare is sugar: normalize to the canonical "compare:" form so there is
-    # a single classification path (ADR 0007).
-    raw_input = args.input
-    if args.compare and not raw_input.lower().startswith("compare:"):
-        raw_input = f"compare: {raw_input}"
-
     try:
-        result = pipeline.run(raw_input, overwrite=args.overwrite, guidance=args.guidance)
+        if args.captured_from:
+            text = _captured_text(args)
+            result = pipeline.run_captured(
+                args.captured_from,
+                text,
+                title=args.title,
+                overwrite=args.overwrite,
+                guidance=args.guidance,
+            )
+        else:
+            if not args.input:
+                print("Input error: an input is required.", file=sys.stderr)
+                return 2
+            # --compare is sugar: normalize to the canonical "compare:" form so
+            # there is a single classification path (ADR 0007).
+            raw_input = args.input
+            if args.compare and not raw_input.lower().startswith("compare:"):
+                raw_input = f"compare: {raw_input}"
+            result = pipeline.run(raw_input, overwrite=args.overwrite, guidance=args.guidance)
     except ValueError as exc:
         print(f"Input error: {exc}", file=sys.stderr)
         return 2
@@ -64,12 +76,28 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
+def _captured_text(args: argparse.Namespace) -> str:
+    """Resolve the captured article body: --text-file, then the positional arg, then stdin."""
+    if args.text_file is not None:
+        return args.text_file.read_text(encoding="utf-8")
+    if args.input:
+        return args.input
+    return sys.stdin.read()
+
+
 def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="asb",
         description="Turn an AI concept or article URL into a structured Obsidian note.",
     )
-    parser.add_argument("input", help="An AI concept (e.g. 'Transformer') or URL.")
+    parser.add_argument(
+        "input",
+        nargs="?",
+        help=(
+            "A concept (e.g. 'Transformer') or URL. With --captured-from, this is "
+            "instead the article body text (unless --text-file is given)."
+        ),
+    )
     parser.add_argument(
         "--overwrite",
         action="store_true",
@@ -94,6 +122,28 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
             "(e.g. '高校生向けに、歴史的背景を含めて'). Applies to the body and the "
             "illustration. Recorded in the note's frontmatter."
         ),
+    )
+    parser.add_argument(
+        "--captured-from",
+        default="",
+        metavar="URL",
+        help=(
+            "Ingest already-captured article body text as News from this source URL, "
+            "skipping the fetch (for login-required sites, Issue #38). The body comes "
+            "from --text-file, the positional argument, or stdin."
+        ),
+    )
+    parser.add_argument(
+        "--text-file",
+        type=Path,
+        metavar="PATH",
+        help="Read the captured article body from this file (used with --captured-from).",
+    )
+    parser.add_argument(
+        "--title",
+        default="",
+        metavar="TEXT",
+        help="Optional title for captured content (used with --captured-from).",
     )
     parser.add_argument(
         "--config",

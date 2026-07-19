@@ -32,3 +32,4 @@
 | [0006](0006-capture-interface-local-first.md) | Capture interface: local-first (Inbox queue + Claude Code Channels) | Accepted |
 | [0007](0007-comparison-knowledge-type.md) | Comparison knowledge type: trigger, schema, folder, table granularity | Accepted |
 | [0008](0008-domain-independence.md) | Domain-independence: AI as the default focus, `domain` metadata, default reader | Accepted |
+| [0009](0009-captured-content-ingestion.md) | Captured-content ingestion for login-required sites (bring-your-own-text, no credentials) | Accepted |
