@@ -175,6 +175,41 @@ no fixed hosting cost ([ADR 0006](docs/adr/0006-capture-interface-local-first.md
   [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md) for the step-by-step setup
   (bot token, plugin, pairing, and pre-approving commands so it runs unattended).
 
+### Login-required sites (captured content)
+
+For pages behind a login (incl. free-membership walls) that `asb` cannot fetch,
+**bring the body text yourself** from your own logged-in browser. ASB never
+handles your credentials or cookies — it just summarizes the text you give it,
+stored as News under the source URL ([ADR 0009](docs/adr/0009-captured-content-ingestion.md)).
+
+Drop a capture stub into `00 Inbox/` (then run `uv run asb-inbox`):
+
+```markdown
+---
+source: https://atmarkit.itmedia.co.jp/...
+title: 記事タイトル   # optional
+---
+（記事本文をここに貼り付け）
+```
+
+Or from the CLI (handy for a bookmarklet/script):
+
+```bash
+uv run asb --captured-from "https://atmarkit.itmedia.co.jp/..." --text-file article.txt
+# or pipe the clipboard:
+pbpaste | uv run asb --captured-from "https://atmarkit.itmedia.co.jp/..."
+```
+
+A bookmarklet that copies a ready-to-paste stub (frontmatter + article text) to
+your clipboard, to run on the article page while logged in:
+
+```javascript
+javascript:(()=>{const t=(document.querySelector('article')||document.body).innerText.trim();const s=`---\nsource: ${location.href}\ntitle: ${document.title}\n---\n\n${t}`;navigator.clipboard.writeText(s);})();
+```
+
+Only capture content you have legitimate access to, and respect each site's terms
+of use. ASB does not bypass paywalls, CAPTCHAs, or MFA.
+
 ## Philosophy
 
 This project is **not** an image generator and **not** a note-taking app — it is

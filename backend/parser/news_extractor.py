@@ -10,7 +10,7 @@ import json
 from dataclasses import dataclass, field
 
 from backend.llm.base import LLMError, LLMProvider
-from backend.parser.fetcher import ArticleFetcher
+from backend.parser.fetcher import ArticleFetcher, FetchedArticle
 from backend.prompts.extraction.news import (
     NEWS_SYSTEM_PROMPT,
     build_news_user_prompt,
@@ -58,7 +58,25 @@ class NewsExtractor:
             raise ValueError("URL must not be empty.")
 
         article = self._fetcher.fetch(url.strip())
+        return self.extract_from_article(article, language=language, guidance=guidance)
 
+    def extract_from_article(
+        self, article: FetchedArticle, *, language: str = "ja", guidance: str = ""
+    ) -> NewsExtraction:
+        """Extract structured fields from an already-fetched (or captured) article.
+
+        This is the LLM step alone, with no network access — used both by the
+        URL path (after fetching) and by the captured-content path, where the
+        user supplies the body text from their own logged-in browser (Issue #38).
+
+        Args:
+            article: The article's URL, title, and body text.
+            language: Language for the natural-language fields (e.g. summary).
+            guidance: Optional user instruction steering tone/audience (Issue #32).
+
+        Raises:
+            LLMError: If the LLM response is missing or not valid JSON.
+        """
         raw = self._provider.complete(
             NEWS_SYSTEM_PROMPT,
             build_news_user_prompt(article, language=language, guidance=guidance),

@@ -40,6 +40,10 @@ When the user (or an incoming Channels message) gives you an AI **concept** or a
 
 - `asb` writes to the configured external Vault. Concept input generates an
   explanation + illustration; a URL fetches and summarizes the article.
+- For **login-required** pages `asb` cannot fetch, use captured content: if the
+  message provides the article **body text** plus its URL, run
+  `uv run python -m backend.cli --captured-from "<URL>" --text-file <path>`
+  (or pipe the text via stdin). Do not attempt to log in or bypass any wall.
 - Generation calls OpenAI (per-note cost). Idempotent: an existing concept/URL is
   skipped, not regenerated (no extra cost).
 - If several items were dropped into the Vault's `00 Inbox/`, run
