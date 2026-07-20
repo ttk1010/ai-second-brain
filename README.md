@@ -178,37 +178,13 @@ no fixed hosting cost ([ADR 0006](docs/adr/0006-capture-interface-local-first.md
 ### Login-required sites (captured content)
 
 For pages behind a login (incl. free-membership walls) that `asb` cannot fetch,
-**bring the body text yourself** from your own logged-in browser. ASB never
-handles your credentials or cookies — it just summarizes the text you give it,
-stored as News under the source URL ([ADR 0009](docs/adr/0009-captured-content-ingestion.md)).
-
-Drop a capture stub into `00 Inbox/` (then run `uv run asb-inbox`):
-
-```markdown
----
-source: https://atmarkit.itmedia.co.jp/...
-title: 記事タイトル   # optional
----
-（記事本文をここに貼り付け）
-```
-
-Or from the CLI (handy for a bookmarklet/script):
-
-```bash
-uv run asb --captured-from "https://atmarkit.itmedia.co.jp/..." --text-file article.txt
-# or pipe the clipboard:
-pbpaste | uv run asb --captured-from "https://atmarkit.itmedia.co.jp/..."
-```
-
-A bookmarklet that copies a ready-to-paste stub (frontmatter + article text) to
-your clipboard, to run on the article page while logged in:
-
-```javascript
-javascript:(()=>{const t=(document.querySelector('article')||document.body).innerText.trim();const s=`---\nsource: ${location.href}\ntitle: ${document.title}\n---\n\n${t}`;navigator.clipboard.writeText(s);})();
-```
-
-Only capture content you have legitimate access to, and respect each site's terms
-of use. ASB does not bypass paywalls, CAPTCHAs, or MFA.
+**bring the body text yourself** from your own logged-in browser — via an Inbox
+stub, `asb --captured-from <URL>`, or Claude Code reading the page through the
+Claude in Chrome extension. ASB never handles your credentials or cookies; it
+just summarizes the text you give it, stored as News under the source URL
+([ADR 0009](docs/adr/0009-captured-content-ingestion.md)). See
+[docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) for the step-by-step guide
+(including a capture bookmarklet).
 
 ## Philosophy
 
@@ -235,6 +211,7 @@ The full vision and long-term goals live in
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | The Knowledge Object schema |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Development roadmap |
+| [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | Capturing login-required articles |
 | [docs/adr/](docs/adr/) | Architecture Decision Records |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Setup & runtime troubleshooting |
 | [CLAUDE.md](CLAUDE.md) | Engineering guide for AI-assisted development |
