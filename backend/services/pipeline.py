@@ -23,9 +23,11 @@ from backend.models.educational_plan import EducationalPlan
 from backend.parser import (
     ComparisonExtractor,
     ConceptExtractor,
+    DigestExtraction,
     DigestExtractor,
     KnowledgeObjectBuilder,
     NewsExtractor,
+    RankedArticle,
     RankingFetcher,
     classify,
 )
@@ -232,8 +234,47 @@ class KnowledgePipeline:
         extraction = self._digest.extract(
             ranked, period, language=self._language, guidance=guidance
         )
-        ko = self._builder.from_digest(period, ranked, extraction, language=self._language, top=top)
+        return self.render_digest(
+            period, ranked, extraction, top=top, overwrite=overwrite, guidance=guidance
+        )
 
+    def render_digest(
+        self,
+        period: str,
+        ranked: list[RankedArticle],
+        extraction: DigestExtraction,
+        *,
+        top: int = 10,
+        overwrite: bool = False,
+        guidance: str = "",
+    ) -> PipelineResult:
+        """Render a digest note + illustration from already-authored data (Issue #40).
+
+        Used by the Claude-Code digest skill, which reads the article bodies and
+        authors the labels/summaries itself (no OpenAI text cost), then hands the
+        result here to build the Knowledge Object, note, and illustration.
+
+        Raises:
+            ValueError: If ``period`` is empty or ``ranked`` is empty.
+        """
+        if not period or not period.strip():
+            raise ValueError("A digest period (e.g. '2026-08') is required.")
+        period = period.strip()
+        if not ranked:
+            raise ValueError("A digest needs at least one ranked article.")
+
+        if not overwrite:
+            existing = self._vault.find_existing(SourceType.DIGEST, period)
+            if existing is not None:
+                return PipelineResult(
+                    status="exists",
+                    message=(
+                        f"Digest already exists: {existing.name}. Use --overwrite to regenerate."
+                    ),
+                    path=existing,
+                )
+
+        ko = self._builder.from_digest(period, ranked, extraction, language=self._language, top=top)
         self._record_guidance(ko, guidance)
         return self._finalize(ko, overwrite=overwrite, guidance=guidance, plan=False)
 

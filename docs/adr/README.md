@@ -34,3 +34,4 @@
 | [0008](0008-domain-independence.md) | Domain-independence: AI as the default focus, `domain` metadata, default reader | Accepted |
 | [0009](0009-captured-content-ingestion.md) | Captured-content ingestion for login-required sites (bring-your-own-text, no credentials) | Accepted |
 | [0010](0010-monthly-news-digest.md) | Monthly news digest from ledge.ai's access ranking (static Nuxt parse, digest type) | Accepted |
+| [0011](0011-digest-claude-authored-labels.md) | Digest labels/summaries authored by a Claude skill from article bodies (no OpenAI text cost) | Accepted |

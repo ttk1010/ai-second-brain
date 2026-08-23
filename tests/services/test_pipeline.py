@@ -234,6 +234,29 @@ def test_run_digest_unsupported_when_ranking_empty(tmp_path: Path) -> None:
     assert result.status == "unsupported"
 
 
+def test_render_digest_builds_from_authored_data(tmp_path: Path) -> None:
+    from backend.parser.digest_extractor import DigestExtraction
+
+    ranked = [RankedArticle(rank=1, title="見出し1", url="https://ledge.ai/articles/a1")]
+    extraction = DigestExtraction(
+        overview="概観。", summaries={1: "要約1。"}, labels={1: "ラベル1"}
+    )
+    # No ranking fetcher / digest extractor needed — the text is already authored.
+    result = _pipeline(tmp_path).render_digest("2026-08", ranked, extraction, top=1)
+
+    assert result.status == "created"
+    assert result.path.parent.name == "08 Digests"
+    assert result.knowledge_object.digest.items[0].label == "ラベル1"
+    assert "要約1。" in result.path.read_text(encoding="utf-8")
+
+
+def test_render_digest_requires_ranked(tmp_path: Path) -> None:
+    from backend.parser.digest_extractor import DigestExtraction
+
+    with pytest.raises(ValueError, match="at least one ranked"):
+        _pipeline(tmp_path).render_digest("2026-08", [], DigestExtraction(overview="o"))
+
+
 def test_illustration_generated_and_embedded(tmp_path: Path) -> None:
     result = _pipeline(tmp_path, image_provider=_FakeImageProvider()).run("Transformer")
 

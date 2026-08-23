@@ -197,7 +197,7 @@ summary per story, and generates a digest note + an overview illustration under
 `08 Digests` ([ADR 0010](docs/adr/0010-monthly-news-digest.md)).
 
 ```bash
-uv run asb-digest                       # this month, top 10
+uv run asb-digest                       # this month, top 10 (fully automatic)
 uv run asb-digest --month 2026-08 --top 5
 ```
 
@@ -205,6 +205,14 @@ The ranking is always the last 30 days; `--month` only labels the note (and is i
 idempotency key — the same month is skipped unless you pass `--overwrite`). The
 image carries ranks and short labels; the accurate one-line summaries live in the
 note. Run it monthly from cron/launchd (like `asb-inbox`), local-first, no daemon.
+
+**Higher-quality (Claude Code):** the `asb-digest` skill reads the actual article
+bodies and writes the labels/summaries itself — better captions, and **no OpenAI
+text cost** (only the illustration is billed; [ADR 0011](docs/adr/0011-digest-claude-authored-labels.md)).
+It splits into two helper commands the skill drives: `asb-digest fetch` (ranking +
+bodies as JSON, no OpenAI) and `asb-digest build --from <file>` (note + image from
+the authored JSON). The fully-automatic `asb-digest` above stays for unattended
+cron runs.
 
 ## Philosophy
 

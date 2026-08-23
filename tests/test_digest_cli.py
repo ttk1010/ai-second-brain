@@ -72,3 +72,58 @@ def test_digest_cli_defaults_month_to_today(tmp_path: Path, monkeypatch, capsys)
     assert code == 0
     period = date.today().strftime("%Y-%m")
     assert (vault / "08 Digests" / f"{period} AIニュースTOP2.md").exists()
+
+
+class _FakeArticleFetcher:
+    def fetch(self, url: str):
+        from backend.parser.fetcher import FetchedArticle
+
+        return FetchedArticle(url=url, title="t", text=f"本文テキスト for {url}")
+
+
+def test_fetch_prints_ranking_with_bodies(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(cli, "LedgeAiRankingFetcher", lambda: _FakeRanking())
+    monkeypatch.setattr(cli, "HttpArticleFetcher", lambda: _FakeArticleFetcher())
+
+    code = cli.main(["fetch", "--top", "2"])
+
+    assert code == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["top"] == 2
+    assert len(out["articles"]) == 2
+    assert out["articles"][0]["url"].endswith("a1")
+    assert out["articles"][0]["body"].startswith("本文テキスト")
+
+
+def test_build_from_authored_json_uses_labels(tmp_path: Path, monkeypatch, capsys) -> None:
+    _patch(monkeypatch)
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    cfg = _config(tmp_path, vault)
+    authored = {
+        "period": "2026-08",
+        "overview": "概観。",
+        "concepts": ["AIエージェント"],
+        "entities": ["OpenAI"],
+        "items": [
+            {
+                "rank": 1,
+                "title": "見出し1",
+                "url": "https://ledge.ai/articles/a1",
+                "label": "ヤコビアン予想に反例",
+                "summary": "要約1。",
+            }
+        ],
+    }
+    src = tmp_path / "digest.json"
+    src.write_text(json.dumps(authored, ensure_ascii=False), encoding="utf-8")
+
+    code = cli.main(["build", "--from", str(src), "--no-image", "--config", str(cfg)])
+
+    assert code == 0
+    note = vault / "08 Digests" / "2026-08 AIニュースTOP1.md"
+    assert note.exists()
+    content = note.read_text(encoding="utf-8")
+    assert "[見出し1](https://ledge.ai/articles/a1) — 要約1。" in content
+    # The label is for the illustration tile, not the note body.
+    assert "ヤコビアン予想に反例" not in content
