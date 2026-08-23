@@ -26,9 +26,11 @@ month's themes. {DEFAULT_READER}
 Follow these rules:
 - Base each label and summary only on its title; do not invent specifics.
 - "label" is for a chart tile: a self-contained phrase of about 8-16 characters
-  that captures the gist (e.g. actor + action). It must be COMPLETE — never cut a
-  word mid-way, and always close any brackets like 「」. Prefer plain words over
-  long product names; drop trailing punctuation.
+  that captures the gist (e.g. actor + action). It MUST keep at least one of the
+  headline's most identifying terms — the key proper noun or subject (a product,
+  model, organization, or the specific topic) — never drop them for a vague
+  paraphrase. It must be COMPLETE — never cut a word mid-way, and always close any
+  brackets like 「」. Drop trailing punctuation.
 - "summary" is a single factual sentence (this is the accurate text; the label is
   only the short caption).
 - The overview is 2-3 sentences on the month's overall themes and standouts.
