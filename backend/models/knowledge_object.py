@@ -15,6 +15,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.models.comparison import ComparisonData
+from backend.models.digest import DigestData
 from backend.models.educational_plan import EducationalPlan
 from backend.models.enums import SourceType
 from backend.models.metadata import Metadata
@@ -58,6 +59,10 @@ class KnowledgeObject(BaseModel):
     comparison: ComparisonData | None = Field(
         default=None,
         description="Structured comparison; set only for comparison notes.",
+    )
+    digest: DigestData | None = Field(
+        default=None,
+        description="Ranked top stories; set only for digest notes (Issue #39).",
     )
     references: list[str] = Field(default_factory=list)
     metadata: Metadata = Field(default_factory=Metadata)

@@ -12,8 +12,10 @@ from backend.markdown import MarkdownGenerator
 from backend.parser import (
     ComparisonExtractor,
     ConceptExtractor,
+    DigestExtractor,
     HttpArticleFetcher,
     KnowledgeObjectBuilder,
+    LedgeAiRankingFetcher,
     NewsExtractor,
 )
 from backend.planner import EducationalPlanner
@@ -48,6 +50,8 @@ def build_pipeline(settings: Settings, *, no_image: bool = False) -> KnowledgePi
         vault_writer=VaultWriter(settings.vault_path),
         news_extractor=NewsExtractor(provider, HttpArticleFetcher()),
         comparison_extractor=ComparisonExtractor(provider),
+        digest_extractor=DigestExtractor(provider),
+        ranking_fetcher=LedgeAiRankingFetcher(),
         illustration_writer=illustration_writer,
         language=settings.default_language,
     )

@@ -11,8 +11,11 @@ from backend.models import SourceType
 from backend.parser import (
     ComparisonExtractor,
     ConceptExtractor,
+    DigestExtractor,
     KnowledgeObjectBuilder,
     NewsExtractor,
+    RankedArticle,
+    RankingFetcher,
 )
 from backend.parser.fetcher import ArticleFetcher, FetchedArticle
 from backend.planner import EducationalPlanner
@@ -53,6 +56,30 @@ COMPARISON_RESPONSE = json.dumps(
 )
 
 
+DIGEST_RESPONSE = json.dumps(
+    {
+        "overview": "今月はエージェントが話題。",
+        "items": [{"rank": 1, "summary": "要約1。"}, {"rank": 2, "summary": "要約2。"}],
+        "concepts": ["AIエージェント"],
+        "entities": ["OpenAI"],
+    }
+)
+
+
+class _FakeRanking(RankingFetcher):
+    def __init__(self, count: int = 2) -> None:
+        self._count = count
+
+    def fetch_monthly(self, *, limit: int = 10) -> list[RankedArticle]:
+        n = min(self._count, limit)
+        return [
+            RankedArticle(
+                rank=i + 1, title=f"見出し{i + 1}", url=f"https://ledge.ai/articles/a{i + 1}"
+            )
+            for i in range(n)
+        ]
+
+
 class _FakeImageProvider(ImageProvider):
     def __init__(self, *, error: Exception | None = None) -> None:
         self.error = error
@@ -76,6 +103,8 @@ def _pipeline(
     image_provider: ImageProvider | None = None,
     with_news: bool = False,
     with_comparison: bool = False,
+    with_digest: bool = False,
+    ranking: "RankingFetcher | None" = None,
 ) -> KnowledgePipeline:
     illustration_writer = (
         IllustrationWriter(vault, image_provider) if image_provider is not None else None
@@ -84,6 +113,8 @@ def _pipeline(
     comparison_extractor = (
         ComparisonExtractor(MockLLMProvider(COMPARISON_RESPONSE)) if with_comparison else None
     )
+    digest_extractor = DigestExtractor(MockLLMProvider(DIGEST_RESPONSE)) if with_digest else None
+    ranking_fetcher = ranking if ranking is not None else (_FakeRanking() if with_digest else None)
     return KnowledgePipeline(
         extractor=ConceptExtractor(MockLLMProvider(response)),
         builder=KnowledgeObjectBuilder(),
@@ -92,6 +123,8 @@ def _pipeline(
         vault_writer=VaultWriter(vault),
         news_extractor=news_extractor,
         comparison_extractor=comparison_extractor,
+        digest_extractor=digest_extractor,
+        ranking_fetcher=ranking_fetcher,
         illustration_writer=illustration_writer,
     )
 
@@ -165,6 +198,39 @@ def test_run_captured_requires_url(tmp_path: Path) -> None:
 
 def test_run_captured_unsupported_without_news_extractor(tmp_path: Path) -> None:
     result = _pipeline(tmp_path).run_captured(CAPTURED_URL, "body")
+    assert result.status == "unsupported"
+
+
+def test_run_digest_creates_digest_note(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path, with_digest=True).run_digest("2026-08", top=2)
+
+    assert result.status == "created"
+    assert result.path.parent.name == "08 Digests"
+    assert result.path.name == "2026-08 AIニュースTOP2.md"
+    content = result.path.read_text(encoding="utf-8")
+    assert "## Top Stories" in content
+    assert "[見出し1](https://ledge.ai/articles/a1) — 要約1。" in content
+
+
+def test_run_digest_is_idempotent(tmp_path: Path) -> None:
+    pipeline = _pipeline(tmp_path, with_digest=True)
+    pipeline.run_digest("2026-08", top=2)
+    assert pipeline.run_digest("2026-08", top=2).status == "exists"
+
+
+def test_run_digest_requires_period(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="period"):
+        _pipeline(tmp_path, with_digest=True).run_digest("  ")
+
+
+def test_run_digest_unsupported_without_ranking(tmp_path: Path) -> None:
+    assert _pipeline(tmp_path).run_digest("2026-08").status == "unsupported"
+
+
+def test_run_digest_unsupported_when_ranking_empty(tmp_path: Path) -> None:
+    result = _pipeline(tmp_path, with_digest=True, ranking=_FakeRanking(count=0)).run_digest(
+        "2026-08"
+    )
     assert result.status == "unsupported"
 
 

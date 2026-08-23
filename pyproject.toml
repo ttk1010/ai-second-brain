@@ -32,6 +32,7 @@ Repository = "https://github.com/ttk1010/ai-second-brain"
 asb = "backend.cli:main"
 asb-link = "backend.linker.cli:main"
 asb-inbox = "backend.inbox.cli:main"
+asb-digest = "backend.digest.cli:main"
 
 [dependency-groups]
 dev = [

@@ -121,6 +121,9 @@ still skipped unless you pass `--overwrite` (so you can re-run with new guidance
 - **Capture from anywhere:** a local `00 Inbox` queue (`asb-inbox`) and chat
   capture via Claude Code Channels (Telegram) — local-first, no fixed hosting
   cost.
+- **Monthly digest:** `asb-digest` turns [ledge.ai](https://ledge.ai/)'s 30-day
+  access ranking into a single note + overview illustration of the month's top
+  AI stories.
 
 ## How it works
 
@@ -185,6 +188,23 @@ just summarizes the text you give it, stored as News under the source URL
 ([ADR 0009](docs/adr/0009-captured-content-ingestion.md)). See
 [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) for the step-by-step guide
 (including a capture bookmarklet).
+
+## Monthly digest
+
+`asb-digest` builds a one-page overview of the month's most-read AI news. It reads
+[ledge.ai](https://ledge.ai/)'s **30-day access ranking**, writes a one-line
+summary per story, and generates a digest note + an overview illustration under
+`08 Digests` ([ADR 0010](docs/adr/0010-monthly-news-digest.md)).
+
+```bash
+uv run asb-digest                       # this month, top 10
+uv run asb-digest --month 2026-08 --top 5
+```
+
+The ranking is always the last 30 days; `--month` only labels the note (and is its
+idempotency key — the same month is skipped unless you pass `--overwrite`). The
+image carries ranks and short labels; the accurate one-line summaries live in the
+note. Run it monthly from cron/launchd (like `asb-inbox`), local-first, no daemon.
 
 ## Philosophy
 

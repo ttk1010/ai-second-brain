@@ -34,6 +34,7 @@ class MarkdownGenerator:
             self._published_date(ko),
             self._summary(ko),
             self._illustration(ko),
+            self._digest(ko),
             self._comparison(ko),
             self._background(ko),
             self._key_takeaways(ko),
@@ -86,6 +87,19 @@ class MarkdownGenerator:
         # Obsidian embed by Vault-relative path (robust to folder location).
         return f"{section('Illustration')}\n\n![[{path}]]"
 
+    def _digest(self, ko: KnowledgeObject) -> str | None:
+        digest = ko.digest
+        if digest is None or not digest.items:
+            return None
+        lines = []
+        for item in digest.items:
+            title = _cell(item.title)
+            entry = f"{item.rank}. [{title}]({item.url})"
+            if item.summary:
+                entry += f" — {item.summary}"
+            lines.append(entry)
+        return f"{section('Top Stories')}\n\n" + "\n".join(lines)
+
     def _comparison(self, ko: KnowledgeObject) -> str | None:
         comp = ko.comparison
         if comp is None or not comp.items:
@@ -102,12 +116,17 @@ class MarkdownGenerator:
             table = f"{table}\n\n{comp.recommendation}"
         return f"{section('Comparison')}\n\n{table}"
 
-    def _background(self, ko: KnowledgeObject) -> str:
+    def _background(self, ko: KnowledgeObject) -> str | None:
+        # A digest has no single "background"; its content is the ranked list.
+        if ko.digest is not None:
+            return None
         if not ko.background:
             return f"{section('Background')}\n\n{PLACEHOLDER}"
         return f"{section('Background')}\n\n{ko.background}"
 
-    def _key_takeaways(self, ko: KnowledgeObject) -> str:
+    def _key_takeaways(self, ko: KnowledgeObject) -> str | None:
+        if ko.digest is not None:
+            return None
         takeaways = _unique(ko.key_takeaways)
         if not takeaways:
             return f"{section('Key Takeaways')}\n\n{PLACEHOLDER}"
