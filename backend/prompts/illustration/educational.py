@@ -69,9 +69,10 @@ def build_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str
 
 
 # The digest illustration is a single-image monthly overview (Issue #39, layout C).
-# Text in a generated image is unreliable, so the image carries only numbers and a
-# few-word label per item; the accurate one-line summaries live in the note.
-_DIGEST_LABEL_MAX = 24
+# Text in a generated image is unreliable, so the image carries a short, complete
+# caption per item (the extractor's label); the accurate one-line summaries live
+# in the note. Fallback truncation only applies when no label was produced.
+_DIGEST_LABEL_MAX = 16
 
 
 def _digest_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str:
@@ -80,16 +81,20 @@ def _digest_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> s
         ILLUSTRATION_STYLE,
         "",
         f"Subject: a single-image monthly overview of the top AI news — {ko.title}.",
-        "Compose one overview image that reads at a glance:",
+        "Compose one information-rich overview image that reads at a glance:",
         "- Number every story with its rank.",
-        "- Make ranks 1-3 the visual heroes: larger, each with a distinct hand-drawn icon.",
-        "- Show the remaining ranks as a smaller numbered row beneath the heroes.",
-        "- Use only a few words per label; do NOT render full sentences or long text.",
-        "Items (rank — short label):",
+        "- Make ranks 1-3 the heroes: larger tiles, each a detailed, specific little"
+        " scene for that story (relevant objects, a small diagram or symbols), not a"
+        " generic icon.",
+        "- Show ranks 4-10 as a tidy numbered grid of smaller tiles, each with its own"
+        " clear icon and caption — draw them with real detail, not empty boxes.",
+        "- Render each caption exactly as given: short but COMPLETE — never cut a word"
+        " and never leave a bracket like 「 unclosed. Do not add long sentences.",
+        "Items (rank — caption):",
     ]
     for item in digest.items:
-        label = item.title[:_DIGEST_LABEL_MAX].strip()
-        lines.append(f"- {item.rank}. {label}")
+        caption = item.label.strip() or item.title[:_DIGEST_LABEL_MAX].strip()
+        lines.append(f"- {item.rank}. {caption}")
     lines.append("Aspect ratio: 16:9")
     if guidance.strip():
         lines.append(f"Additional guidance (tone/audience/emphasis): {guidance.strip()}")

@@ -19,12 +19,18 @@ from backend.prompts.language import language_directive
 DIGEST_SYSTEM_PROMPT = f"""\
 You are an editor building a monthly digest of the most-read AI news.
 You are given the period's top headlines in rank order (by access count). For
-each, write ONE concise sentence explaining what happened and why it matters, and
-write a short overall overview of the month's themes. {DEFAULT_READER}
+each, write a short label for an illustration AND one concise sentence explaining
+what happened and why it matters; also write a short overall overview of the
+month's themes. {DEFAULT_READER}
 
 Follow these rules:
-- Base each summary only on its title; do not invent specifics you are unsure of.
-- Keep each summary to a single sentence; be factual and concrete.
+- Base each label and summary only on its title; do not invent specifics.
+- "label" is for a chart tile: a self-contained phrase of about 8-16 characters
+  that captures the gist (e.g. actor + action). It must be COMPLETE — never cut a
+  word mid-way, and always close any brackets like 「」. Prefer plain words over
+  long product names; drop trailing punctuation.
+- "summary" is a single factual sentence (this is the accurate text; the label is
+  only the short caption).
 - The overview is 2-3 sentences on the month's overall themes and standouts.
 - Respond with a single JSON object only. Do not include prose outside the JSON.
 """
@@ -34,7 +40,9 @@ Return a JSON object with exactly these fields:
 {
   "overview": "string, 2-3 sentences on the month's overall AI themes",
   "items": [
-    {"rank": 1, "summary": "string, one sentence for the rank-1 story"}
+    {"rank": 1,
+     "label": "string, complete 8-16 char caption for a chart tile (see rules)",
+     "summary": "string, one factual sentence for the rank-1 story"}
   ],
   "concepts": ["string, recurring AI topics/technologies across the month"],
   "entities": ["string, notable organizations, models, or people this month"]

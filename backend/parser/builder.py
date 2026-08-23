@@ -129,6 +129,7 @@ class KnowledgeObjectBuilder:
                 title=article.title,
                 url=article.url,
                 summary=extraction.summaries.get(article.rank, ""),
+                label=extraction.labels.get(article.rank, ""),
             )
             for article in ranked
         ]

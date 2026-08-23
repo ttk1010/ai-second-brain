@@ -23,6 +23,7 @@ class DigestExtraction:
 
     overview: str
     summaries: dict[int, str] = field(default_factory=dict)
+    labels: dict[int, str] = field(default_factory=dict)
     concepts: list[str] = field(default_factory=list)
     entities: list[str] = field(default_factory=list)
 
@@ -66,6 +67,7 @@ class DigestExtractor:
             raise LLMError("Digest summarization must return a JSON object.")
 
         summaries: dict[int, str] = {}
+        labels: dict[int, str] = {}
         for item in data.get("items") or []:
             if not isinstance(item, dict):
                 continue
@@ -73,13 +75,19 @@ class DigestExtractor:
                 rank = int(item.get("rank"))
             except (TypeError, ValueError):
                 continue
+            if not rank:
+                continue
             summary = str(item.get("summary") or "").strip()
-            if rank and summary:
+            label = str(item.get("label") or "").strip()
+            if summary:
                 summaries[rank] = summary
+            if label:
+                labels[rank] = label
 
         return DigestExtraction(
             overview=str(data.get("overview") or "").strip(),
             summaries=summaries,
+            labels=labels,
             concepts=_string_list(data.get("concepts")),
             entities=_string_list(data.get("entities")),
         )
