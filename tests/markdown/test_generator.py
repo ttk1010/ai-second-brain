@@ -215,3 +215,39 @@ def test_guidance_in_frontmatter_when_present() -> None:
 def test_no_guidance_line_when_absent() -> None:
     md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
     assert "guidance:" not in md
+
+
+def _digest_ko() -> KnowledgeObject:
+    from backend.models import DigestData, DigestItem
+
+    return KnowledgeObject(
+        id="dig1",
+        source=Source(type=SourceType.DIGEST, value="2026-08"),
+        title="2026-08 AIニュースTOP2",
+        summary="今月の概観。",
+        concepts=["AIエージェント"],
+        digest=DigestData(
+            period="2026-08",
+            items=[
+                DigestItem(
+                    rank=1, title="見出し1", url="https://ledge.ai/articles/a1", summary="要約1。"
+                ),
+                DigestItem(
+                    rank=2, title="見出し2", url="https://ledge.ai/articles/a2", summary="要約2。"
+                ),
+            ],
+        ),
+    )
+
+
+def test_digest_renders_numbered_ranked_list() -> None:
+    md = MarkdownGenerator().generate(_digest_ko(), created=FIXED_DATE)
+    assert "## Top Stories" in md
+    assert "1. [見出し1](https://ledge.ai/articles/a1) — 要約1。" in md
+    assert "2. [見出し2](https://ledge.ai/articles/a2) — 要約2。" in md
+
+
+def test_digest_omits_background_and_takeaways() -> None:
+    md = MarkdownGenerator().generate(_digest_ko(), created=FIXED_DATE)
+    assert "## Background" not in md
+    assert "## Key Takeaways" not in md

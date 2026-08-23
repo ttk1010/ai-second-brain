@@ -10,6 +10,8 @@ from datetime import date
 from backend.models import (
     ComparisonData,
     ComparisonRow,
+    DigestData,
+    DigestItem,
     KnowledgeObject,
     Metadata,
     Source,
@@ -17,7 +19,9 @@ from backend.models import (
 )
 from backend.parser.comparison_extractor import ComparisonExtraction
 from backend.parser.concept_extractor import ConceptExtraction
+from backend.parser.digest_extractor import DigestExtraction
 from backend.parser.news_extractor import NewsExtraction
+from backend.parser.ranking import RankedArticle
 
 
 class KnowledgeObjectBuilder:
@@ -102,6 +106,42 @@ class KnowledgeObjectBuilder:
             comparison=comparison,
             references=extraction.references,
             metadata=Metadata(language=language, domain=_clean_domain(extraction.domain)),
+        )
+
+    def from_digest(
+        self,
+        period: str,
+        ranked: list[RankedArticle],
+        extraction: DigestExtraction,
+        *,
+        language: str = "ja",
+        top: int = 10,
+    ) -> KnowledgeObject:
+        """Normalize a ranked list + summaries into a monthly digest Knowledge Object.
+
+        The digest is stored as its own source type (``period`` is the source, so
+        the same month is idempotent) and carries the ranked stories, so the note
+        and the illustration are both generated from the Knowledge Object.
+        """
+        items = [
+            DigestItem(
+                rank=article.rank,
+                title=article.title,
+                url=article.url,
+                summary=extraction.summaries.get(article.rank, ""),
+            )
+            for article in ranked
+        ]
+        return KnowledgeObject(
+            source=Source(type=SourceType.DIGEST, value=period.strip()),
+            title=f"{period} AIニュースTOP{top}",
+            short_title=f"{period} AIニュースTOP{top}",
+            summary=extraction.overview or f"{period} のアクセス上位AIニュースTOP{len(items)}。",
+            concepts=extraction.concepts,
+            entities=extraction.entities,
+            digest=DigestData(period=period.strip(), items=items),
+            references=[item.url for item in items],
+            metadata=Metadata(language=language, domain="AI"),
         )
 
 

@@ -16,6 +16,7 @@ _FOLDER_BY_SOURCE: dict[SourceType, str] = {
     SourceType.COMPARISON: "04 Comparisons",
     SourceType.NEWS: "06 News",
     SourceType.PAPER: "07 Papers",
+    SourceType.DIGEST: "08 Digests",
     SourceType.DOCUMENTATION: INBOX_FOLDER,
     SourceType.UNKNOWN: INBOX_FOLDER,
 }

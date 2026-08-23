@@ -23,8 +23,10 @@ from backend.models.educational_plan import EducationalPlan
 from backend.parser import (
     ComparisonExtractor,
     ConceptExtractor,
+    DigestExtractor,
     KnowledgeObjectBuilder,
     NewsExtractor,
+    RankingFetcher,
     classify,
 )
 from backend.parser.fetcher import FetchedArticle
@@ -59,6 +61,8 @@ class KnowledgePipeline:
         *,
         news_extractor: NewsExtractor | None = None,
         comparison_extractor: ComparisonExtractor | None = None,
+        digest_extractor: DigestExtractor | None = None,
+        ranking_fetcher: RankingFetcher | None = None,
         illustration_writer: IllustrationWriter | None = None,
         language: str = "ja",
     ) -> None:
@@ -69,6 +73,8 @@ class KnowledgePipeline:
         self._vault = vault_writer
         self._news = news_extractor
         self._comparison = comparison_extractor
+        self._digest = digest_extractor
+        self._ranking = ranking_fetcher
         self._illustrations = illustration_writer
         self._language = language
 
@@ -177,6 +183,60 @@ class KnowledgePipeline:
         self._record_guidance(ko, guidance)
         return self._finalize(ko, overwrite=overwrite, guidance=guidance)
 
+    def run_digest(
+        self,
+        period: str,
+        *,
+        top: int = 10,
+        overwrite: bool = False,
+        guidance: str = "",
+    ) -> PipelineResult:
+        """Build a monthly digest note from the news access ranking (Issue #39).
+
+        Fetches the 30-day access ranking, summarizes each headline in one line,
+        and renders a digest note + one overview illustration. ``period`` is the
+        source (so the same month is idempotent). The educational planner is
+        skipped — the digest illustration composition is fixed (ADR 0010).
+
+        Raises:
+            ValueError: If ``period`` is empty.
+        """
+        if not period or not period.strip():
+            raise ValueError("A digest period (e.g. '2026-08') is required.")
+        period = period.strip()
+
+        if self._ranking is None or self._digest is None:
+            return PipelineResult(
+                status="unsupported",
+                message="Digest needs the ranking fetcher and digest extractor, not configured.",
+            )
+
+        if not overwrite:
+            existing = self._vault.find_existing(SourceType.DIGEST, period)
+            if existing is not None:
+                return PipelineResult(
+                    status="exists",
+                    message=(
+                        f"Digest already exists: {existing.name}. Use --overwrite to regenerate."
+                    ),
+                    path=existing,
+                )
+
+        ranked = self._ranking.fetch_monthly(limit=top)
+        if not ranked:
+            return PipelineResult(
+                status="unsupported",
+                message="Could not read the access ranking (site structure may have changed).",
+            )
+
+        extraction = self._digest.extract(
+            ranked, period, language=self._language, guidance=guidance
+        )
+        ko = self._builder.from_digest(period, ranked, extraction, language=self._language, top=top)
+
+        self._record_guidance(ko, guidance)
+        return self._finalize(ko, overwrite=overwrite, guidance=guidance, plan=False)
+
     @staticmethod
     def _record_guidance(ko: KnowledgeObject, guidance: str) -> None:
         """Record the guidance as provenance (Issue #32): how the note was generated."""
@@ -184,10 +244,11 @@ class KnowledgePipeline:
             ko.metadata.guidance = guidance.strip()
 
     def _finalize(
-        self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = ""
+        self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = "", plan: bool = True
     ) -> PipelineResult:
         """Shared tail for every pipeline: plan, illustrate, render, store."""
-        ko.educational_plan = self._plan(ko, guidance=guidance)
+        if plan:
+            ko.educational_plan = self._plan(ko, guidance=guidance)
         self._illustrate(ko, overwrite=overwrite, guidance=guidance)
         markdown = self._markdown.generate(ko)
         path = self._vault.write(ko, markdown, overwrite=overwrite)
