@@ -18,6 +18,7 @@ class DigestItem(BaseModel):
     title: str = Field(min_length=1)
     url: str = Field(min_length=1)
     summary: str = ""
+    label: str = Field(default="", description="Short caption for the illustration tile.")
 
 
 class DigestData(BaseModel):

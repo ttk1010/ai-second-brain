@@ -18,8 +18,8 @@ VALID_RESPONSE = json.dumps(
     {
         "overview": "今月はエージェントが話題。",
         "items": [
-            {"rank": 1, "summary": "要約1。"},
-            {"rank": 2, "summary": "要約2。"},
+            {"rank": 1, "label": "数学の難問に反例", "summary": "要約1。"},
+            {"rank": 2, "label": "AIブラウザ統合", "summary": "要約2。"},
         ],
         "concepts": ["AIエージェント"],
         "entities": ["OpenAI"],
@@ -33,6 +33,7 @@ def test_extract_returns_overview_and_summaries() -> None:
 
     assert extraction.overview == "今月はエージェントが話題。"
     assert extraction.summaries == {1: "要約1。", 2: "要約2。"}
+    assert extraction.labels == {1: "数学の難問に反例", 2: "AIブラウザ統合"}
     assert extraction.concepts == ["AIエージェント"]
     # The titles are passed to the LLM (title-based summaries, no body fetch).
     assert "見出し1" in provider.calls[0][1]
@@ -61,6 +62,7 @@ def test_builder_produces_digest_knowledge_object() -> None:
     assert ko.digest is not None
     assert [i.rank for i in ko.digest.items] == [1, 2]
     assert ko.digest.items[0].summary == "要約1。"
+    assert ko.digest.items[0].label == "数学の難問に反例"
     assert ko.digest.items[1].url == "https://ledge.ai/articles/a2"
     # References list every ranked article's URL.
     assert ko.references == ["https://ledge.ai/articles/a1", "https://ledge.ai/articles/a2"]
@@ -72,3 +74,17 @@ def test_builder_tolerates_missing_summaries() -> None:
     extraction = DigestExtraction(overview="o", summaries={})
     ko = KnowledgeObjectBuilder().from_digest("2026-08", RANKED, extraction)
     assert ko.digest.items[0].summary == ""
+
+
+def test_illustration_prompt_uses_the_label_not_a_truncated_title() -> None:
+    from backend.parser.digest_extractor import DigestExtraction
+    from backend.prompts.illustration import build_illustration_prompt
+
+    long_title = [RankedArticle(rank=1, title="と" * 40 + "「未完の見出し", url="https://x/1")]
+    extraction = DigestExtraction(overview="o", labels={1: "数学の難問に反例"})
+    ko = KnowledgeObjectBuilder().from_digest("2026-08", long_title, extraction, top=1)
+
+    prompt = build_illustration_prompt(ko)
+    assert "1. 数学の難問に反例" in prompt
+    # The raw (truncated, bracket-dangling) title is not used as the caption.
+    assert "「未完の見出し" not in prompt
