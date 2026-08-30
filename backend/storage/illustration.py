@@ -45,7 +45,12 @@ class IllustrationWriter:
         self._default_aspect_ratio = default_aspect_ratio
 
     def write(
-        self, ko: KnowledgeObject, *, overwrite: bool = False, guidance: str = ""
+        self,
+        ko: KnowledgeObject,
+        *,
+        overwrite: bool = False,
+        guidance: str = "",
+        stem: str | None = None,
     ) -> list[Path]:
         """Generate and store the illustration(s) for ``ko``.
 
@@ -53,7 +58,9 @@ class IllustrationWriter:
         Vault-relative reference(s): ``ko.outputs['illustration']`` always holds
         the first page, and ``ko.illustrations`` holds the ordered list when the
         Educational Plan requested a multi-page series (Issue #41). ``guidance``
-        is the user's optional generation-time instruction (Issue #32).
+        is the user's optional generation-time instruction (Issue #32). ``stem``
+        pins the image filename to the note's (Issue #39): on overwrite it keeps
+        the image aligned with the existing note so no orphaned PNG is left behind.
 
         Raises:
             ImageError: If image generation fails (the caller decides whether to
@@ -61,7 +68,7 @@ class IllustrationWriter:
         """
         folder = self._vault_path / self._image_output_dir
         folder.mkdir(parents=True, exist_ok=True)
-        stem = slugify_title(ko.short_title or ko.title)
+        stem = stem or slugify_title(ko.short_title or ko.title)
 
         pages = ko.educational_plan.pages if ko.educational_plan is not None else []
         if pages:

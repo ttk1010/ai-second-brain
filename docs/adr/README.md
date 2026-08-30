@@ -36,3 +36,4 @@
 | [0010](0010-monthly-news-digest.md) | Monthly news digest from ledge.ai's access ranking (static Nuxt parse, digest type) | Accepted |
 | [0011](0011-digest-claude-authored-labels.md) | Digest labels/summaries authored by a Claude skill from article bodies (no OpenAI text cost) | Accepted |
 | [0012](0012-multi-page-illustration.md) | Multi-page illustrations (opt-in `--pages`, per-facet series, reference-image consistency) | Accepted |
+| [0013](0013-overwrite-in-place.md) | `--overwrite` replaces the existing note in place (keep filename, no duplicates/orphans) | Accepted |
