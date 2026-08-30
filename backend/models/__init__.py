@@ -6,7 +6,7 @@ Public API for the model layer. All generators consume the Knowledge Object
 
 from backend.models.comparison import ComparisonData, ComparisonRow
 from backend.models.digest import DigestData, DigestItem
-from backend.models.educational_plan import EducationalPlan, VisualizationStrategy
+from backend.models.educational_plan import EducationalPlan, PageSpec, VisualizationStrategy
 from backend.models.enums import AspectRatio, ImageQuality, RelationshipType, SourceType
 from backend.models.knowledge_object import KnowledgeObject, Source
 from backend.models.metadata import Metadata
@@ -22,6 +22,7 @@ __all__ = [
     "ImageQuality",
     "KnowledgeObject",
     "Metadata",
+    "PageSpec",
     "Relationship",
     "RelationshipType",
     "Source",

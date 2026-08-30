@@ -70,3 +70,11 @@ class KnowledgeObject(BaseModel):
         default_factory=dict,
         description="Artifact type -> path/id reference. References only, never bodies.",
     )
+    illustrations: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Ordered Vault-relative illustration page paths for a multi-page note "
+            "(Issue #41). The single-page case keeps outputs['illustration']; when "
+            "multiple pages exist, outputs['illustration'] mirrors the first page."
+        ),
+    )

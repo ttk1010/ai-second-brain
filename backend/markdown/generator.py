@@ -81,11 +81,28 @@ class MarkdownGenerator:
         return f"{section('Summary')}\n\n{ko.summary}"
 
     def _illustration(self, ko: KnowledgeObject) -> str:
-        path = ko.outputs.get("illustration")
+        # Multi-page series (Issue #41): embed each page with its facet caption.
+        if len(ko.illustrations) > 1:
+            captions = self._page_captions(ko)
+            blocks = []
+            for i, path in enumerate(ko.illustrations):
+                caption = captions[i] if i < len(captions) else ""
+                header = f"**{caption}**\n\n" if caption else ""
+                blocks.append(f"{header}![[{path}]]")
+            return f"{section('Illustration')}\n\n" + "\n\n".join(blocks)
+
+        path = ko.outputs.get("illustration") or (ko.illustrations[0] if ko.illustrations else "")
         if not path:
             return f"{section('Illustration')}\n\n{ILLUSTRATION_PLACEHOLDER}"
         # Obsidian embed by Vault-relative path (robust to folder location).
         return f"{section('Illustration')}\n\n![[{path}]]"
+
+    @staticmethod
+    def _page_captions(ko: KnowledgeObject) -> list[str]:
+        """Page titles from the Educational Plan, numbered, for multi-page embeds."""
+        if ko.educational_plan is None:
+            return []
+        return [f"{i}. {page.title}" for i, page in enumerate(ko.educational_plan.pages, start=1)]
 
     def _digest(self, ko: KnowledgeObject) -> str | None:
         digest = ko.digest

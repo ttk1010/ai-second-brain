@@ -13,15 +13,17 @@ class _FakePipeline:
         self.behavior = behavior or {}
         self.calls: list[str] = []
 
-    def run(self, raw_input: str, *, overwrite: bool = False) -> PipelineResult:
+    def run(self, raw_input: str, *, overwrite: bool = False, pages=None) -> PipelineResult:
         self.calls.append(raw_input)
+        self.pages: list = getattr(self, "pages", [])
+        self.pages.append(pages)
         status = self.behavior.get(raw_input, "created")
         if status == "raise":
             raise RuntimeError("boom")
         return PipelineResult(status=status, message="", path=None)
 
     def run_captured(
-        self, url: str, text: str, *, title: str = "", overwrite: bool = False
+        self, url: str, text: str, *, title: str = "", overwrite: bool = False, pages=None
     ) -> PipelineResult:
         self.captured: list[tuple[str, str, str]] = getattr(self, "captured", [])
         self.captured.append((url, text, title))

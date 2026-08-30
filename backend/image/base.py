@@ -27,6 +27,7 @@ class ImageProvider(ABC):
         aspect_ratio: AspectRatio,
         quality: ImageQuality,
         output_path: Path,
+        reference_images: list[Path] | None = None,
     ) -> Path:
         """Generate an illustration and write it to ``output_path``.
 
@@ -35,6 +36,10 @@ class ImageProvider(ABC):
             aspect_ratio: Decided by the Educational Planner (ADR 0001).
             quality: Quality tier (cost-sensitive; see ADR 0002).
             output_path: Where to write the generated image.
+            reference_images: Optional existing images to carry visual style
+                forward from. Used by multi-page series so later pages match the
+                first one (Issue #41); the provider passes them to an image-edit
+                call. ``None`` (the default) generates from the prompt alone.
 
         Returns:
             The path to the written image.

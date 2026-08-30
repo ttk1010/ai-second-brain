@@ -102,6 +102,27 @@ def test_illustration_embedded_when_present() -> None:
     assert "## Illustration\n\n![[Images/MCP.png]]" in md
 
 
+def test_multipage_illustration_embeds_each_page_with_caption() -> None:
+    from backend.models import AspectRatio, EducationalPlan, PageSpec, VisualizationStrategy
+
+    ko = _minimal_ko()
+    ko.illustrations = ["Images/MCP.png", "Images/MCP-p2.png"]
+    ko.outputs = {"illustration": "Images/MCP.png"}
+    ko.educational_plan = EducationalPlan(
+        learning_objective="Understand MCP.",
+        target_audience="Engineers.",
+        visualization_strategy=VisualizationStrategy(aspect_ratio=AspectRatio.WIDE),
+        pages=[
+            PageSpec(title="Overview", learning_objective="x", aspect_ratio=AspectRatio.WIDE),
+            PageSpec(title="Mechanism", learning_objective="y", aspect_ratio=AspectRatio.WIDE),
+        ],
+    )
+    md = MarkdownGenerator().generate(ko, created=FIXED_DATE)
+    assert "## Illustration" in md
+    assert "**1. Overview**\n\n![[Images/MCP.png]]" in md
+    assert "**2. Mechanism**\n\n![[Images/MCP-p2.png]]" in md
+
+
 def test_background_and_takeaways_placeholder_when_absent() -> None:
     md = MarkdownGenerator().generate(_minimal_ko(), created=FIXED_DATE)
     assert "## Background\n\n> _(To be generated)_" in md

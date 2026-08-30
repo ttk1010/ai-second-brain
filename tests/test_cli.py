@@ -21,7 +21,9 @@ RESPONSE = json.dumps(
 
 
 class _MockImageProvider:
-    def generate(self, prompt, *, aspect_ratio, quality, output_path) -> Path:
+    def generate(
+        self, prompt, *, aspect_ratio, quality, output_path, reference_images=None
+    ) -> Path:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_bytes(b"image-bytes")
         return output_path
@@ -73,6 +75,42 @@ def test_cli_compare_creates_comparison_note(
     assert list((vault / "04 Comparisons").glob("*.md"))
     content = next((vault / "04 Comparisons").glob("*.md")).read_text(encoding="utf-8")
     assert "## Comparison" in content
+
+
+def test_cli_pages_generates_multipage_series(
+    tmp_path: Path, vault: Path, monkeypatch, capsys
+) -> None:
+    _patch_providers(monkeypatch)
+    cfg = _write_config(tmp_path, vault)
+
+    code = cli.main(["Transformer", "--pages", "3", "--config", str(cfg)])
+
+    assert code == 0
+    images = sorted(p.name for p in (vault / "Images").glob("*.png"))
+    assert images == ["Transformer-p2.png", "Transformer-p3.png", "Transformer.png"]
+    note = (vault / "01 Concepts" / "Transformer.md").read_text(encoding="utf-8")
+    assert "![[Images/Transformer-p2.png]]" in note
+
+
+def test_cli_pages_with_no_image_creates_no_images(
+    tmp_path: Path, vault: Path, monkeypatch, capsys
+) -> None:
+    _patch_providers(monkeypatch)
+    cfg = _write_config(tmp_path, vault)
+
+    # --no-image wins over --pages: no illustrations at all.
+    code = cli.main(["Transformer", "--pages", "3", "--no-image", "--config", str(cfg)])
+
+    assert code == 0
+    assert not (vault / "Images").exists()
+
+
+def test_cli_rejects_invalid_pages(tmp_path: Path, vault: Path, monkeypatch) -> None:
+    _patch_providers(monkeypatch)
+    cfg = _write_config(tmp_path, vault)
+
+    with pytest.raises(SystemExit):
+        cli.main(["Transformer", "--pages", "0", "--config", str(cfg)])
 
 
 def test_cli_no_image_skips_illustration(tmp_path: Path, vault: Path, monkeypatch, capsys) -> None:
@@ -148,4 +186,22 @@ def test_cli_bad_config_returns_2(tmp_path: Path, capsys) -> None:
 
 class _MockProvider:
     def complete(self, system: str, user: str, *, response_format: str = "text") -> str:
+        # The planner has its own schema; return a valid plan (with pages when a
+        # multi-page series was requested) so the CLI --pages path is exercised.
+        if "educational planner" in system.lower():
+            plan = {
+                "learning_objective": "Understand it.",
+                "target_audience": "Engineers.",
+                "visualization": {"aspect_ratio": "16:9"},
+            }
+            if "sequential illustration pages" in user:
+                plan["pages"] = [
+                    {
+                        "title": f"Page {i}",
+                        "learning_objective": f"Teach part {i}.",
+                        "aspect_ratio": "16:9",
+                    }
+                    for i in range(1, 4)
+                ]
+            return json.dumps(plan)
         return RESPONSE
