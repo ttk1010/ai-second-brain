@@ -42,3 +42,4 @@ Labels: enhancement, services, llm
 ## Notes
 - セクション限定・冪等の安全更新は、#22（Related Notes 更新）の設計を一般化する形が自然。
 - KO 永続化に踏み切るかは本 Issue の最大の設計判断。踏み切る場合は別途 ADR を起こす。
+- **イラスト改善に `images.edit` を活用**（#41 の調査で確認）：gpt-image-2 の `images.edit` は **既存イラストを参照画像として渡して部分/スタイル改善** ができ、**全入力画像を高フィデリティ処理**（`input_fidelity` 指定不要）するため元の絵柄を保ったまま「ここをこう直して」が可能。フル再生成（`--overwrite`）より安全・低コストに狙った改善ができる。対話を重ねるなら Responses API のマルチターン（`previous_response_id` + `image_generation` tool）で前ターンの生成画像を文脈保持したまま反復編集する選択肢もある（テキストトークン課金は乗る）。イラスト再生成タスクはこの経路を第一候補にする。

@@ -110,6 +110,11 @@ generated artifacts (Markdown, illustration, etc.). It never stores the artifact
 bodies themselves. This keeps the Knowledge Object free of presentation data
 (see ADR 0001).
 
+A note has one illustration by default. When the user opts into a multi-page
+series (`--pages`, ADR 0012), the Educational Plan carries a `pages` list and the
+ordered page paths are recorded in `illustrations`; `outputs['illustration']`
+still mirrors the first page, so single-page consumers are unaffected.
+
 ---
 
 ## Responsibilities

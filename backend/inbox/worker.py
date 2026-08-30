@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from backend.parser.fetcher import FetchedArticle
+from backend.planner import PagesOption
 from backend.services import KnowledgePipeline
 
 _URL_RE = re.compile(r"^https?://", re.IGNORECASE)
@@ -41,10 +42,12 @@ class InboxWorker:
         inbox_dir: Path,
         *,
         overwrite: bool = False,
+        pages: PagesOption = None,
     ) -> None:
         self._pipeline = pipeline
         self._inbox_dir = inbox_dir
         self._overwrite = overwrite
+        self._pages = pages
 
     def process_all(self) -> InboxSummary:
         """Process every ``*.md`` stub in the inbox directory once."""
@@ -67,9 +70,10 @@ class InboxWorker:
                         captured.text,
                         title=captured.title,
                         overwrite=self._overwrite,
+                        pages=self._pages,
                     )
                 else:
-                    result = self._pipeline.run(raw, overwrite=self._overwrite)
+                    result = self._pipeline.run(raw, overwrite=self._overwrite, pages=self._pages)
             except Exception as exc:  # noqa: BLE001 - one bad stub must not stop the rest
                 logger.warning("Failed to process inbox stub %s: %s", stub.name, exc)
                 failed += 1

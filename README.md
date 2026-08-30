@@ -97,6 +97,10 @@ uv run asb --compare "GPT, Claude, Gemini"   # a comparison
 
 # Steer tone / audience / emphasis with --guidance
 uv run asb "Transformer" --guidance "高校生向けに、歴史的背景を含めて"
+
+# Explain across several illustration pages instead of one image
+uv run asb "Transformer" --pages 4      # exactly 4 facet pages
+uv run asb "Transformer" --pages auto   # let the planner choose (2–6)
 ```
 
 Each note is written into your vault with an educational illustration. Re-running
@@ -107,6 +111,14 @@ the illustration).
 the illustration (tone, target audience, which angle to emphasize). It is recorded
 in the note's frontmatter. Guidance does not change idempotency — the same input is
 still skipped unless you pass `--overwrite` (so you can re-run with new guidance).
+
+`--pages {N|auto}` turns the single illustration into a **multi-page series** that
+teaches one facet per page (overview → mechanism → example → caveats), all in one
+consistent visual style (later pages are generated with the first page as a
+reference image). It is opt-in: without the flag you get one image as before.
+**Each page is a separate image API call, so `--pages N` costs N× the image
+generation** (capped at 6 pages); `--no-image` overrides it and generates nothing.
+See [ADR 0012](docs/adr/0012-multi-page-illustration.md).
 
 ## Features
 

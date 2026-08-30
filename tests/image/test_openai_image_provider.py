@@ -28,7 +28,14 @@ class _FakeImages:
         self.calls: list[dict] = []
 
     def generate(self, **kwargs: object) -> _FakeResponse:
-        self.calls.append(kwargs)
+        self.calls.append({"op": "generate", **kwargs})
+        if self._error is not None:
+            raise self._error
+        assert self._response is not None
+        return self._response
+
+    def edit(self, **kwargs: object) -> _FakeResponse:
+        self.calls.append({"op": "edit", **kwargs})
         if self._error is not None:
             raise self._error
         assert self._response is not None
@@ -117,4 +124,56 @@ def test_generate_rejects_missing_b64(tmp_path: Path) -> None:
             aspect_ratio=AspectRatio.WIDE,
             quality=ImageQuality.HIGH,
             output_path=tmp_path / "img.png",
+        )
+
+
+# --- Reference images / multi-page series (Issue #41) -----------------------
+
+
+def test_reference_images_use_the_edit_endpoint(tmp_path: Path) -> None:
+    client = _client()
+    ref = tmp_path / "page1.png"
+    ref.write_bytes(PNG_BYTES)
+    out = tmp_path / "page2.png"
+
+    provider = OpenAIImageProvider(client=client)
+    provider.generate(
+        "page 2",
+        aspect_ratio=AspectRatio.WIDE,
+        quality=ImageQuality.MEDIUM,
+        output_path=out,
+        reference_images=[ref],
+    )
+
+    call = client.images.calls[0]
+    assert call["op"] == "edit"  # reference images route to images.edit
+    assert len(call["image"]) == 1  # the reference file is passed through
+    assert call["size"] == "1536x1024"
+    assert call["quality"] == "medium"
+    assert out.read_bytes() == PNG_BYTES
+
+
+def test_missing_reference_image_raises(tmp_path: Path) -> None:
+    provider = OpenAIImageProvider(client=_client())
+    with pytest.raises(ImageError, match="Reference image not found"):
+        provider.generate(
+            "x",
+            aspect_ratio=AspectRatio.WIDE,
+            quality=ImageQuality.MEDIUM,
+            output_path=tmp_path / "out.png",
+            reference_images=[tmp_path / "does-not-exist.png"],
+        )
+
+
+def test_edit_wraps_api_errors(tmp_path: Path) -> None:
+    ref = tmp_path / "page1.png"
+    ref.write_bytes(PNG_BYTES)
+    provider = OpenAIImageProvider(client=_client(error=RuntimeError("boom")))
+    with pytest.raises(ImageError, match="image edit failed"):
+        provider.generate(
+            "x",
+            aspect_ratio=AspectRatio.WIDE,
+            quality=ImageQuality.HIGH,
+            output_path=tmp_path / "out.png",
+            reference_images=[ref],
         )

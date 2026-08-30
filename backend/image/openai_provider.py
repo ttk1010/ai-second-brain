@@ -63,12 +63,26 @@ class OpenAIImageProvider(ImageProvider):
         aspect_ratio: AspectRatio,
         quality: ImageQuality,
         output_path: Path,
+        reference_images: list[Path] | None = None,
     ) -> Path:
         client = self._get_client()
         size = _SIZE_FOR_RATIO[aspect_ratio]
 
+        if reference_images:
+            response = self._edit(client, prompt, size, quality, reference_images)
+        else:
+            response = self._generate(client, prompt, size, quality)
+
+        image_bytes = _decode_first_image(response)
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_bytes(image_bytes)
+        logger.info("Generated illustration: %s (%s, %s)", output_path, size, quality.value)
+        return output_path
+
+    def _generate(self, client, prompt, size, quality):  # type: ignore[no-untyped-def]
         try:
-            response = client.images.generate(
+            return client.images.generate(
                 model=self._model,
                 prompt=prompt,
                 size=size,
@@ -78,12 +92,34 @@ class OpenAIImageProvider(ImageProvider):
         except Exception as exc:  # the SDK raises many error subclasses
             raise ImageError(f"OpenAI image generation failed: {exc}") from exc
 
-        image_bytes = _decode_first_image(response)
+    def _edit(self, client, prompt, size, quality, reference_images):  # type: ignore[no-untyped-def]
+        """Generate a new image from a prompt plus reference image(s) (Issue #41).
 
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_bytes(image_bytes)
-        logger.info("Generated illustration: %s (%s, %s)", output_path, size, quality.value)
-        return output_path
+        gpt-image models accept multiple reference images and always process image
+        inputs at high fidelity, so the new page keeps the series' style. Each
+        reference file is opened and closed here.
+        """
+        opened = []
+        try:
+            for path in reference_images:
+                if not path.exists():
+                    raise ImageError(f"Reference image not found: {path}")
+                opened.append(path.open("rb"))
+            return client.images.edit(
+                model=self._model,
+                image=opened,
+                prompt=prompt,
+                size=size,
+                quality=quality.value,
+                n=1,
+            )
+        except ImageError:
+            raise
+        except Exception as exc:  # the SDK raises many error subclasses
+            raise ImageError(f"OpenAI image edit failed: {exc}") from exc
+        finally:
+            for handle in opened:
+                handle.close()
 
 
 def _decode_first_image(response: object) -> bytes:

@@ -32,7 +32,7 @@ from backend.parser import (
     classify,
 )
 from backend.parser.fetcher import FetchedArticle
-from backend.planner import EducationalPlanner
+from backend.planner import EducationalPlanner, PagesOption
 from backend.storage import IllustrationWriter, VaultWriter
 
 logger = logging.getLogger(__name__)
@@ -80,13 +80,24 @@ class KnowledgePipeline:
         self._illustrations = illustration_writer
         self._language = language
 
-    def run(self, raw_input: str, *, overwrite: bool = False, guidance: str = "") -> PipelineResult:
+    def run(
+        self,
+        raw_input: str,
+        *,
+        overwrite: bool = False,
+        guidance: str = "",
+        pages: PagesOption = None,
+    ) -> PipelineResult:
         """Process ``raw_input`` end to end.
 
         ``guidance`` is the user's optional generation-time instruction (Issue #32):
         a free-text steer (tone, audience, emphasis) applied to extraction,
         planning, and illustration. It does not affect idempotency — the same
         source is still skipped unless ``overwrite`` is set (decision A).
+
+        ``pages`` opts into a multi-page illustration series (Issue #41): an
+        integer requests that many pages, ``"auto"`` lets the planner choose, and
+        ``None``/1 keeps the default single illustration.
 
         Raises:
             ValueError: If the input is empty.
@@ -132,7 +143,7 @@ class KnowledgePipeline:
             ko = self._builder.from_news(extraction, language=self._language)
 
         self._record_guidance(ko, guidance)
-        return self._finalize(ko, overwrite=overwrite, guidance=guidance)
+        return self._finalize(ko, overwrite=overwrite, guidance=guidance, pages=pages)
 
     def run_captured(
         self,
@@ -142,6 +153,7 @@ class KnowledgePipeline:
         title: str = "",
         overwrite: bool = False,
         guidance: str = "",
+        pages: PagesOption = None,
     ) -> PipelineResult:
         """Process an article whose body text was captured by the user (Issue #38).
 
@@ -183,7 +195,7 @@ class KnowledgePipeline:
         ko = self._builder.from_news(extraction, language=self._language)
 
         self._record_guidance(ko, guidance)
-        return self._finalize(ko, overwrite=overwrite, guidance=guidance)
+        return self._finalize(ko, overwrite=overwrite, guidance=guidance, pages=pages)
 
     def run_digest(
         self,
@@ -285,11 +297,17 @@ class KnowledgePipeline:
             ko.metadata.guidance = guidance.strip()
 
     def _finalize(
-        self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = "", plan: bool = True
+        self,
+        ko: KnowledgeObject,
+        *,
+        overwrite: bool,
+        guidance: str = "",
+        plan: bool = True,
+        pages: PagesOption = None,
     ) -> PipelineResult:
         """Shared tail for every pipeline: plan, illustrate, render, store."""
         if plan:
-            ko.educational_plan = self._plan(ko, guidance=guidance)
+            ko.educational_plan = self._plan(ko, guidance=guidance, pages=pages)
         self._illustrate(ko, overwrite=overwrite, guidance=guidance)
         markdown = self._markdown.generate(ko)
         path = self._vault.write(ko, markdown, overwrite=overwrite)
@@ -301,15 +319,18 @@ class KnowledgePipeline:
             path=path,
         )
 
-    def _plan(self, ko: KnowledgeObject, *, guidance: str = "") -> EducationalPlan | None:
+    def _plan(
+        self, ko: KnowledgeObject, *, guidance: str = "", pages: PagesOption = None
+    ) -> EducationalPlan | None:
         """Plan the education for ``ko``, degrading gracefully on failure.
 
         The Educational Plan enriches outputs but should never block note
         creation: the system is AI-assisted, not AI-dependent (ARCHITECTURE.md).
-        A planning failure is logged and the note is still created without a plan.
+        A planning failure is logged and the note is still created without a plan
+        (and therefore as a single illustration, even if pages were requested).
         """
         try:
-            return self._planner.plan(ko, guidance=guidance)
+            return self._planner.plan(ko, guidance=guidance, pages=pages)
         except LLMError:
             logger.warning(
                 "Educational planning failed for %r; continuing without a plan.", ko.title

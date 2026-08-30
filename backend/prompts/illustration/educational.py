@@ -13,7 +13,7 @@ follow the same visual language so the same concept looks consistent over time
 (Illustration Principles).
 """
 
-from backend.models import KnowledgeObject
+from backend.models import KnowledgeObject, PageSpec
 
 # System layer: the long-term visual language. This rarely changes so that the
 # same concept is always drawn in the same style (PROMPT_STYLE_GUIDE.md).
@@ -65,6 +65,48 @@ def build_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str
     if guidance.strip():
         lines.append(f"Additional guidance (tone/audience/emphasis): {guidance.strip()}")
 
+    return "\n".join(lines)
+
+
+def build_illustration_page_prompt(
+    ko: KnowledgeObject,
+    page: PageSpec,
+    *,
+    index: int,
+    total: int,
+    guidance: str = "",
+    has_reference: bool = False,
+) -> str:
+    """Build the prompt for one page of a multi-page illustration series (Issue #41).
+
+    Each page teaches a distinct facet (``page``) of the same Knowledge Object,
+    but the whole series must look like one coherent lesson. The series context
+    (page k of n, same style/characters) is injected so the pages stay visually
+    consistent. When ``has_reference`` is set, the first page is supplied to the
+    image model as a reference image, so the prompt tells it to match that style.
+    """
+    lines = [
+        ILLUSTRATION_STYLE,
+        "",
+        f"This is page {index} of {total} in ONE consistent illustration series about: {ko.title}.",
+        f"This page teaches: {page.learning_objective}",
+        f"Page title (draw as a short caption): {page.title}",
+    ]
+    if page.description:
+        lines.append(f"Illustration focus: {page.description}")
+    lines.append(
+        "Keep the SAME visual style, color palette, line quality, and any recurring"
+        " characters or objects as the other pages in the series; only the content"
+        " of this page changes."
+    )
+    if has_reference:
+        lines.append(
+            "A reference image from page 1 is provided: match its style, palette,"
+            " and characters exactly while showing this page's own content."
+        )
+    lines.append(f"Aspect ratio: {page.aspect_ratio.value}")
+    if guidance.strip():
+        lines.append(f"Additional guidance (tone/audience/emphasis): {guidance.strip()}")
     return "\n".join(lines)
 
 

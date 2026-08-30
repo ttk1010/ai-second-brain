@@ -12,6 +12,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from backend.cli import _pages_arg
 from backend.config import DEFAULT_SETTINGS_PATH, SettingsError, load_settings
 from backend.inbox.worker import InboxWorker
 from backend.services import build_pipeline
@@ -32,7 +33,9 @@ def main(argv: list[str] | None = None) -> int:
 
     pipeline = build_pipeline(settings, no_image=args.no_image)
     inbox_dir = settings.vault_path / INBOX_FOLDER
-    summary = InboxWorker(pipeline, inbox_dir, overwrite=args.overwrite).process_all()
+    summary = InboxWorker(
+        pipeline, inbox_dir, overwrite=args.overwrite, pages=args.pages
+    ).process_all()
 
     print(
         f"Inbox: {summary.created} created, {summary.skipped} existing, "
@@ -55,6 +58,17 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--no-image",
         action="store_true",
         help="Skip illustration generation (saves cost).",
+    )
+    parser.add_argument(
+        "--pages",
+        type=_pages_arg,
+        default=None,
+        metavar="N|auto",
+        help=(
+            "Generate a multi-page illustration series for every processed stub "
+            "(Issue #41): an integer, or 'auto'. Each page is a separate image "
+            "(N× the image cost per note). Ignored with --no-image."
+        ),
     )
     parser.add_argument(
         "--config",

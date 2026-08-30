@@ -44,6 +44,7 @@ def main(argv: list[str] | None = None) -> int:
                 title=args.title,
                 overwrite=args.overwrite,
                 guidance=args.guidance,
+                pages=args.pages,
             )
         else:
             if not args.input:
@@ -54,7 +55,9 @@ def main(argv: list[str] | None = None) -> int:
             raw_input = args.input
             if args.compare and not raw_input.lower().startswith("compare:"):
                 raw_input = f"compare: {raw_input}"
-            result = pipeline.run(raw_input, overwrite=args.overwrite, guidance=args.guidance)
+            result = pipeline.run(
+                raw_input, overwrite=args.overwrite, guidance=args.guidance, pages=args.pages
+            )
     except ValueError as exc:
         print(f"Input error: {exc}", file=sys.stderr)
         return 2
@@ -74,6 +77,19 @@ def main(argv: list[str] | None = None) -> int:
         if committed:
             print("Committed to Vault Git repository.")
     return 0
+
+
+def _pages_arg(value: str) -> int | str:
+    """Parse ``--pages``: a positive integer, or the literal 'auto' (Issue #41)."""
+    if value == "auto":
+        return "auto"
+    try:
+        count = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("--pages must be a positive integer or 'auto'.") from None
+    if count < 1:
+        raise argparse.ArgumentTypeError("--pages must be at least 1.")
+    return count
 
 
 def _captured_text(args: argparse.Namespace) -> str:
@@ -107,6 +123,18 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         "--no-image",
         action="store_true",
         help="Skip illustration generation (saves cost; the note is still created).",
+    )
+    parser.add_argument(
+        "--pages",
+        type=_pages_arg,
+        default=None,
+        metavar="N|auto",
+        help=(
+            "Generate a multi-page illustration series instead of one image "
+            "(Issue #41): an integer for that many pages, or 'auto' to let the "
+            "planner choose. Each page is a separate image (N× the image cost). "
+            "Ignored with --no-image. Default: a single illustration."
+        ),
     )
     parser.add_argument(
         "--compare",
