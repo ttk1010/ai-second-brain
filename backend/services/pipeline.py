@@ -308,9 +308,13 @@ class KnowledgePipeline:
         """Shared tail for every pipeline: plan, illustrate, render, store."""
         if plan:
             ko.educational_plan = self._plan(ko, guidance=guidance, pages=pages)
-        self._illustrate(ko, overwrite=overwrite, guidance=guidance)
+        # Issue #39: on overwrite, reuse the existing note's filename for both the
+        # note and its illustration so the source is replaced in place (one note,
+        # one illustration) instead of duplicated under a drifting short_title.
+        stem = self._vault.pinned_stem(ko, overwrite=overwrite)
+        self._illustrate(ko, overwrite=overwrite, guidance=guidance, stem=stem)
         markdown = self._markdown.generate(ko)
-        path = self._vault.write(ko, markdown, overwrite=overwrite)
+        path = self._vault.write(ko, markdown, overwrite=overwrite, stem=stem)
 
         return PipelineResult(
             status="created",
@@ -337,17 +341,20 @@ class KnowledgePipeline:
             )
             return None
 
-    def _illustrate(self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = "") -> None:
+    def _illustrate(
+        self, ko: KnowledgeObject, *, overwrite: bool, guidance: str = "", stem: str | None = None
+    ) -> None:
         """Generate and store the illustration, degrading gracefully on failure.
 
         Like planning, the illustration enriches the note but must never block its
         creation (AI-assisted, not AI-dependent). A generation failure is logged
-        and the note is still created without an illustration.
+        and the note is still created without an illustration. ``stem`` pins the
+        image filename to the note's on overwrite (Issue #39).
         """
         if self._illustrations is None:
             return
         try:
-            self._illustrations.write(ko, overwrite=overwrite, guidance=guidance)
+            self._illustrations.write(ko, overwrite=overwrite, guidance=guidance, stem=stem)
         except ImageError:
             logger.warning(
                 "Illustration generation failed for %r; continuing without one.", ko.title

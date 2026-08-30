@@ -114,6 +114,101 @@ def test_find_existing_is_source_type_scoped(tmp_path: Path) -> None:
     assert writer.find_existing(SourceType.NEWS, "Transformer") is None
 
 
+# --- In-place overwrite: no duplicates, keep the name (Issue #39) -----------
+
+
+def _existing(writer: VaultWriter, *, source: str, short_title: str) -> Path:
+    """Write a note whose frontmatter source is ``source`` under a short_title stem."""
+    from backend.markdown import MarkdownGenerator
+
+    ko = KnowledgeObject(
+        source=Source(type=SourceType.CONCEPT, value=source),
+        title=source,
+        short_title=short_title,
+        summary="A summary.",
+    )
+    return writer.write(ko, MarkdownGenerator().generate(ko))
+
+
+def test_pinned_stem_reuses_existing_filename_on_overwrite(tmp_path: Path) -> None:
+    writer = VaultWriter(tmp_path)
+    _existing(writer, source="uv, Poetry", short_title="Old Name")
+
+    ko = KnowledgeObject(
+        source=Source(type=SourceType.CONCEPT, value="uv, Poetry"),
+        title="uv, Poetry",
+        short_title="A Better New Name",  # a "improved" title on regeneration
+        summary="A summary.",
+    )
+    assert writer.pinned_stem(ko, overwrite=True) == "Old Name"
+
+
+def test_pinned_stem_is_none_without_overwrite(tmp_path: Path) -> None:
+    writer = VaultWriter(tmp_path)
+    _existing(writer, source="uv, Poetry", short_title="Old Name")
+    ko = KnowledgeObject(
+        source=Source(type=SourceType.CONCEPT, value="uv, Poetry"),
+        title="uv, Poetry",
+        summary="A summary.",
+    )
+    assert writer.pinned_stem(ko, overwrite=False) is None
+
+
+def test_pinned_stem_is_none_when_no_existing_note(tmp_path: Path) -> None:
+    writer = VaultWriter(tmp_path)
+    ko = _ko("Brand New")
+    assert writer.pinned_stem(ko, overwrite=True) is None
+
+
+def test_pinned_stem_logs_title_drift(tmp_path: Path, caplog) -> None:
+    import logging
+
+    writer = VaultWriter(tmp_path)
+    _existing(writer, source="uv, Poetry", short_title="Old Name")
+    ko = KnowledgeObject(
+        source=Source(type=SourceType.CONCEPT, value="uv, Poetry"),
+        title="uv, Poetry",
+        short_title="A Better New Name",
+        summary="A summary.",
+    )
+    with caplog.at_level(logging.INFO):
+        writer.pinned_stem(ko, overwrite=True)
+    assert any("Keeping existing filename" in r.message for r in caplog.records)
+
+
+def test_write_with_pinned_stem_replaces_in_place(tmp_path: Path) -> None:
+    writer = VaultWriter(tmp_path)
+    _existing(writer, source="uv, Poetry", short_title="Old Name")
+
+    ko = KnowledgeObject(
+        source=Source(type=SourceType.CONCEPT, value="uv, Poetry"),
+        title="uv, Poetry",
+        short_title="A Better New Name",
+        summary="Updated.",
+    )
+    stem = writer.pinned_stem(ko, overwrite=True)
+    target = writer.write(ko, "# updated\n", overwrite=True, stem=stem)
+
+    folder = tmp_path / "01 Concepts"
+    # Exactly one note remains, under the original filename; no duplicate created.
+    assert target.name == "Old Name.md"
+    assert sorted(p.name for p in folder.glob("*.md")) == ["Old Name.md"]
+
+
+def test_find_existing_warns_on_duplicates(tmp_path: Path, caplog) -> None:
+    import logging
+
+    writer = VaultWriter(tmp_path)
+    # Two notes sharing the same source (a Vault duplicated before this fix).
+    _existing(writer, source="uv, Poetry", short_title="Name A")
+    _existing(writer, source="uv, Poetry", short_title="Name B")
+
+    with caplog.at_level(logging.WARNING):
+        found = writer.find_existing(SourceType.CONCEPT, "uv, Poetry")
+    assert found is not None
+    assert any("Multiple notes share source" in r.message for r in caplog.records)
+
+
 def test_missing_vault_raises(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError, match="Vault path does not exist"):
         VaultWriter(tmp_path / "nope").write(_ko(), "x")

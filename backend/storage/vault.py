@@ -28,17 +28,61 @@ class VaultWriter:
 
         Used for idempotent generation: the same concept/URL is not regenerated.
         The match is on the canonical ``source`` value, not the (short_title-based)
-        filename.
+        filename. When more than one note shares the same ``source`` (a Vault that
+        was already duplicated before Issue #39's fix), a warning is logged and the
+        first (name-sorted) match is returned deterministically so behavior is
+        stable; duplicates are left for the user to remove.
         """
         folder = self._vault_path / folder_for(source_type)
         if not folder.is_dir():
             return None
         wanted = source.strip()
-        for note in sorted(folder.glob("*.md")):
-            frontmatter = parse_frontmatter(note.read_text(encoding="utf-8"))
-            if str(frontmatter.get("source") or "").strip() == wanted:
-                return note
-        return None
+        matches = [
+            note
+            for note in sorted(folder.glob("*.md"))
+            if str(parse_frontmatter(note.read_text(encoding="utf-8")).get("source") or "").strip()
+            == wanted
+        ]
+        if not matches:
+            return None
+        if len(matches) > 1:
+            names = ", ".join(note.name for note in matches)
+            logger.warning(
+                "Multiple notes share source %r: %s. Using %s; remove the duplicates.",
+                wanted,
+                names,
+                matches[0].name,
+            )
+        return matches[0]
+
+    def pinned_stem(self, ko: KnowledgeObject, *, overwrite: bool) -> str | None:
+        """Return the filename stem to reuse when regenerating ``ko`` (Issue #39).
+
+        On ``overwrite``, an existing note for the same ``source`` is rewritten in
+        place under its current filename (decision: option A — keep the name so
+        Obsidian ``[[links]]`` and illustration embeds never break). Returns that
+        existing stem, or ``None`` when there is nothing to pin to (no overwrite,
+        or no existing note) so callers fall back to the short_title-derived name.
+
+        A drift between the existing filename and the freshly generated
+        short_title is logged, not applied: the improved title is available but the
+        filename stays put to preserve links. Shared here so the same in-place
+        resolution can back Issue #29's illustration-only regeneration later.
+        """
+        if not overwrite:
+            return None
+        existing = self.find_existing(ko.source.type, ko.source.value)
+        if existing is None:
+            return None
+        stem = existing.stem
+        regenerated = slugify_title(ko.short_title or ko.title)
+        if regenerated != stem:
+            logger.info(
+                "Keeping existing filename %r (regenerated title would be %r) to preserve links.",
+                stem,
+                regenerated,
+            )
+        return stem
 
     def write(
         self,
@@ -46,11 +90,15 @@ class VaultWriter:
         markdown: str,
         *,
         overwrite: bool = False,
+        stem: str | None = None,
     ) -> Path:
         """Write ``markdown`` for ``ko`` into the Vault.
 
         Returns the absolute path written. Records the Vault-relative path in
-        ``ko.outputs['markdown']``.
+        ``ko.outputs['markdown']``. ``stem`` pins the filename (Issue #39): when
+        given (from :meth:`pinned_stem` on overwrite) the note is written under
+        that exact name so an existing note is replaced in place instead of
+        duplicated; otherwise the name is derived from the short_title.
 
         Raises:
             FileNotFoundError: If the Vault path does not exist.
@@ -62,7 +110,7 @@ class VaultWriter:
         folder.mkdir(parents=True, exist_ok=True)
 
         target = resolve_target(
-            folder, slugify_title(ko.short_title or ko.title), overwrite=overwrite
+            folder, stem or slugify_title(ko.short_title or ko.title), overwrite=overwrite
         )
         target.write_text(markdown, encoding="utf-8")
 

@@ -365,3 +365,38 @@ def test_overwrite_is_passed_through(tmp_path: Path) -> None:
     first = pipeline.run("Transformer")
     second = pipeline.run("Transformer", overwrite=True)
     assert first.path == second.path  # same file, overwritten
+
+
+def _concept_response(*, short_title: str, summary: str) -> str:
+    return json.dumps(
+        {
+            "title": "Transformer",
+            "short_title": short_title,
+            "summary": summary,
+            "concepts": ["attention"],
+        }
+    )
+
+
+def test_overwrite_with_changed_short_title_keeps_one_note_and_image(tmp_path: Path) -> None:
+    # Issue #39: a drifting short_title must not duplicate the note or orphan the
+    # illustration. The regeneration replaces both in place, under the old name.
+    first = _pipeline(
+        tmp_path,
+        response=_concept_response(short_title="Old Name", summary="First."),
+        image_provider=_FakeImageProvider(),
+    ).run("Transformer")
+    assert first.path.name == "Old Name.md"
+
+    second = _pipeline(
+        tmp_path,
+        response=_concept_response(short_title="A Better New Name", summary="Updated."),
+        image_provider=_FakeImageProvider(),
+    ).run("Transformer", overwrite=True)
+
+    # Same filename kept (links preserved); content refreshed.
+    assert second.path == first.path
+    assert "Updated." in second.path.read_text(encoding="utf-8")
+    # Exactly one note and one image survive — no duplicate, no orphan PNG.
+    assert sorted(p.name for p in (tmp_path / "01 Concepts").glob("*.md")) == ["Old Name.md"]
+    assert sorted(p.name for p in (tmp_path / "Images").glob("*.png")) == ["Old Name.png"]
