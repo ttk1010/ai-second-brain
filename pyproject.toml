@@ -33,6 +33,7 @@ asb = "backend.cli:main"
 asb-link = "backend.linker.cli:main"
 asb-inbox = "backend.inbox.cli:main"
 asb-digest = "backend.digest.cli:main"
+asb-revise = "backend.revise.cli:main"
 
 [dependency-groups]
 dev = [

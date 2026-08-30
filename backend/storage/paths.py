@@ -30,6 +30,15 @@ def folder_for(source_type: SourceType) -> str:
     return _FOLDER_BY_SOURCE.get(source_type, INBOX_FOLDER)
 
 
+def all_note_folders() -> list[str]:
+    """Return every Vault folder that can hold notes (deduped, stable order).
+
+    Used to locate an existing note by title/source when the source type is not
+    known up front (Issue #29's ``asb-revise``).
+    """
+    return sorted(set(_FOLDER_BY_SOURCE.values()))
+
+
 def slugify_title(title: str) -> str:
     """Turn a note title into a safe file name stem (without extension).
 
