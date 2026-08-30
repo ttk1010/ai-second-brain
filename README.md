@@ -120,6 +120,24 @@ reference image). It is opt-in: without the flag you get one image as before.
 generation** (capped at 6 pages); `--no-image` overrides it and generates nothing.
 See [ADR 0012](docs/adr/0012-multi-page-illustration.md).
 
+### Revise an existing note
+
+Improve one part of a note without regenerating the whole thing:
+
+```bash
+asb-revise "Transformer" "要約をもっと易しく"          # rewrite a text section
+asb-revise "AWS" "図を白背景で描き直して" --illustration  # redraw the illustration
+asb-revise "AWS" "背景を厚く" --section background       # force a section
+```
+
+`asb-revise` finds the note by title or filename, then rewrites **only** the
+targeted body section (`summary` / `background` / `key_takeaways`) or redraws the
+illustration using the existing image as a style reference (so the look is kept
+and only what you asked for changes). Without `--section` / `--illustration` the
+target is inferred from the instruction. Edits are written in place — the Vault is
+Git-managed, so history lives there. See
+[ADR 0014](docs/adr/0014-note-revision.md).
+
 ## Features
 
 - **Three knowledge types:** AI **concepts**, **news URLs** (fetched &

@@ -20,6 +20,7 @@ from backend.parser import (
 )
 from backend.planner import EducationalPlanner
 from backend.services.pipeline import KnowledgePipeline
+from backend.services.reviser import NoteReviser
 from backend.storage import IllustrationWriter, VaultWriter
 
 
@@ -53,5 +54,25 @@ def build_pipeline(settings: Settings, *, no_image: bool = False) -> KnowledgePi
         digest_extractor=DigestExtractor(provider),
         ranking_fetcher=LedgeAiRankingFetcher(),
         illustration_writer=illustration_writer,
+        language=settings.default_language,
+    )
+
+
+def build_reviser(settings: Settings, *, no_image: bool = False) -> NoteReviser:
+    """Build a NoteReviser from settings (Issue #29).
+
+    Args:
+        settings: Loaded application settings.
+        no_image: When True, the illustration cannot be revised (text sections
+            only); saves building the image provider.
+    """
+    image_provider = None if no_image else OpenAIImageProvider(model=settings.image_model)
+    return NoteReviser(
+        VaultWriter(settings.vault_path),
+        OpenAIProvider(model=settings.llm_model),
+        settings.vault_path,
+        image_provider=image_provider,
+        quality=settings.image_quality,
+        default_aspect_ratio=settings.default_aspect_ratio,
         language=settings.default_language,
     )

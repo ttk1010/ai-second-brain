@@ -12,7 +12,12 @@ from pathlib import Path
 from backend.models import KnowledgeObject
 from backend.models.enums import SourceType
 from backend.storage.frontmatter import parse_frontmatter
-from backend.storage.paths import folder_for, resolve_target, slugify_title
+from backend.storage.paths import (
+    all_note_folders,
+    folder_for,
+    resolve_target,
+    slugify_title,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +59,33 @@ class VaultWriter:
                 matches[0].name,
             )
         return matches[0]
+
+    def find_note(self, reference: str) -> Path | None:
+        """Locate an existing note by a free-form reference (Issue #29).
+
+        Searches every note folder and matches the ``reference`` against, in
+        priority order: the filename stem (slugified), the frontmatter ``title``,
+        then the frontmatter ``source``. Returns the first match, or ``None``.
+        Used by ``asb-revise`` where the user names a note but not its type.
+        """
+        ref = reference.strip()
+        if not ref:
+            return None
+        slug = slugify_title(ref)
+        source_match: Path | None = None
+        for folder_name in all_note_folders():
+            folder = self._vault_path / folder_name
+            if not folder.is_dir():
+                continue
+            for note in sorted(folder.glob("*.md")):
+                if note.stem == slug or note.stem == ref:
+                    return note
+                frontmatter = parse_frontmatter(note.read_text(encoding="utf-8"))
+                if str(frontmatter.get("title") or "").strip() == ref:
+                    return note
+                if source_match is None and str(frontmatter.get("source") or "").strip() == ref:
+                    source_match = note
+        return source_match
 
     def pinned_stem(self, ko: KnowledgeObject, *, overwrite: bool) -> str | None:
         """Return the filename stem to reuse when regenerating ``ko`` (Issue #39).
