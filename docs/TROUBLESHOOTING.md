@@ -99,4 +99,18 @@ the design rationale in `docs/adr/`.
   ```
 - **Notes:** プロジェクト構成を変更した後（ディレクトリ移動、Python バージョン変更など）は editable インストールが無効になることがある。`uv sync` だけでは不十分な場合は `--reinstall-package` オプションを付ける
 
+### `ModuleNotFoundError: No module named 'backend'` が `--reinstall-package` でも直らない（macOS）
+
+- **Symptom:** 全 CLI（`asb` / `asb-revise` 等）が `ModuleNotFoundError: No module named 'backend'` で落ちる。`uv run python -m backend.cli` は動く。再インストールしても直らない
+- **Cause:** macOS が `.venv` 配下の全ファイルに `hidden` フラグ（`UF_HIDDEN`）を自動付与しており（iCloud 同期下の `~/Documents` で確認、`chflags nohidden` しても数秒で再付与される）、Python 3.12.13+ の `site.py` は hidden な `.pth` ファイルをセキュリティ対策でスキップするため、editable インストールのパス登録が効かない。確認方法：
+  ```bash
+  ls -lO .venv/lib/python3.12/site-packages/*.pth   # "hidden" と表示されれば該当
+  ```
+- **Fix:** `.pth` に依存しない non-editable インストールに切り替える：
+  ```bash
+  uv sync --dev --no-editable
+  ```
+  恒久化はこのリポジトリでは 2 段構え：`.envrc`（direnv）と `.claude/settings.json` の両方で `UV_NO_EDITABLE=1` を設定済み。direnv 未導入の環境では `export UV_NO_EDITABLE=1` をシェルに設定する
+- **Notes:** non-editable でもコード変更は `uv run` が毎回自動 re-sync するため、開発体験はほぼ変わらない。フラグ側を外す対処（`chflags -R nohidden .venv`）はデーモンが即座に戻すため無効
+
 ### (add more CLI/environment entries here)
