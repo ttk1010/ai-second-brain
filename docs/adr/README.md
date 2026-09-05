@@ -38,4 +38,4 @@
 | [0012](0012-multi-page-illustration.md) | Multi-page illustrations (opt-in `--pages`, per-facet series, reference-image consistency) | Accepted |
 | [0013](0013-overwrite-in-place.md) | `--overwrite` replaces the existing note in place (keep filename, no duplicates/orphans) | Accepted |
 | [0014](0014-note-revision.md) | Natural-language note revision (`asb-revise`): read-back, section-safe rewrite, illustration edit | Accepted |
-| [0015](0015-serverless-instant-generation.md) | Serverless (AWS Lambda) endpoint for instant on-the-go generation (OpenAI direct, Git-synced Vault) | Proposed |
+| [0015](0015-serverless-instant-generation.md) | Serverless (AWS Lambda) endpoint for instant on-the-go generation (OpenAI direct, Git-synced Vault) | Accepted |

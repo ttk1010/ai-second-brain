@@ -1,6 +1,6 @@
 # ADR 0015: 外出先からの即時生成のためのサーバーレス（AWS Lambda）エンドポイント
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-05
 - Deciders: Project owner (ttk1010), Lead Software Engineer (Claude Code)
 
