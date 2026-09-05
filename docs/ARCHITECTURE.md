@@ -16,6 +16,10 @@ Implementation details belong in the source code.
 
 This document focuses on architecture, responsibilities, and data flow.
 
+For before/after architecture diagrams (current local-first design and the
+proposed AWS Lambda serverless design), see
+[architecture-diagrams.md](architecture-diagrams.md).
+
 ---
 
 # Design Principles
