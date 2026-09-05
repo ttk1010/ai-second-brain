@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AI Second Brain - instant on-the-go generation (Issue #42, ADR 0015).
+  A single Lambda (container) exposed via a Function URL runs the backend/
+  pipeline and commits the note+illustration to a GitHub-backed Vault.
+
+Parameters:
+  SecretName:
+    Type: String
+    Default: asb/config
+    Description: >
+      Secrets Manager secret (JSON) holding OPENAI_API_KEY, GITHUB_TOKEN,
+      GITHUB_REPO (owner/name) and ASB_AUTH_SECRET.
+
+Globals:
+  Function:
+    Timeout: 120          # gpt-image-2 can take tens of seconds (ADR 0015).
+    MemorySize: 1024
+    Architectures:
+      - x86_64
+
+Resources:
+  AsbFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      # Public URL; the handler verifies a shared secret (Authorization: Bearer).
+      FunctionUrlConfig:
+        AuthType: NONE
+      Environment:
+        Variables:
+          # Secrets are injected from Secrets Manager at deploy time. Rotating the
+          # secret and redeploying picks up new values.
+          OPENAI_API_KEY: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:OPENAI_API_KEY}}"
+          GITHUB_TOKEN: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:GITHUB_TOKEN}}"
+          GITHUB_REPO: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:GITHUB_REPO}}"
+          ASB_AUTH_SECRET: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:ASB_AUTH_SECRET}}"
+          GITHUB_BRANCH: main
+    Metadata:
+      DockerContext: ..
+      Dockerfile: infra/Dockerfile
+      DockerTag: latest
+
+Outputs:
+  FunctionUrl:
+    Description: HTTPS endpoint. POST JSON {input, guidance?, pages?} with a Bearer token.
+    Value: !GetAtt AsbFunctionUrl.FunctionUrl

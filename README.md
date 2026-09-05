@@ -151,6 +151,11 @@ Git-managed, so history lives there. See
 - **Capture from anywhere:** a local `00 Inbox` queue (`asb-inbox`) and chat
   capture via Claude Code Channels (Telegram) — local-first, no fixed hosting
   cost.
+- **Instant generation on the go (optional):** an AWS Lambda endpoint runs the
+  same pipeline in the cloud and commits the note to a Git-backed Vault, so you
+  can generate from your phone without your Mac being on — infra ≈ free
+  (scale-to-zero). Setup: [DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md),
+  design: [ADR 0015](docs/adr/0015-serverless-instant-generation.md).
 - **Monthly digest:** `asb-digest` turns [ledge.ai](https://ledge.ai/)'s 30-day
   access ranking into a single note + overview illustration of the month's top
   AI stories.
