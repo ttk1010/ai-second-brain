@@ -18,7 +18,7 @@ Globals:
     Timeout: 120          # gpt-image-2 can take tens of seconds (ADR 0015).
     MemorySize: 1024
     Architectures:
-      - x86_64
+      - arm64          # Graviton: cheaper, and native build on Apple Silicon.
 
 Resources:
   AsbFunction:
