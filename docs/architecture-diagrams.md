@@ -35,7 +35,7 @@ flowchart LR
 
 ## 図2：Phase 1 アーキテクチャ（serverless / 提案・ADR 0015）
 
-外出先の iPhone から `API Gateway → Lambda` が同じ `backend/` パイプラインを実行し、**画像をその場で返信**する。生成は **OpenAI 直叩きのまま**（`gpt-image-2` の絵柄・複数参照 edit・日本語ラベルを維持）で、AWS は「常時稼働の実行＋配信」だけを担う。ノートは **Git 経由**で Mac / iPhone の Obsidian に同期する。ローカル経路（図1）も併存する。
+外出先の iPhone から **Lambda Function URL（HTTPS）**で Lambda を直接呼び、同じ `backend/` パイプラインを実行して**画像をその場で返信**する（同期。Function URL は最大 15 分で `gpt-image-2` の数十秒生成に耐える）。生成は **OpenAI 直叩きのまま**（`gpt-image-2` の絵柄・複数参照 edit・日本語ラベルを維持）で、AWS は「常時稼働の実行＋配信」だけを担う。ノートは **GitHub API のコミット**で Mac / iPhone の Obsidian に同期する。ローカル経路（図1）も併存する。
 
 ```mermaid
 flowchart LR
@@ -46,27 +46,27 @@ flowchart LR
     SC["入口<br/>iOS ショートカット<br/>POST /generate"]
   end
   subgraph CLOUD["AWS クラウド"]
-    APIGW["API Gateway"]
+    FURL["Lambda Function URL<br/>（HTTPS · 同期）"]
     subgraph LAM["Lambda（コンテナ · SAM デプロイ）"]
       PIPE["backend/ パイプライン<br/>classify → extract → plan → illustrate → markdown"]
     end
-    SM["Secrets Manager<br/>OPENAI_API_KEY"]
+    SM["Secrets Manager<br/>OPENAI_API_KEY / GitHub PAT"]
     CW["CloudWatch Logs"]
   end
   OAI["OpenAI API<br/>gpt-5.4 / gpt-image-2<br/>直叩き・変更なし"]
-  GIT[("Git リポジトリ<br/>Vault · private GitHub")]
-  SC -->|"① 概念 / URL"| APIGW
-  APIGW --> PIPE
+  GIT[("GitHub リポジトリ<br/>Vault · private")]
+  SC -->|"① 概念 / URL"| FURL
+  FURL --> PIPE
   SM -.->|IAM| PIPE
   PIPE --> CW
   PIPE -.->|HTTPS| OAI
   PIPE -->|"② 画像を即返信"| SC
-  PIPE -->|"③ ノート+画像 commit"| GIT
+  PIPE -->|"③ GitHub APIでcommit"| GIT
   GIT -.->|pull| MAC["Mac（Obsidian Git）"]
   GIT -.->|pull| OBS["iPhone（Obsidian）"]
   class OAI ext
   class GIT,MAC,OBS store
-  class APIGW,SM,CW,PIPE aws
+  class FURL,SM,CW,PIPE aws
   style CLOUD fill:#fff9f3,stroke:#EC7211,color:#7a3b06
   style LAM fill:#fffdfb,stroke:#EC7211,color:#7a3b06
 ```
@@ -75,7 +75,7 @@ flowchart LR
 
 | | 内容 |
 | --- | --- |
-| **変わる点** | 入口が iPhone → API Gateway に（Mac 起動に非依存で即時生成）／実行は Lambda（未使用時ゼロスケール、個人利用は無料枠内）／保存は Git 経由 |
+| **変わる点** | 入口が iPhone → Lambda Function URL に（Mac 起動に非依存で即時生成）／実行は Lambda（未使用時ゼロスケール、個人利用は無料枠内）／保存は GitHub API コミット |
 | **変わらない点** | 生成は OpenAI 直叩き（`gpt-image-2`）／`backend/` パイプラインと Knowledge Object 設計は無改修／プロバイダ抽象は維持（将来 `BedrockImageProvider` も差し替え可能）／ローカル経路も併存 |
 
 ## 補足

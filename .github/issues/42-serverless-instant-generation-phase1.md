@@ -10,9 +10,13 @@ Labels: enhancement, infrastructure, services
 ## Goal（Phase 1 のスコープ）
 外出先の iPhone から HTTP で概念/URL を送ると、**Lambda が既存 `backend/` パイプラインを実行 → 画像を即返信 → ノート＋画像を Git(Vault) に保存**する、最小構成を作る。認証は簡易、入口はまず iOS ショートカットのみ。Telegram / Claude MCP アダプタ、既存ノートのイラスト改善（#29 のリモート化）は後続フェーズ。
 
+## 決定事項（すり合わせ済み）
+- **同期返信＝Lambda Function URL**（API Gateway の ~29 秒制限を回避。Function URL は最大 15 分で `gpt-image-2` の数十秒生成に耐える）。非同期（即 ACK→通知）は将来必要なら Phase 2。
+- **Git 保存＝GitHub API（Git Data API）で 1 コミット**（clone 不要・軽量で Lambda 向き、Vault が画像で肥大しても重くならない）。ローカルは既存 `VaultWriter`、クラウドは `GitHubVaultWriter`（API commit）＝プロバイダ抽象の追加実装。
+
 ## 提案する設計
-- **生成API（素の HTTP）**：`POST /generate {input, guidance?, pages?}` → `KnowledgePipeline.run(...)` を実行。生成物（画像バイト＋ノートのメタ）を返す。入口非依存にして、フロントはアダプタで後付け。
-- **Git バックエンド保存**：ローカル `VaultWriter` のクラウド版として、生成ノート＋画像を private Git リポジトリに commit/push（`ImageProvider`/`VaultWriter` 抽象は再利用）。#39 の in-place 方針（名前維持）を踏襲。
+- **生成API（素の HTTP・Lambda Function URL 同期）**：`POST /generate {input, guidance?, pages?}` → `KnowledgePipeline.run(...)` を実行。生成物（画像バイト＋ノートのメタ）を返す。入口非依存にして、フロントはアダプタで後付け。
+- **Git バックエンド保存（GitHub API）**：生成ノート＋画像を private GitHub リポジトリに **Git Data API で 1 コミット**（`VaultWriter` 抽象のクラウド実装）。#39 の in-place 方針（名前維持）を踏襲。
 - **パッケージ/デプロイ**：`backend/` ＋依存をコンテナイメージ化（Dockerfile）。**AWS SAM** で Lambda（コンテナ）／エンドポイント／IAM ロール／Secrets 参照／CloudWatch を定義。`infra/`（新規トップレベル）に SAM テンプレートを置く。
 - **Lambda は VPC 外**（OpenAI への外向き通信のため）。シークレット（`OPENAI_API_KEY`、Git 認証）は **Secrets Manager**。
 - **入口**：iOS ショートカット（共有シート/1タップ→POST→画像表示）。手順を docs 化。
@@ -35,8 +39,8 @@ Labels: enhancement, infrastructure, services
 - 外部API/ネットワーク非依存でハンドラのテストが通る
 
 ## Open questions（実装前に決める）
-1. **同期返信のタイムアウト**：`gpt-image-2` の生成は数十秒かかりうる。**API Gateway(HTTP API) は統合タイムアウト ~29 秒**の上限があるため、超過時は同期返信できない。**Lambda Function URL（最大 15 分）で同期返信**にするか、API Gateway＋非同期（即 ACK→後でプッシュ/Telegram 返信）にするか。← Phase 1 は Function URL 同期が最有力。
-2. **Git 保存の実装**：Lambda 内で `git clone/commit/push`（/tmp 作業）か、**GitHub Contents API** 経由か。画像バイナリの扱い・冪等性・競合。
+1. ~~同期返信のタイムアウト~~ → **決定：Lambda Function URL 同期**。
+2. ~~Git 保存の実装~~ → **決定：GitHub API（Git Data API）で 1 コミット**。
 3. **Vault の Git 化範囲**：Vault 全体を1つの Git repo にするか、**生成分だけの別 repo**にして Mac 側で本 Vault にマージするか（既存 iCloud Vault との整合）。
 4. **認証**：エンドポイント保護（簡易 API キーのヘッダ / 署名 / 自分の端末のみ）。Phase 1 は共有シークレット＋Secrets Manager で十分か。
 5. **返信フォーマット**：画像バイト直返し / 署名付き URL（S3）/ Base64。iOS ショートカットで表示しやすい形。
