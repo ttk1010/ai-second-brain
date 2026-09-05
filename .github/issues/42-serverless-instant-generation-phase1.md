@@ -12,7 +12,12 @@ Labels: enhancement, infrastructure, services
 
 ## 決定事項（すり合わせ済み）
 - **同期返信＝Lambda Function URL**（API Gateway の ~29 秒制限を回避。Function URL は最大 15 分で `gpt-image-2` の数十秒生成に耐える）。非同期（即 ACK→通知）は将来必要なら Phase 2。
-- **Git 保存＝GitHub API（Git Data API）で 1 コミット**（clone 不要・軽量で Lambda 向き、Vault が画像で肥大しても重くならない）。ローカルは既存 `VaultWriter`、クラウドは `GitHubVaultWriter`（API commit）＝プロバイダ抽象の追加実装。
+- **Git 保存＝GitHub API（Git Data API）で 1 コミット**（clone 不要・軽量で Lambda 向き、Vault が画像で肥大しても重くならない）。
+- **Vault の Git 化＝Vault 自体を Git repo にする**。ただし `.git` 本体は **iCloud 外**に置く（`git init --separate-git-dir=<iCloud外>`）＝iCloud による `.git` 破損を回避。真実は Git 上の Vault だが基本はローカルファイル、Git は外出先の生成物を Mac に届ける手段。Mac 起動時に `git pull` で差分取込、iCloud は継続（iPhone はファイルアプリで閲覧）。iPhone に Git アプリは入れない。
+- **入口＝iOS ショートカット（一発生成）**。会話しながらの生成は当面「Claude アプリで練る→貼り付け→ショートカット」で対応。シームレスな会話生成（MCP コネクタ）は将来フェーズ。
+- **認証＝共有シークレット（`Authorization: Bearer`）**。Function URL は `AuthType: NONE`、Lambda 内で検証（鍵は Secrets Manager）。＋コスト暴走対策（1 リクエスト上限枚数・CloudWatch 課金アラーム）。
+- **返信フォーマット＝PNG バイナリ直返し**（`Content-Type: image/png`）でショートカットが即プレビュー。ノートは Git に保存（画像はレスポンスで即時、ノートの Vault 反映は Mac の pull 後）。
+- **Lambda 既定＝コンテナイメージ / メモリ 1024MB / タイムアウト 120s / VPC 外 / 1 リクエスト最大 3 枚**。
 
 ## 提案する設計
 - **生成API（素の HTTP・Lambda Function URL 同期）**：`POST /generate {input, guidance?, pages?}` → `KnowledgePipeline.run(...)` を実行。生成物（画像バイト＋ノートのメタ）を返す。入口非依存にして、フロントはアダプタで後付け。
@@ -38,13 +43,8 @@ Labels: enhancement, infrastructure, services
 - インフラは SAM で再現デプロイでき、シークレットはコードに含まれない
 - 外部API/ネットワーク非依存でハンドラのテストが通る
 
-## Open questions（実装前に決める）
-1. ~~同期返信のタイムアウト~~ → **決定：Lambda Function URL 同期**。
-2. ~~Git 保存の実装~~ → **決定：GitHub API（Git Data API）で 1 コミット**。
-3. **Vault の Git 化範囲**：Vault 全体を1つの Git repo にするか、**生成分だけの別 repo**にして Mac 側で本 Vault にマージするか（既存 iCloud Vault との整合）。
-4. **認証**：エンドポイント保護（簡易 API キーのヘッダ / 署名 / 自分の端末のみ）。Phase 1 は共有シークレット＋Secrets Manager で十分か。
-5. **返信フォーマット**：画像バイト直返し / 署名付き URL（S3）/ Base64。iOS ショートカットで表示しやすい形。
-6. **Lambda 設定**：メモリ・タイムアウト・イメージサイズの初期値、コスト上限（1 リクエストあたりの上限枚数など）。
+## Open questions
+すべて確定済み（→ 決定事項を参照）。1: Function URL 同期 / 2: GitHub API コミット / 3: Vault=Git（`.git` は iCloud 外）/ 4: Bearer 共有シークレット / 5: PNG 直返し / 6: 1024MB・120s・最大3枚。
 
 ## フェーズ / 扱い
 ADR 0015 の Phase 1。以降：Phase 2＝Telegram / Claude MCP アダプタ・認証強化・エラー/コスト整流、Phase 3＝既存ノートのイラスト改善（#29）のリモート化。番号付きフェーズには束ねず、ADR 0015 に紐づく独立の enhancement。
