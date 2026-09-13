@@ -58,3 +58,6 @@ package.json
 # CLAUDE.md + .claude/skills). Ignore files some non-Claude tools regenerate.
 /AGENTS.md
 /.agents/
+.aws-sam/
+samconfig.toml
+out.png
