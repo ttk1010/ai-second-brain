@@ -87,6 +87,7 @@ class KnowledgePipeline:
         overwrite: bool = False,
         guidance: str = "",
         pages: PagesOption = None,
+        plan: bool = True,
     ) -> PipelineResult:
         """Process ``raw_input`` end to end.
 
@@ -98,6 +99,11 @@ class KnowledgePipeline:
         ``pages`` opts into a multi-page illustration series (Issue #41): an
         integer requests that many pages, ``"auto"`` lets the planner choose, and
         ``None``/1 keeps the default single illustration.
+
+        ``plan`` runs the Educational Planner (default). Set it to ``False`` to
+        skip that LLM call and illustrate straight from the Knowledge Object's own
+        fields — used by the latency-sensitive cloud path (Issue #42) to fit under
+        the mobile client's request timeout.
 
         Raises:
             ValueError: If the input is empty.
@@ -143,7 +149,7 @@ class KnowledgePipeline:
             ko = self._builder.from_news(extraction, language=self._language)
 
         self._record_guidance(ko, guidance)
-        return self._finalize(ko, overwrite=overwrite, guidance=guidance, pages=pages)
+        return self._finalize(ko, overwrite=overwrite, guidance=guidance, pages=pages, plan=plan)
 
     def run_captured(
         self,

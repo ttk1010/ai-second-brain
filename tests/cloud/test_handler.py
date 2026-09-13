@@ -20,8 +20,10 @@ class _FakePipeline:
         self.status = status
         self.seen: dict | None = None
 
-    def run(self, input_text, *, overwrite=False, guidance="", pages=None) -> PipelineResult:
-        self.seen = {"input": input_text, "guidance": guidance, "pages": pages}
+    def run(
+        self, input_text, *, overwrite=False, guidance="", pages=None, plan=True
+    ) -> PipelineResult:
+        self.seen = {"input": input_text, "guidance": guidance, "pages": pages, "plan": plan}
         if self.status != "created":
             return PipelineResult(status=self.status, message="unsupported")
         note, image = "01 Concepts/Test.md", "Images/Test.png"
@@ -93,6 +95,8 @@ def test_generates_commits_and_returns_png() -> None:
     assert set(publisher.files.keys()) == {"01 Concepts/Test.md", "Images/Test.png"}
     assert publisher.message == "Add note: Test"
     assert holder["pipeline"].seen["input"] == "Transformer"
+    # The cloud path skips the Educational Planner for latency (Issue #42).
+    assert holder["pipeline"].seen["plan"] is False
 
 
 def test_pages_clamped_to_max() -> None:

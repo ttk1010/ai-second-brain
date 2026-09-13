@@ -29,6 +29,7 @@ from pathlib import Path
 from backend.cloud.github_publisher import GitHubPublisher, PublishError
 from backend.config import Settings
 from backend.models import KnowledgeObject
+from backend.models.enums import ImageQuality
 from backend.planner import PagesOption
 from backend.services import KnowledgePipeline, build_pipeline
 
@@ -70,7 +71,11 @@ class Handler:
         vault = Path(tempfile.mkdtemp(prefix="asb-vault-"))
         pipeline = self.pipeline_factory(vault)
         try:
-            result = pipeline.run(input_text, guidance=guidance, pages=pages)
+            # Skip the Educational Planner (plan=False) to shave an LLM round-trip:
+            # the mobile client times out around 60s and the illustration is the
+            # dominant cost (Issue #42). The illustration falls back to the KO's
+            # own fields.
+            result = pipeline.run(input_text, guidance=guidance, pages=pages, plan=False)
         except Exception as exc:  # noqa: BLE001 - report a clean message to the caller
             logger.exception("Generation failed")
             return _json(500, {"error": f"Generation failed: {exc}"})
@@ -178,7 +183,10 @@ def _json(status: int, obj: dict) -> dict:
 
 def _default_pipeline_factory(vault: Path) -> KnowledgePipeline:
     vault.mkdir(parents=True, exist_ok=True)
-    settings = Settings(vault_path=vault)
+    # LOW image quality keeps the 16:9 composition but generates faster/cheaper,
+    # so the synchronous response fits under the mobile client's ~60s timeout
+    # (Issue #42). Higher quality stays available via the local CLI.
+    settings = Settings(vault_path=vault, image_quality=ImageQuality.LOW)
     return build_pipeline(settings, no_image=False)
 
 
