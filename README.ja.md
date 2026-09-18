@@ -65,6 +65,8 @@ tags: [Transformer, Generative AI, Foundation Model, RAG, Attention, ...]
 
 （ノートは設定した言語で生成されます。既定は日本語です。）
 
+実際に生成されたノート（本文＋イラスト）の例は **[docs/examples/LLM.md](docs/examples/LLM.md)** で見られます。
+
 ## 動作要件
 
 - **Python 3.12** と [uv](https://docs.astral.sh/uv/)。

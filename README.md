@@ -69,6 +69,9 @@ predict and generate natural-language patterns…
 (Notes are generated in the language you configure; the default is Japanese —
 see [README.ja.md](README.ja.md) for a Japanese example.)
 
+See a real generated note (text + illustration) in
+**[docs/examples/LLM.md](docs/examples/LLM.md)** (Japanese).
+
 ## Requirements
 
 - **Python 3.12** and [uv](https://docs.astral.sh/uv/).
