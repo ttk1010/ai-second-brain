@@ -1,4 +1,4 @@
-# Development Roadmap
+# 開発ロードマップ
 
 Version: 1.0
 
@@ -6,264 +6,257 @@ Status: Active
 
 ---
 
-# Purpose
+# 目的
 
-This roadmap defines the long-term development plan for AI Second Brain.
+このロードマップは、AI Second Brain の長期的な開発計画を示す。
 
-It is intended to guide implementation priorities while allowing flexibility as the project evolves.
+実装の優先順位を導きつつ、プロジェクトの進化に合わせて柔軟に見直せることを意図している。
 
-The roadmap focuses on incremental delivery.
+重視するのは、段階的なリリースである。
 
-Each phase should produce a usable improvement.
-
----
-
-# Guiding Principles
-
-- Build small, usable increments.
-- Prefer working software over ambitious designs.
-- Maintain knowledge quality above feature count.
-- Every phase should improve the user experience.
-- Documentation evolves together with implementation.
+各フェーズは、それ単体で使える改善を生み出すべきである。
 
 ---
 
-# Phase 1 — Foundation
+# 指針
 
-## Goal
+- 小さく、使える単位で作る。
+- 野心的な設計より、動くソフトウェアを優先する。
+- 機能の数より、知識の品質を保つ。
+- どのフェーズも、ユーザー体験を良くする。
+- ドキュメントは実装と一緒に育てる。
 
-Build the minimum infrastructure required to create knowledge notes.
+---
 
-### Deliverables
+# Phase 1 — 基盤
 
-- Repository initialization
-- Project structure
+## ゴール
+
+知識ノートを作るために必要な、最小限の基盤を用意する。
+
+### 成果物
+
+- リポジトリの初期化
+- プロジェクト構成
 - Obsidian Vault
-- Markdown template
-- URL / Keyword input
-- Basic CLI
-- Unit test setup
+- Markdown テンプレート
+- URL / キーワード入力
+- 基本的な CLI
+- ユニットテストの土台
 
-### Success Criteria
+### 達成基準
 
-A user can input:
+ユーザーが次のいずれかを入力し、
 
-- a concept
+- 概念
 
-or
+または
 
-- an article URL
+- 記事の URL
 
-and receive a Markdown note saved inside the Vault.
-
----
-
-# Phase 2 — Educational Content
-
-## Goal
-
-Automatically transform information into educational material.
-
-### Deliverables
-
-- News parser
-- Concept parser
-- Educational summaries
-- GPT Image integration
-- Illustration prompt builder
-- Illustration storage
-- Markdown image embedding
-
-### Success Criteria
-
-Every note contains:
-
-- summary
-- illustration
-- metadata
-
-with a consistent educational style.
+Vault の中に保存された Markdown ノートを受け取れること。
 
 ---
 
-# Phase 3 — Knowledge Organization
+# Phase 2 — 教育コンテンツ
 
-## Goal
+## ゴール
 
-Turn isolated notes into connected knowledge.
+情報を自動的に教育的な素材へと変換する。
 
-### Deliverables
+### 成果物
 
-- Related note detection
-- Automatic backlinks
-- Metadata enrichment
-- Tag generation
-- Concept relationships
+- ニュースパーサ
+- 概念パーサ
+- 教育的な要約
+- GPT Image 連携
+- イラスト用プロンプトビルダー
+- イラストの保存
+- Markdown への画像埋め込み
 
-### Success Criteria
+### 達成基準
 
-Obsidian Graph View naturally reflects relationships between concepts.
+すべてのノートが、一貫した教育的スタイルで次を含むこと。
 
----
-
-# Phase 4 — Automation
-
-## Goal
-
-Reduce friction when capturing knowledge from mobile and PC, while keeping
-processing local and adding no fixed hosting cost.
-
-### Architecture
-
-Capture and processing are decoupled by a queue, and **all processing stays
-local** (no always-on server, no API key in the cloud, no abuse surface). The
-running cost stays "OpenAI per note" only — no fixed monthly hosting fee.
-
-- The Vault's `00 Inbox/` acts as the capture queue (synced via Obsidian
-  Sync / iCloud / git).
-- A local worker processes inbox items with the existing pipeline when the PC
-  is on (capture is always available; processing is deferred until then).
-
-### Deliverables
-
-- **Inbox capture workflow:** drop a URL/keyword stub into `00 Inbox/`; a local
-  worker (file watcher or scheduled run) turns it into a full note.
-- **Chat capture via Claude Code Channels:** message a Telegram bot; Claude Code
-  (running locally, under the existing Claude Pro subscription) runs `asb` on the
-  input and writes to the Vault. No custom server; reuses the CLI. A thin ASB
-  skill/command and a pre-approved `asb` command let Claude act without remote
-  permission prompts.
-- **iOS/macOS Share Sheet (Shortcut):** share an article straight into the Inbox.
-- CLI improvements as needed.
-
-> A cloud/FastAPI service (processing even when the PC is off) is intentionally
-> out of scope: it adds fixed hosting cost, cloud-key security concerns, and an
-> abuse surface. Revisit only if always-on processing becomes a hard
-> requirement.
-
-### Success Criteria
-
-Capturing a new AI article from a phone or PC takes under a minute, with no
-fixed monthly cost beyond per-note OpenAI usage.
+- 要約
+- イラスト
+- メタデータ
 
 ---
 
-# Phase 5 — AI Research Assistant
+# Phase 3 — 知識の整理
 
-## Goal
+## ゴール
 
-Enable proactive knowledge assistance.
+孤立したノートを、つながった知識に変える。
 
-### Deliverables
+### 成果物
 
-- Learning recommendations
-- Similar news detection
-- Knowledge gap detection
-- Suggested next concepts
-- Duplicate detection
-- Daily digest
+- 関連ノートの検出
+- 自動バックリンク
+- メタデータの充実化
+- タグ生成
+- 概念間の関係
 
-### Success Criteria
+### 達成基準
 
-The system helps users decide what to learn next.
-
----
-
-# Phase 6 — Knowledge Intelligence
-
-## Goal
-
-Transform the knowledge base into an intelligent research environment.
-
-Potential features include:
-
-- semantic search
-- local embeddings
-- vector search
-- timeline visualization
-- citation graph
-- concept evolution tracking
-
-These features should only be introduced when they clearly improve the user experience.
+Obsidian のグラフビューに、概念どうしの関係が自然に表れること。
 
 ---
 
-# Milestone Strategy
+# Phase 4 — 自動化
 
-Development follows GitHub Milestones.
+## ゴール
 
-Each milestone contains multiple GitHub Issues.
+モバイルや PC からの取り込みの手間を減らす。ただし処理はローカルに保ち、固定の
+ホスティング費を増やさない。
 
-Each Issue should be independently reviewable.
+### アーキテクチャ
 
----
+取り込みと処理はキューで切り離し、**処理はすべてローカルで完結する**（常時稼働の
+サーバなし、クラウドに API キーを置かない、悪用の入口を作らない）。運用コストは
+「ノート単位の OpenAI 課金」だけに保ち、固定の月額ホスティング費は発生させない。
 
-# Definition of Done
+- Vault の `00 Inbox/` が取り込みキューの役割を担う（Obsidian Sync / iCloud / git で同期）。
+- ローカルのワーカーが、PC が起動しているときに既存パイプラインで Inbox の項目を処理する
+  （取り込みは常に可能で、処理だけ後回しにされる）。
 
-A phase is complete when:
+### 成果物
 
-- implementation is merged
-- tests pass
-- documentation is updated
-- examples are available
-- the feature is usable
+- **Inbox 取り込みワークフロー：** `00 Inbox/` に URL / キーワードのスタブを置くと、
+  ローカルのワーカー（ファイル監視またはスケジュール実行）が完全なノートに変える。
+- **Claude Code Channels 経由のチャット取り込み：** Telegram bot にメッセージを送ると、
+  （ローカルで動く、既存の Claude Pro サブスクリプション下の）Claude Code が入力に対して
+  `asb` を実行し、Vault に書き込む。専用サーバは持たず、CLI を再利用する。薄い ASB
+  スキル / コマンドと、事前承認した `asb` コマンドにより、Claude が都度の許可プロンプトなしに
+  動ける。
+- **iOS / macOS 共有シート（ショートカット）：** 記事をそのまま Inbox に共有する。
+- 必要に応じた CLI の改善。
 
----
+> クラウド / FastAPI サービス（PC がオフでも処理する）は、意図的にスコープ外とする。固定の
+> ホスティング費、クラウド鍵のセキュリティ懸念、悪用の入口が増えるためである。常時稼働の
+> 処理が明確な必須要件になったときにのみ再検討する。
 
-# Future Ideas
+### 達成基準
 
-Potential future capabilities include:
-
-- arXiv integration
-- YouTube knowledge extraction
-- Podcast summarization
-- RSS monitoring
-- Newsletter generation
-- Weekly AI review
-- Interactive knowledge map
-- Local LLM support
-- Multi-language notes
-
-These are intentionally outside the current scope.
-
-## Long-term: from OSS to an app with shared knowledge
-
-The near-term distribution plan is open source. Further out, a packaged **app**
-is envisioned, whose defining idea is a **shared knowledge layer** that addresses
-the system's main running cost — paying an API every time a Knowledge Object is
-created:
-
-- **Import existing notes.** When someone else has already created a note for the
-  same concept or news, import it instead of regenerating it. This cuts API cost
-  (no duplicate generation) and speeds up capture.
-- **Popularity & trends.** By counting how many users have added a given concept
-  or news to their Second Brain, surface **trending** (rapidly rising) and
-  **popular** concepts/news — turning the collective activity into a signal for
-  what to learn next.
-
-Open considerations for this vision: note quality/trust when importing,
-attribution and licensing of shared notes, privacy (what is shared vs private),
-deduplication/identity of "the same concept or news," and moderation. To be
-revisited when the app phase is planned.
+スマホや PC から新しい AI 記事を取り込むのに 1 分もかからず、固定の月額費は
+ノート単位の OpenAI 利用分を超えないこと。
 
 ---
 
-# Success Metrics
+# Phase 5 — AI リサーチアシスタント
 
-The project is considered successful when:
+## ゴール
 
-- adding new knowledge requires minimal effort
-- knowledge remains searchable
-- concepts are visually understandable
-- notes naturally connect over time
-- learning AI becomes easier than searching the web repeatedly
+先回りした知識支援を可能にする。
+
+### 成果物
+
+- 学習のレコメンド
+- 類似ニュースの検出
+- 知識の抜けの検出
+- 次に学ぶべき概念の提案
+- 重複の検出
+- デイリーダイジェスト
+
+### 達成基準
+
+「次に何を学ぶか」の判断を、システムが助けられること。
 
 ---
 
-# Long-term Vision
+# Phase 6 — 知識のインテリジェンス
 
-AI Second Brain should become more than a collection of notes.
+## ゴール
 
-It should become an environment where both humans and AI collaborate to build, refine, and expand knowledge continuously.
+知識ベースを、知的なリサーチ環境へと発展させる。
 
-The ultimate measure of success is not the number of notes, but the depth of understanding they create.
+想定する機能：
+
+- セマンティック検索
+- ローカル埋め込み
+- ベクトル検索
+- タイムライン可視化
+- 引用グラフ
+- 概念の変遷トラッキング
+
+これらは、ユーザー体験を明確に良くするときにのみ導入する。
+
+---
+
+# マイルストーン戦略
+
+開発は GitHub Milestones に沿って進める。
+
+各マイルストーンは複数の GitHub Issue を含む。
+
+各 Issue は、それ単体でレビュー可能であるべきである。
+
+---
+
+# 完了の定義（Definition of Done）
+
+フェーズが完了したとみなすのは、次を満たすとき。
+
+- 実装がマージされている
+- テストが通る
+- ドキュメントが更新されている
+- 例が用意されている
+- 機能が実際に使える
+
+---
+
+# 将来のアイデア
+
+将来の機能候補：
+
+- arXiv 連携
+- YouTube からの知識抽出
+- ポッドキャストの要約
+- RSS 監視
+- ニュースレター生成
+- 週次 AI レビュー
+- インタラクティブな知識マップ
+- ローカル LLM 対応
+- 多言語ノート
+
+これらは意図的に現在のスコープ外とする。
+
+## 長期：OSS から、知識を共有するアプリへ
+
+当面の配布計画は OSS である。その先には、パッケージ化された **アプリ** を構想している。
+中心となる発想は、このシステムの主な運用コスト——Knowledge Object を作るたびに API 課金が
+発生すること——に対処する **共有知識レイヤー** である。
+
+- **既存ノートのインポート。** 同じ概念やニュースのノートを他の誰かが既に作っていれば、
+  再生成せずにインポートする。これにより API コストを削減し（重複生成を避ける）、取り込みが
+  速くなる。
+- **人気とトレンド。** ある概念やニュースを Second Brain に追加したユーザー数を数えることで、
+  **トレンド**（急上昇）や**人気**の概念/ニュースを浮かび上がらせる——集合的な活動を、
+  「次に何を学ぶか」の手がかりに変える。
+
+このビジョンで検討中の論点：インポート時のノート品質・信頼性、共有ノートの帰属とライセンス、
+プライバシー（何を共有し何を非公開にするか）、「同じ概念やニュース」の重複排除と同定、
+モデレーション。アプリのフェーズを計画するときに再検討する。
+
+---
+
+# 成功指標
+
+このプロジェクトが成功したとみなせるのは、次のとき。
+
+- 新しい知識の追加にほとんど手間がかからない
+- 知識が検索可能なまま保たれる
+- 概念が視覚的に理解できる
+- ノートが時間とともに自然につながっていく
+- AI を学ぶことが、ウェブを繰り返し検索するより楽になる
+
+---
+
+# 長期ビジョン
+
+AI Second Brain は、単なるノートの集まり以上のものになるべきである。
+
+人間と AI が協働して、知識を継続的に構築・洗練・拡張していく環境になるべきである。
+
+究極の成功の尺度は、ノートの数ではなく、それらが生み出す理解の深さである。
