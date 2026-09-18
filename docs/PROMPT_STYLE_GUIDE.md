@@ -1,4 +1,4 @@
-# Prompt Style Guide
+# プロンプトスタイルガイド
 
 Version: 1.0
 
@@ -6,121 +6,122 @@ Status: Active
 
 ---
 
-# Purpose
+# 目的
 
-This document defines how prompts should be designed throughout AI Second Brain.
+このドキュメントは、AI Second Brain 全体でプロンプトをどう設計すべきかを定義する。
 
-Prompts are considered first-class assets.
+プロンプトは第一級の資産とみなす。
 
-They should be treated with the same level of care as source code.
+ソースコードと同じ水準の注意をもって扱うべきである。
 
-Every prompt should be:
+すべてのプロンプトは次であるべきである。
 
-* understandable
-* reusable
-* maintainable
-* model-agnostic whenever possible
-
----
-
-# Core Philosophy
-
-Prompts do not generate knowledge.
-
-Prompts transform a **Knowledge Object** into useful outputs.
-
-The Knowledge Object is always the source of truth.
-
-Never design prompts that rely directly on raw user input if a Knowledge Object is available.
+* 理解しやすい
+* 再利用できる
+* 保守しやすい
+* 可能な限りモデル非依存
 
 ---
 
-# Prompt Architecture
+# 中核となる考え方
 
-Every prompt should follow the same logical structure.
+プロンプトは知識を生成しない。
+
+プロンプトは **Knowledge Object** を有用な出力へと変換する。
+
+Knowledge Object が常に source of truth（正本）である。
+
+Knowledge Object が利用できるなら、生のユーザー入力に直接依存するプロンプトを設計しては
+ならない。
+
+---
+
+# プロンプトの構成
+
+すべてのプロンプトは、同じ論理構造に従うべきである。
 
 ```text
-Role
+役割（Role）
 
 ↓
 
-Goal
+目的（Goal）
 
 ↓
 
-Context
+文脈（Context）
 
 ↓
 
-Input
+入力（Input）
 
 ↓
 
-Constraints
+制約（Constraints）
 
 ↓
 
-Output Format
+出力形式（Output Format）
 ```
 
-This structure improves consistency across different AI models.
+この構造は、異なる AI モデル間での一貫性を高める。
 
 ---
 
-# Prompt Layers
+# プロンプトのレイヤー
 
-Prompts should be divided into three layers.
+プロンプトは 3 つのレイヤーに分けるべきである。
 
-## 1. System Prompt
+## 1. システムプロンプト
 
-Defines long-term behavior.
+長期的な振る舞いを定義する。
 
-Examples:
+例：
 
-* educational tone
-* visual consistency
-* writing principles
+* 教育的なトーン
+* 視覚的な一貫性
+* 執筆の原則
 
-Should rarely change.
-
----
-
-## 2. Task Prompt
-
-Defines the current task.
-
-Examples:
-
-* Generate an illustration.
-* Produce Markdown.
-* Extract concepts.
-
-Changes for every feature.
+めったに変えるべきではない。
 
 ---
 
-## 3. Data Prompt
+## 2. タスクプロンプト
 
-Contains the actual Knowledge Object.
+現在のタスクを定義する。
 
-Should contain structured information only.
+例：
 
-Never embed business logic here.
+* イラストを生成する。
+* Markdown を作る。
+* 概念を抽出する。
+
+機能ごとに変わる。
 
 ---
 
-# Knowledge Object First
+## 3. データプロンプト
 
-Whenever possible, prompts should consume a Knowledge Object rather than raw text.
+実際の Knowledge Object を含む。
 
-Preferred flow:
+構造化された情報のみを含むべきである。
+
+ここにビジネスロジックを埋め込んではならない。
+
+---
+
+# Knowledge Object を最優先に
+
+可能な限り、プロンプトは生テキストではなく Knowledge Object を消費すべきである。
+
+好ましい流れ：
 
 ```text
-Raw Input
+生の入力
 
 ↓
 
-Knowledge Extraction
+知識の抽出
 
 ↓
 
@@ -128,107 +129,107 @@ Knowledge Object
 
 ↓
 
-Prompt
+プロンプト
 
 ↓
 
-Output
+出力
 ```
 
-This ensures consistency across all generated artifacts.
+これにより、生成されるすべての成果物の一貫性が保たれる。
 
 ---
 
-# Prompt Design Principles
+# プロンプト設計の原則
 
-## Single Responsibility
+## 単一責務
 
-One prompt should solve one problem.
+1 つのプロンプトは 1 つの問題を解くべきである。
 
-Avoid prompts that simultaneously summarize, visualize, classify, and generate metadata.
-
----
-
-## Explicit Instructions
-
-Prefer explicit instructions over implicit assumptions.
-
-Bad:
-
-"Explain this well."
-
-Good:
-
-"Explain this concept for a software engineer familiar with machine learning."
+要約・可視化・分類・メタデータ生成を同時に行うプロンプトは避ける。
 
 ---
 
-## Structured Outputs
+## 明示的な指示
 
-Whenever possible, request structured outputs.
+暗黙の前提より、明示的な指示を好む。
 
-Preferred formats:
+悪い例：
+
+「これをうまく説明して。」
+
+良い例：
+
+「この概念を、機械学習に馴染みのあるソフトウェアエンジニア向けに説明して。」
+
+---
+
+## 構造化された出力
+
+可能な限り、構造化された出力を要求する。
+
+好ましい形式：
 
 * JSON
 * Markdown
 * YAML
 
-Avoid free-form outputs unless creativity is desired.
+創造性を求める場合を除き、自由形式の出力は避ける。
 
 ---
 
-## Deterministic First
+## まず決定論的に
 
-Prioritize consistency over novelty.
+新しさより一貫性を優先する。
 
-The same Knowledge Object should produce similar outputs across multiple runs.
-
----
-
-# Educational Prompt Principles
-
-Educational prompts should answer:
-
-* What is it?
-* Why does it matter?
-* How does it work?
-* How does it connect to existing knowledge?
-
-Avoid unnecessary jargon.
-
-Prefer conceptual clarity.
+同じ Knowledge Object は、複数回の実行で似た出力を生むべきである。
 
 ---
 
-# Illustration Prompt Principles
+# 教育プロンプトの原則
 
-Illustrations should teach.
+教育プロンプトは、次に答えるべきである。
 
-Never decorate.
+* それは何か？
+* なぜ重要か？
+* どう動くか？
+* 既存の知識とどうつながるか？
 
-Illustrations should:
+不要な専門用語は避ける。
 
-* simplify complexity
-* reveal relationships
-* explain processes
-* emphasize important concepts
-
-Preferred visual style:
-
-* hand-drawn
-* soft colors
-* white background
-* textbook-inspired
-* information-rich
-* visually calm
+概念的な明快さを優先する。
 
 ---
 
-# Markdown Prompt Principles
+# イラストプロンプトの原則
 
-Markdown should remain valuable without AI.
+イラストは「教える」べきである。
 
-Every note should include:
+決して装飾してはならない。
+
+イラストは次を行うべきである。
+
+* 複雑さを単純化する
+* 関係を明らかにする
+* プロセスを説明する
+* 重要な概念を強調する
+
+好ましい視覚スタイル：
+
+* 手描き
+* やわらかい色
+* 白背景
+* 教科書調
+* 情報が豊富
+* 視覚的に落ち着いている
+
+---
+
+# Markdown プロンプトの原則
+
+Markdown は、AI なしでも価値を持ち続けるべきである。
+
+すべてのノートは次を含むべきである。
 
 * Summary
 * Background
@@ -238,50 +239,50 @@ Every note should include:
 * References
 * Tags
 
-Use concise technical writing.
+簡潔なテクニカルライティングを用いる。
 
 ---
 
-# Prompt Reuse
+# プロンプトの再利用
 
-Avoid duplicating prompts.
+プロンプトの重複を避ける。
 
-Whenever multiple prompts share common behavior:
+複数のプロンプトが共通の振る舞いを持つときは、
 
-Extract shared instructions into reusable templates.
+共通の指示を再利用可能なテンプレートに切り出す。
 
 ---
 
-# Model Independence
+# モデル非依存
 
-Prompts should avoid relying on model-specific behavior whenever possible.
+プロンプトは、可能な限りモデル固有の振る舞いに依存しないようにすべきである。
 
-The same prompt should work with:
+同じプロンプトが次で動くべきである。
 
 * ChatGPT
 * Claude
 * Gemini
 
-Minor adjustments are acceptable.
+わずかな調整は許容する。
 
 ---
 
-# Prompt Versioning
+# プロンプトのバージョニング
 
-Every significant prompt should include:
+重要なプロンプトはすべて、次を含むべきである。
 
-* version
-* purpose
-* expected input
-* expected output
+* バージョン
+* 目的
+* 期待する入力
+* 期待する出力
 
-Prompt changes should be reviewed similarly to source code.
+プロンプトの変更は、ソースコードと同様にレビューすべきである。
 
 ---
 
-# Future Prompt Library
+# 将来のプロンプトライブラリ
 
-The repository will eventually include:
+リポジトリには、いずれ次を含める。
 
 ```text
 backend/prompts/
@@ -295,14 +296,16 @@ backend/prompts/
 └── shared/
 ```
 
-Each prompt should have a single responsibility.
+各プロンプトは単一責務を持つべきである。
 
 ---
 
-# Long-Term Vision
+# 長期ビジョン
 
-Prompt engineering is a core capability of AI Second Brain.
+プロンプトエンジニアリングは AI Second Brain の中核能力である。
 
-The goal is to build a reusable prompt ecosystem where every AI task is modular, testable, and maintainable.
+ゴールは、あらゆる AI タスクがモジュラーで、テスト可能で、保守しやすい、再利用可能な
+プロンプトのエコシステムを築くことである。
 
-Prompts should evolve together with the architecture rather than being embedded inside application code.
+プロンプトは、アプリケーションコードの中に埋め込むのではなく、アーキテクチャと一緒に
+進化させるべきである。

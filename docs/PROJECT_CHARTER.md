@@ -1,4 +1,4 @@
-# Project Charter
+# プロジェクト憲章（Project Charter）
 
 Version: 1.0
 
@@ -6,130 +6,136 @@ Status: Active
 
 ---
 
-# Mission
+# ミッション
 
-Build a personal AI-powered Second Brain that transforms information from any field—with AI as its default focus—into structured, visual, and reusable knowledge.
+あらゆる分野の情報を——AI を主な題材としつつ——構造化され、図解され、使いまわせる知識へと
+変える、個人向けの AI 駆動「Second Brain」を作る。
 
-The system should enable continuous learning by turning articles, research papers, technical concepts, and news into a long-term knowledge base that evolves together with its owner.
-
----
-
-# Core Design Principle
-
-Every input should first become a structured Knowledge Object.
-
-Knowledge Objects represent the canonical understanding of a topic.
-
-All outputs—including illustrations, Markdown, metadata, and future export formats—must be generated from the same Knowledge Object.
-
-This ensures consistency, extensibility, and long-term maintainability.
+記事・論文・技術的な概念・ニュースを、持ち主とともに育っていく長期的な知識ベースに変え、
+継続的な学習を可能にすることを目指す。
 
 ---
 
-# Vision
+# 中核となる設計原則
 
-Artificial Intelligence is evolving faster than any individual can keep up with.
+すべての入力は、まず構造化された Knowledge Object になる。
 
-Instead of repeatedly searching for the same information, AI Second Brain aims to create an environment where knowledge is continuously accumulated, connected, and refined. It starts with AI as its default focus, but the same pipeline handles any field of knowledge the owner wants to keep (ADR 0008).
+Knowledge Object は、あるトピックについての正本となる理解を表す。
 
-The long-term vision is to make learning feel less like collecting notes and more like growing an intelligent research companion.
+イラスト・Markdown・メタデータ、そして将来のエクスポート形式を含むすべての出力は、
+同じ Knowledge Object から生成されなければならない。
 
----
-
-# Guiding Principles
-
-## Knowledge over Content
-
-The purpose of the project is not to generate content.
-
-The purpose is to generate reusable knowledge.
-
-Every output should provide long-term value.
+これにより、一貫性・拡張性・長期の保守性が保証される。
 
 ---
 
-## Understanding over Summarization
+# ビジョン
 
-Simply summarizing an article is not enough.
+AI は、どんな個人も追いつけないほど速く進化している。
 
-The system should explain:
+同じ情報を何度も検索する代わりに、AI Second Brain は、知識が継続的に蓄積され、つながり、
+洗練されていく環境を作ることを目指す。AI を出発点の主題としつつ、同じパイプラインで、
+持ち主が残したい任意の分野の知識を扱える（ADR 0008）。
 
-* What happened?
-* Why does it matter?
-* How does it relate to existing knowledge?
-* What should be learned next?
-
----
-
-## Visual Learning
-
-Educational illustrations are a core feature.
-
-Images should improve understanding, not decoration.
-
-Every illustration should maintain a consistent visual language across the entire knowledge base.
+長期のビジョンは、学習を「ノートを集める作業」ではなく「知的なリサーチの相棒を育てること」の
+ように感じさせることである。
 
 ---
 
-## Human-in-the-Loop
+# 指針
 
-AI accelerates knowledge creation.
+## コンテンツより知識
 
-Humans validate knowledge quality.
+このプロジェクトの目的は、コンテンツを生成することではない。
 
-The project values automation without sacrificing accuracy.
+目的は、使いまわせる知識を生み出すことである。
 
----
-
-## Long-term Maintainability
-
-The project should remain understandable years from now.
-
-Every architectural decision should prioritize simplicity, extensibility, and readability.
+すべての出力は、長期的な価値を持つべきである。
 
 ---
 
-# Goals
+## 要約より理解
 
-The system should be able to:
+記事をただ要約するだけでは足りない。
 
-* Accept a URL or AI-related keyword as input.
-* Automatically determine whether the input is a concept or a news article.
-* Analyze the input and extract meaningful knowledge.
-* Generate a consistent educational illustration.
-* Produce structured Markdown notes.
-* Link related concepts automatically.
-* Store the knowledge inside an Obsidian Vault.
-* Track every change using Git and GitHub.
+システムは次を説明すべきである。
+
+* 何が起きたのか？
+* なぜ重要なのか？
+* 既存の知識とどう関係するのか？
+* 次に何を学ぶべきか？
 
 ---
 
-# Non-Goals
+## 視覚的な学習
 
-The following are intentionally excluded from the first version:
+教育イラストは中核機能である。
 
-* Multi-user support
-* SaaS deployment
-* Public web interface
-* Authentication
-* Vector databases
-* Retrieval-Augmented Generation (RAG)
-* Autonomous agents making irreversible changes
-* Complex workflow orchestration
+画像は装飾ではなく、理解を助けるためにある。
 
-These may be revisited in future phases.
+すべてのイラストは、知識ベース全体で一貫した視覚言語を保つべきである。
 
 ---
 
-# Product Scope
+## 人間を介在させる（Human-in-the-Loop）
 
-## Inputs
+AI は知識の創出を加速する。
 
-The system accepts two primary input types:
+人間は知識の品質を検証する。
 
-### AI Concepts
+正確さを犠牲にしない自動化を重視する。
 
-Examples:
+---
+
+## 長期の保守性
+
+このプロジェクトは、数年後でも理解できるままであるべきである。
+
+あらゆるアーキテクチャ上の判断は、単純さ・拡張性・読みやすさを優先すべきである。
+
+---
+
+# ゴール
+
+システムは次を行えるべきである。
+
+* URL または AI 関連キーワードを入力として受け取る。
+* 入力が概念かニュース記事かを自動で判定する。
+* 入力を分析し、意味のある知識を抽出する。
+* 一貫した教育イラストを生成する。
+* 構造化された Markdown ノートを作る。
+* 関連する概念を自動でリンクする。
+* 知識を Obsidian Vault に保存する。
+* すべての変更を Git と GitHub で追跡する。
+
+---
+
+# 非ゴール（Non-Goals）
+
+初版では、次を意図的に除外する。
+
+* マルチユーザー対応
+* SaaS デプロイ
+* 公開 Web インターフェース
+* 認証
+* ベクトルデータベース
+* 検索拡張生成（RAG）
+* 不可逆な変更を行う自律エージェント
+* 複雑なワークフローのオーケストレーション
+
+これらは将来のフェーズで再検討する可能性がある。
+
+---
+
+# プロダクトの範囲
+
+## 入力
+
+システムは主に 2 種類の入力を受け付ける。
+
+### AI の概念
+
+例：
 
 * Transformer
 * MCP
@@ -137,70 +143,70 @@ Examples:
 * LoRA
 * Agentic Commerce
 
-### AI-related URLs
+### AI 関連の URL
 
-Examples:
+例：
 
-* AI news
-* Research papers
-* Official announcements
-* Blog posts
-* Technical documentation
-
----
-
-# Outputs
-
-Each execution produces:
-
-* Educational summary
-* Educational illustration
-* Structured Markdown
-* Metadata
-* Related note suggestions
-* Git history
-
-Knowledge should always remain editable by humans.
+* AI ニュース
+* 論文
+* 公式アナウンス
+* ブログ記事
+* 技術ドキュメント
 
 ---
 
-# Educational Illustration Principles
+# 出力
 
-Illustrations exist to teach.
+各実行は次を生み出す。
 
-Every image should be:
+* 教育的な要約
+* 教育イラスト
+* 構造化された Markdown
+* メタデータ
+* 関連ノートの提案
+* Git 履歴
 
-* technically accurate
-* visually approachable
-* information-rich
-* easy to understand
-* consistent with previous illustrations
+知識は、常に人間が編集できるままであるべきである。
 
-Preferred style:
+---
 
-* hand-drawn
-* soft lines
-* pastel colors
-* white background
-* slide-friendly
-* textbook-inspired
+# 教育イラストの原則
 
-The system automatically selects the most appropriate aspect ratio based on the information structure.
+イラストは「教える」ために存在する。
 
-| Information Type       | Aspect Ratio |
+すべての画像は次を満たすべきである。
+
+* 技術的に正確
+* 視覚的に親しみやすい
+* 情報が豊富
+* 理解しやすい
+* 過去のイラストと一貫している
+
+好ましいスタイル：
+
+* 手描き
+* やわらかい線
+* パステルカラー
+* 白背景
+* スライドに載せやすい
+* 教科書調
+
+システムは、情報構造に応じて最も適切なアスペクト比を自動で選ぶ。
+
+| 情報の種類             | アスペクト比 |
 | ---------------------- | ------------ |
-| Process / Workflow     | 16:9         |
-| Hierarchical Structure | 4:3          |
-| Single Concept         | 1:1          |
-| Step-by-step Guide     | 9:16         |
+| プロセス / ワークフロー | 16:9         |
+| 階層構造               | 4:3          |
+| 単一の概念             | 1:1          |
+| 手順ガイド             | 9:16         |
 
 ---
 
-# Knowledge Organization
+# 知識の整理
 
-Knowledge is organized independently of implementation details.
+知識は、実装の詳細から独立して整理される。
 
-Recommended structure:
+推奨する構成：
 
 ```
 00 Inbox/
@@ -215,13 +221,13 @@ Recommended structure:
 Templates/
 ```
 
-Markdown files should remain readable without AI tools.
+Markdown ファイルは、AI ツールなしでも読めるままであるべきである。
 
 ---
 
-# Technology Principles
+# 技術の方針
 
-The implementation should favor:
+実装は次を優先する。
 
 * Python
 * FastAPI
@@ -230,119 +236,120 @@ The implementation should favor:
 * Git
 * GitHub
 
-Technology choices may evolve without changing the project's philosophy.
+技術選定は、プロジェクトの思想を変えることなく進化してよい。
 
 ---
 
-# AI Responsibilities
+# AI の役割分担
 
-Different AI systems have different roles.
+AI システムごとに役割が異なる。
 
 ## ChatGPT
 
-* Product design
-* Architecture
-* Educational design
-* Illustration prompt engineering
-* Design reviews
+* プロダクト設計
+* アーキテクチャ
+* 教育設計
+* イラスト用プロンプトエンジニアリング
+* 設計レビュー
 
 ## Claude Code
 
-* Implementation
-* Refactoring
-* Testing
-* Repository maintenance
+* 実装
+* リファクタリング
+* テスト
+* リポジトリの整備
 
-## Other AI Assistants
+## その他の AI アシスタント
 
-May be used for:
+次に使ってよい。
 
-* Research
-* Benchmarking
-* Alternative implementations
+* リサーチ
+* ベンチマーク
+* 代替実装
 
-No single AI should become a project dependency.
-
----
-
-# Development Philosophy
-
-Development follows an issue-driven workflow.
-
-Every feature should begin as a GitHub Issue.
-
-Each Issue should define:
-
-* Why
-* Goal
-* Tasks
-* Definition of Done
-
-Small, reviewable iterations are preferred over large implementations.
+どの単一の AI も、プロジェクトの依存先になってはならない。
 
 ---
 
-# Roadmap
+# 開発哲学
 
-## Phase 1 — Foundation
+開発は Issue 駆動のワークフローに従う。
 
-* Repository setup
-* Markdown generation
-* Obsidian integration
-* URL and keyword processing
+すべての機能は GitHub Issue から始めるべきである。
 
-## Phase 2 — Educational Content
+各 Issue は次を定義すべきである。
 
-* Illustration generation
-* News analysis
-* Concept analysis
+* Why（なぜ）
+* Goal（ゴール）
+* Tasks（タスク）
+* Definition of Done（完了の定義）
 
-## Phase 3 — Knowledge Graph
+大きな実装よりも、小さくレビュー可能な反復を好む。
 
-* Automatic linking
-* Related notes
-* Metadata enrichment
+---
 
-## Phase 4 — Automation
+# ロードマップ
+
+## Phase 1 — 基盤
+
+* リポジトリのセットアップ
+* Markdown 生成
+* Obsidian 連携
+* URL・キーワードの処理
+
+## Phase 2 — 教育コンテンツ
+
+* イラスト生成
+* ニュース分析
+* 概念分析
+
+## Phase 3 — 知識グラフ
+
+* 自動リンク
+* 関連ノート
+* メタデータの充実化
+
+## Phase 4 — 自動化
 
 * CLI
 * FastAPI
-* Browser extension
-* Mobile sharing
+* ブラウザ拡張
+* モバイル共有
 
-## Phase 5 — AI Research Assistant
+## Phase 5 — AI リサーチアシスタント
 
-* Knowledge recommendations
-* Related news detection
-* Learning suggestions
-* Continuous knowledge evolution
-
----
-
-# Success Criteria
-
-The project is successful when:
-
-* AI learning becomes frictionless.
-* Knowledge accumulates with minimal manual effort.
-* Every new article strengthens the existing knowledge base.
-* The Obsidian graph naturally reflects conceptual relationships.
-* Future AI assistants can understand and build upon the stored knowledge.
+* 知識のレコメンド
+* 関連ニュースの検出
+* 学習の提案
+* 継続的な知識の進化
 
 ---
 
-# Long-Term Vision
+# 成功基準
 
-AI Second Brain is not intended to be another note-taking application.
+このプロジェクトが成功するのは、次のとき。
 
-It is intended to become a personal AI research environment where knowledge continuously evolves.
+* AI の学習が摩擦なく行える。
+* ほとんど手作業なしに知識が蓄積する。
+* 新しい記事のたびに既存の知識ベースが強化される。
+* Obsidian グラフに概念間の関係が自然に表れる。
+* 将来の AI アシスタントが、蓄えた知識を理解し、その上に積み上げられる。
 
-The ultimate goal is to create a system in which both humans and AI collaborate to understand, organize, and expand knowledge over time.
+---
 
-Rather than asking:
+# 長期ビジョン
 
-> "What did this article say?"
+AI Second Brain は、もう一つのノートアプリになることを目指してはいない。
 
-the user should naturally begin asking:
+知識が継続的に進化していく、個人向けの AI リサーチ環境になることを目指している。
 
-> "How does this change what I already know?"
+究極のゴールは、人間と AI が協働して、時間をかけて知識を理解・整理・拡張していくシステムを
+作ることである。
+
+こう問う代わりに——
+
+> 「この記事は何と言っていたか？」
+
+ユーザーが自然にこう問い始めるようになるべきである。
+
+> 「これは、自分がすでに知っていることをどう変えるか？」

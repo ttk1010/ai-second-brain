@@ -1,4 +1,4 @@
-# System Architecture
+# システムアーキテクチャ
 
 Version: 1.0
 
@@ -6,38 +6,38 @@ Status: Draft
 
 ---
 
-# Purpose
+# 目的
 
-This document defines the high-level architecture of AI Second Brain.
+このドキュメントは、AI Second Brain の高レベルなアーキテクチャを定義する。
 
-Its purpose is to describe how information flows through the system and how each component is responsible for transforming raw input into reusable knowledge.
+情報がシステム内をどう流れ、各コンポーネントが生の入力を使いまわせる知識へと変換する
+うえでどんな責務を持つかを説明することを目的とする。
 
-Implementation details belong in the source code.
+実装の詳細はソースコードに属する。
 
-This document focuses on architecture, responsibilities, and data flow.
+このドキュメントは、アーキテクチャ・責務・データフローに焦点を当てる。
 
-For before/after architecture diagrams (current local-first design and the
-proposed AWS Lambda serverless design), see
-[ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md).
-
----
-
-# Design Principles
-
-The architecture should satisfy the following principles:
-
-* Simple over clever
-* Modular over monolithic
-* Knowledge-first
-* Human-readable outputs
-* AI-assisted, not AI-dependent
-* Easy to extend
-
-Each component should have a single responsibility.
+現在のローカルファースト設計と、提案中の AWS Lambda サーバーレス設計の before/after 構成図は
+[ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md) を参照。
 
 ---
 
-# High-Level Architecture
+# 設計原則
+
+アーキテクチャは次の原則を満たすべきである。
+
+* 賢さより単純さ
+* モノリシックよりモジュラー
+* 知識を第一に（Knowledge-first）
+* 人間が読める出力
+* AI 依存ではなく AI 支援
+* 拡張しやすいこと
+
+各コンポーネントは単一の責務を持つべきである。
+
+---
+
+# 高レベルアーキテクチャ
 
 ```
                         User
@@ -85,34 +85,34 @@ Markdown Generator  Illustration Generator  Metadata Generator
 
 ---
 
-# Core Components
+# 中核コンポーネント
 
-## 1. Input Layer
+## 1. 入力レイヤー（Input Layer）
 
-### Responsibility
+### 責務
 
-Receive user input.
+ユーザー入力を受け取る。
 
-Supported inputs:
+対応する入力：
 
-* AI concepts
-* URLs
-* Research papers
-* News articles
+* AI の概念
+* URL
+* 論文
+* ニュース記事
 
-The input layer should remain extremely lightweight.
+入力レイヤーはきわめて軽量なままであるべきである。
 
-Its only job is accepting input.
+その唯一の役割は、入力を受け付けることである。
 
 ---
 
-## 2. Input Classifier
+## 2. Input Classifier（入力の分類）
 
-### Responsibility
+### 責務
 
-Determine the input type.
+入力の種類を判定する。
 
-Possible classification labels include:
+想定される分類ラベル：
 
 * Concept
 * News
@@ -120,62 +120,62 @@ Possible classification labels include:
 * Documentation
 * Unknown
 
-In Phase 1, these labels map onto only two processing pipelines (see ADR 0001):
+Phase 1 では、これらのラベルは 2 つの処理パイプラインにのみ対応づく（ADR 0001 参照）。
 
-* Concept → Concept pipeline
-* News → News pipeline
-* Research Paper / Documentation → handled provisionally by the News pipeline (treated as URL input)
-* Unknown → falls back to the News pipeline if it parses as a URL; otherwise the system fails fast with an explicit error
+* Concept → Concept パイプライン
+* News → News パイプライン
+* Research Paper / Documentation → 暫定的に News パイプラインで扱う（URL 入力として処理）
+* Unknown → URL として解釈できれば News パイプラインにフォールバック。そうでなければ、明示的な
+  エラーで即座に失敗する
 
-Dedicated pipelines for Research Paper and Documentation are deferred to a future issue.
+Research Paper と Documentation の専用パイプラインは、将来の Issue に先送りする。
 
 ---
 
-## 3. Knowledge Pipelines
+## 3. 知識パイプライン（Knowledge Pipelines）
 
-Different input types require different processing.
+入力の種類ごとに、異なる処理が必要になる。
 
-Examples:
+例：
 
-### Concept Pipeline
+### Concept パイプライン
 
-Input:
+入力：
 
 Transformer
 
-Output:
+出力：
 
-* concept explanation
-* related concepts
-* educational structure
+* 概念の説明
+* 関連概念
+* 教育的な構造
 
 ---
 
-### News Pipeline
+### News パイプライン
 
-Input:
+入力：
 
 https://ledge.ai/...
 
-Output:
+出力：
 
-* summary
-* technology
-* companies
-* impact
-* related concepts
+* 要約
+* 技術
+* 企業
+* 影響
+* 関連概念
 
-Both pipelines eventually produce the same normalized structure.
+どちらのパイプラインも、最終的には同じ正規化された構造を生む。
 
 ---
 
 # Knowledge Object Builder
 
-This component converts every input into the canonical internal representation:
-the **Knowledge Object**. It is the single component responsible for normalization.
+このコンポーネントは、すべての入力を正本の内部表現である **Knowledge Object** に変換する。
+正規化を担う唯一のコンポーネントである。
 
-The authoritative schema is defined in `DATA_MODEL.md`. A Knowledge Object is
-structured along these fields:
+正式なスキーマは `DATA_MODEL.md` で定義される。Knowledge Object は次のフィールドで構成される。
 
 ```text
 KnowledgeObject
@@ -192,61 +192,61 @@ KnowledgeObject
 └── outputs (optional)
 ```
 
-Downstream components should never care whether the original input was a keyword or a URL.
+下流のコンポーネントは、元の入力がキーワードだったか URL だったかを気にすべきではない。
 
-> Note: an earlier draft called this component "Knowledge Normalizer". The name
-> has been unified to **Knowledge Object Builder** (ADR 0001). For data-structure
-> details, `DATA_MODEL.md` is the source of truth.
+> 注：初期の草案ではこのコンポーネントを「Knowledge Normalizer」と呼んでいた。名称は
+> **Knowledge Object Builder** に統一された（ADR 0001）。データ構造の詳細は `DATA_MODEL.md`
+> が source of truth である。
 
 ---
 
 # Educational Planner
 
-This is the heart of the system.
+これはシステムの心臓部である。
 
-Its responsibility is not summarization.
+その責務は要約ではない。
 
-Its responsibility is education.
+その責務は教育である。
 
-It decides:
+次を決める。
 
-* What should be explained?
-* What should be visualized?
-* Which concepts require emphasis?
-* What prior knowledge should be assumed?
+* 何を説明すべきか？
+* 何を可視化すべきか？
+* どの概念を強調すべきか？
+* どんな前提知識を想定すべきか？
 
-Outputs from this component drive both illustration generation and Markdown generation.
+このコンポーネントの出力は、イラスト生成と Markdown 生成の両方を駆動する。
 
 ---
 
 # Illustration Generator
 
-Purpose:
+目的：
 
-Transform educational plans into consistent visual explanations.
+教育プランを、一貫した視覚的な説明へと変換する。
 
-The illustration generator should always follow the project's illustration policy.
+イラストジェネレータは、常にプロジェクトのイラストポリシーに従うべきである。
 
-Responsibilities include:
+責務には次が含まれる。
 
-* selecting the layout
-* selecting the aspect ratio
-* determining visual hierarchy
-* maintaining visual consistency
+* レイアウトの選択
+* アスペクト比の選択
+* 視覚的な階層の決定
+* 視覚的な一貫性の維持
 
-Illustration styles should never be embedded directly in application code.
+イラストのスタイルを、アプリケーションコードに直接埋め込んではならない。
 
-They belong in dedicated prompt templates.
+専用のプロンプトテンプレートに属する。
 
 ---
 
 # Markdown Generator
 
-Generate human-readable notes.
+人間が読めるノートを生成する。
 
-Each note follows the standard template:
+各ノートは標準テンプレートに従う。
 
-* Frontmatter
+* フロントマター
 * Summary
 * Illustration
 * Background
@@ -255,72 +255,72 @@ Each note follows the standard template:
 * References
 * Tags
 
-Markdown is the primary long-term knowledge format.
+Markdown は、長期の知識形式として最も重要である。
 
 ---
 
 # Knowledge Linker
 
-The linker enriches generated notes by identifying relationships.
+Linker は、関係を見つけることで生成済みのノートを充実させる。
 
-Examples:
+例：
 
-* related concepts
-* prerequisite knowledge
-* follow-up topics
-* existing notes
+* 関連概念
+* 前提知識
+* 発展的なトピック
+* 既存のノート
 
-This component transforms isolated notes into a connected knowledge graph.
+このコンポーネントは、孤立したノートを、つながった知識グラフへと変える。
 
 ---
 
-# Storage Layer
+# 保存レイヤー（Storage Layer）
 
 ## Obsidian Vault
 
-The Vault is the primary knowledge repository.
+Vault は主たる知識リポジトリである。
 
-It lives **outside this code repository**, in an external location configured via
-`vault_path` (see ADR 0002). The Storage Layer writes Knowledge Nodes into that
-external Vault; this code repository never contains the knowledge data itself.
+このコードリポジトリの**外**にあり、`vault_path` で指定される外部の場所に置かれる（ADR 0002）。
+保存レイヤーは Knowledge Node をその外部 Vault に書き込む。このコードリポジトリは、知識データ
+そのものを決して含まない。
 
-All generated knowledge should remain editable without AI.
+生成された知識はすべて、AI なしでも編集可能なままであるべきである。
 
-Folder organization is defined separately.
+フォルダの整理方法は別途定義する。
 
 ---
 
 ## Git
 
-Git here refers to the **external Vault's own optional version control** — distinct
-from this code repository's Git. When the external Vault is under Git and
-`auto_commit` is enabled, generated changes are committed there.
+ここでの Git は、**外部 Vault 自身の任意のバージョン管理**を指す——このコードリポジトリの
+Git とは別物である。外部 Vault が Git 管理下にあり `auto_commit` が有効なとき、生成された変更が
+そこにコミットされる。
 
-Git provides:
+Git が提供するもの：
 
-* version history
-* reproducibility
-* rollback
-* synchronization
+* 変更履歴
+* 再現性
+* ロールバック
+* 同期
 
-Every meaningful change should be committed.
+意味のある変更はすべてコミットすべきである。
 
 ---
 
 ## GitHub
 
-GitHub serves as:
+GitHub は次を担う。
 
-* backup
-* collaboration platform
-* project management
-* issue tracking
+* バックアップ
+* コラボレーションの場
+* プロジェクト管理
+* Issue トラッキング
 
 ---
 
-# Data Flow
+# データフロー
 
-Every execution follows the same lifecycle.
+すべての実行は、同じライフサイクルに従う。
 
 ```
 Input
@@ -368,7 +368,7 @@ GitHub
 
 ---
 
-# Repository Layout
+# リポジトリ構成
 
 ```
 backend/
@@ -389,71 +389,72 @@ tests/
 scripts/
 ```
 
-The Obsidian Vault is **not** part of this layout. It is external and referenced
-via `vault_path` (see ADR 0002).
+Obsidian Vault はこの構成の**一部ではない**。外部にあり、`vault_path` で参照される（ADR 0002）。
 
-Each directory should have a clear and independent responsibility.
+各ディレクトリは、明確で独立した責務を持つべきである。
 
 ---
 
-# AI Responsibilities
+# AI の役割分担
 
 ChatGPT
 
-* architecture
-* educational design
-* illustration prompt design
+* アーキテクチャ
+* 教育設計
+* イラスト用プロンプト設計
 
 Claude Code
 
-* implementation
-* testing
-* refactoring
-* repository maintenance
+* 実装
+* テスト
+* リファクタリング
+* リポジトリの整備
 
-Other AI assistants
+その他の AI アシスタント
 
-* benchmarking
-* experimentation
-* research
-
----
-
-# Extensibility
-
-Future components may include:
-
-* RSS ingestion
-* arXiv integration
-* YouTube ingestion
-* Podcast summarization
-* Semantic search
-* Local embedding generation
-* Knowledge recommendation
-* Timeline visualization
-
-These should integrate by extending existing pipelines rather than replacing them.
+* ベンチマーク
+* 実験
+* リサーチ
 
 ---
 
-# Architectural Constraints
+# 拡張性
 
-The architecture should avoid:
+将来のコンポーネント候補：
 
-* tightly coupled components
-* duplicated business logic
-* AI-specific assumptions in core modules
-* hardcoded prompt text
-* implementation-specific storage logic
+* RSS の取り込み
+* arXiv 連携
+* YouTube の取り込み
+* ポッドキャストの要約
+* セマンティック検索
+* ローカル埋め込みの生成
+* 知識のレコメンド
+* タイムライン可視化
 
-Components should communicate through well-defined data structures.
+これらは、既存のパイプラインを置き換えるのではなく、拡張する形で統合すべきである。
 
 ---
 
-# Long-Term Architecture Vision
+# アーキテクチャ上の制約
 
-AI Second Brain is designed as a knowledge operating system.
+アーキテクチャは次を避けるべきである。
 
-The architecture should evolve toward a modular platform where new knowledge sources, AI models, and output formats can be added without redesigning the system.
+* 密結合なコンポーネント
+* 重複したビジネスロジック
+* 中核モジュールにおける AI 固有の前提
+* ハードコードされたプロンプト文
+* 実装固有の保存ロジック
 
-The ultimate objective is a system where knowledge continuously grows, connects, and becomes easier to understand over time.
+コンポーネントは、明確に定義されたデータ構造を通じて通信すべきである。
+
+---
+
+# 長期アーキテクチャビジョン
+
+AI Second Brain は、知識のオペレーティングシステムとして設計されている。
+
+アーキテクチャは、新しい知識ソース・AI モデル・出力形式を、システムを再設計することなく
+追加できる、モジュラーなプラットフォームへと進化していくべきである。
+
+究極の目標は、知識が継続的に育ち、つながり、時間とともに理解しやすくなっていくシステムで
+ある。

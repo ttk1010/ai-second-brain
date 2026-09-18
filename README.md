@@ -13,17 +13,14 @@
        alt="Send input from anywhere — the CLI, the Claude mobile app, or Telegram — and AI Second Brain turns it into a structured Markdown note, an educational illustration, and an Obsidian-style graph of linked notes.">
 </p>
 
-<p align="center"><sub>Cover illustration generated with AI Second Brain's image engine (gpt-image-2).</sub></p>
-
 ## What is this?
 
 AI Second Brain turns what you learn into a **structured, visual, and
-continuously evolving knowledge base**. Give it a concept (`Transformer`), an
-article URL, or a comparison (`GPT, Claude, Gemini`) — it generates a structured,
-illustrated Markdown note in your [Obsidian](https://obsidian.md/) vault and
-links it into your knowledge graph. AI is its default focus, but it handles any
-field of knowledge (biology, economics, cooking…), tagging each note with its
-domain (ADR 0008).
+continuously evolving knowledge base**. Give it a concept (`LLM`), an article URL,
+or a comparison (`GPT, Claude, Gemini`) — it generates a structured, illustrated
+Markdown note in your [Obsidian](https://obsidian.md/) vault and links it into
+your knowledge graph. AI is its default focus, but it handles any field of
+knowledge (biology, economics, cooking…), tagging each note with its domain.
 
 The real product isn't notes or images; it's **organized, reusable knowledge**.
 Every output is generated from a single canonical [Knowledge
@@ -96,16 +93,16 @@ cp config/settings.example.toml config/settings.toml   # then edit vault_path
 echo 'OPENAI_API_KEY=sk-...' > .env
 
 # 3. Generate a note
-uv run asb "Transformer"                 # a concept
+uv run asb "LLM"                         # a concept
 uv run asb "https://ledge.ai/..."        # a news article
 uv run asb --compare "GPT, Claude, Gemini"   # a comparison
 
 # Steer tone / audience / emphasis with --guidance
-uv run asb "Transformer" --guidance "For high-schoolers; include the history"
+uv run asb "LLM" --guidance "For high-schoolers; include the history"
 
 # Explain across several illustration pages instead of one image
-uv run asb "Transformer" --pages 4      # exactly 4 facet pages
-uv run asb "Transformer" --pages auto   # let the planner choose (2–6)
+uv run asb "LLM" --pages 4      # exactly 4 facet pages
+uv run asb "LLM" --pages auto   # let the planner choose (2–6)
 ```
 
 Each note is written into your vault with an educational illustration. Re-running
@@ -123,25 +120,23 @@ consistent visual style (later pages are generated with the first page as a
 reference image). It is opt-in: without the flag you get one image as before.
 **Each page is a separate image API call, so `--pages N` costs N× the image
 generation** (capped at 6 pages); `--no-image` overrides it and generates nothing.
-See [ADR 0012](docs/adr/0012-multi-page-illustration.md).
 
 ### Revise an existing note
 
 Improve one part of a note without regenerating the whole thing:
 
 ```bash
-asb-revise "Transformer" "Make the summary simpler"            # rewrite a text section
-asb-revise "AWS" "Redraw the illustration on a white background" --illustration
-asb-revise "AWS" "Expand the background" --section background   # force a section
+asb-revise "LLM" "Make the summary simpler"            # rewrite a text section
+asb-revise "LLM" "Redraw the illustration on a white background" --illustration
+asb-revise "LLM" "Expand the background" --section background   # force a section
 ```
 
 `asb-revise` finds the note by title or filename, then rewrites **only** the
 targeted body section (`summary` / `background` / `key_takeaways`) or redraws the
 illustration using the existing image as a style reference (so the look is kept
 and only what you asked for changes). Without `--section` / `--illustration` the
-target is inferred from the instruction. Edits are written in place — the Vault is
-Git-managed, so history lives there. See
-[ADR 0014](docs/adr/0014-note-revision.md).
+target is inferred from the instruction. Edits are written in place — the vault is
+Git-managed, so history lives there.
 
 ## Features
 
@@ -161,8 +156,7 @@ Git-managed, so history lives there. See
 - **Instant generation on the go (optional):** an AWS Lambda endpoint runs the
   same pipeline in the cloud and commits the note to a Git-backed vault, so you
   can generate from your phone without your Mac being on — infra ≈ free
-  (scale-to-zero). Setup: [DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md),
-  design: [ADR 0015](docs/adr/0015-serverless-instant-generation.md).
+  (scale-to-zero). Setup: [DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md).
 - **Monthly digest:** `asb-digest` turns [ledge.ai](https://ledge.ai/)'s 30-day
   access ranking into a single note + overview illustration of the month's top
   AI stories.
@@ -195,8 +189,7 @@ same canonical representation. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
 [docs/ARCHITECTURE_DIAGRAMS.md](docs/ARCHITECTURE_DIAGRAMS.md).
 
 The Obsidian vault lives **outside** this repository (configured via
-`vault_path`); this repo tracks only code and docs, never knowledge data
-(see [ADR 0002](docs/adr/0002-vault-and-layout.md)).
+`vault_path`); this repo tracks only code and docs, never knowledge data.
 
 ## Connecting notes
 
@@ -211,7 +204,7 @@ As your vault grows, connect notes into a knowledge graph:
 ## Capture from anywhere
 
 Capture is decoupled from processing by a queue, so everything runs locally with
-no fixed hosting cost ([ADR 0006](docs/adr/0006-capture-interface-local-first.md)).
+no fixed hosting cost.
 
 - **Inbox queue:** drop a stub note (a URL or concept) into `00 Inbox/` from
   Obsidian; run `uv run asb-inbox` to turn the queue into notes.
@@ -229,8 +222,7 @@ For pages behind a login (incl. free-membership walls) that `asb` cannot fetch,
 **bring the body text yourself** from your own logged-in browser — via an Inbox
 stub, `asb --captured-from <URL>`, or Claude Code reading the page through the
 Claude in Chrome extension. ASB never handles your credentials or cookies; it
-just summarizes the text you give it, stored as News under the source URL
-([ADR 0009](docs/adr/0009-captured-content-ingestion.md)). See
+just summarizes the text you give it, stored as News under the source URL. See
 [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) for the step-by-step guide.
 
 ## Monthly digest
@@ -238,7 +230,7 @@ just summarizes the text you give it, stored as News under the source URL
 `asb-digest` builds a one-page overview of the month's most-read AI news. It reads
 [ledge.ai](https://ledge.ai/)'s **30-day access ranking**, writes a one-line
 summary per story, and generates a digest note + an overview illustration under
-`08 Digests` ([ADR 0010](docs/adr/0010-monthly-news-digest.md)).
+`08 Digests`.
 
 ```bash
 uv run asb-digest                       # this month, top 10 (fully automatic)
@@ -247,8 +239,7 @@ uv run asb-digest --month 2026-08 --top 5
 
 **Higher-quality (Claude Code):** the `asb-digest` skill reads the actual article
 bodies and writes the labels/summaries itself — better captions, and **no OpenAI
-text cost** (only the illustration is billed;
-[ADR 0011](docs/adr/0011-digest-claude-authored-labels.md)).
+text cost** (only the illustration is billed).
 
 ## Philosophy
 
@@ -280,7 +271,7 @@ Design docs are in Japanese; the README is bilingual.
 | [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md) | Deploy the serverless instant-generation endpoint |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Development roadmap |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | Capturing login-required articles |
-| [docs/adr/](docs/adr/) | Architecture Decision Records |
+| [docs/adr/](docs/adr/) | Architecture Decision Records (design rationale) |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Setup & runtime troubleshooting |
 | [CLAUDE.md](CLAUDE.md) | Engineering guide for AI-assisted development |
 
