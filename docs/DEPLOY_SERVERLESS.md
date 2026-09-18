@@ -1,6 +1,6 @@
 # サーバーレス即時生成 セットアップ手順（Phase 1）
 
-外出先の iPhone から、家の Mac 抜きでイラストを即時生成する構成（[ADR 0015](adr/0015-serverless-instant-generation.md)、構成図は [architecture-diagrams.md](architecture-diagrams.md) の図2）を、**ゼロから完走する**ための手順。実際に構築したときにハマった箇所を「⚠️ つまずき」として各所に記載する。
+外出先の iPhone から、家の Mac 抜きでイラストを即時生成する構成（[ADR 0015](adr/0015-serverless-instant-generation.md)、構成図は [ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md) の図2）を、**ゼロから完走する**ための手順。実際に構築したときにハマった箇所を「⚠️ つまずき」として各所に記載する。
 
 **全体像**：iPhone（iOS ショートカット）→ Lambda Function URL → 既存 `backend/` パイプラインを実行 → 画像を即返信＋ノート/画像を GitHub（`asb-vault`）にコミット → Mac が `git pull` で取り込み、iCloud で iPhone のファイルアプリからも閲覧。生成は OpenAI 直叩き（`gpt-image-2`）のまま。
 

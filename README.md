@@ -1,19 +1,19 @@
-<p align="center">
-  <img src="docs/assets/asb-icon.png" alt="AI Second Brain" width="140">
-</p>
-
 # AI Second Brain
 
 > Capture. Understand. Visualize. Remember.
+
+**English** · [日本語 (README.ja.md)](README.ja.md)
 
 [![CI](https://github.com/ttk1010/ai-second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/ttk1010/ai-second-brain/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 
 <p align="center">
-  <img src="docs/assets/overview.png" width="820"
-       alt="Inputs (a concept, a news URL, or a comparison) become one Knowledge Object, which generates a structured Markdown note, an educational illustration, and an Obsidian-style graph of linked notes.">
+  <img src="docs/assets/cover.png" width="820"
+       alt="Send input from anywhere — the CLI, the Claude mobile app, or Telegram — and AI Second Brain turns it into a structured Markdown note, an educational illustration, and an Obsidian-style graph of linked notes.">
 </p>
+
+<p align="center"><sub>Cover illustration generated with AI Second Brain's image engine (gpt-image-2).</sub></p>
 
 ## What is this?
 
@@ -30,42 +30,47 @@ Every output is generated from a single canonical [Knowledge
 Object](docs/DATA_MODEL.md), so notes stay consistent and the vault remains
 valuable even without AI tools.
 
+> 📖 The README is in English and Japanese; the detailed design docs
+> (`docs/`, ADRs) are written in **Japanese**.
+
 ## Example
 
 ```bash
 uv run asb "LLM"
 ```
 
-produces `01 Concepts/大規模言語モデル.md` in your vault — a full note with an
-embedded illustration and resolved links:
+produces a note like `01 Concepts/Large Language Model.md` in your vault — a full
+note with an embedded illustration and resolved links:
 
 ```markdown
 ---
-title: "大規模言語モデル"
+title: "Large Language Model"
 source_type: concept
 tags: [Transformer, Generative AI, Foundation Model, RAG, Attention, ...]
 ---
 
-# 大規模言語モデル
+# Large Language Model
 
 ## Summary
-大規模言語モデル（LLM）は、大量のテキストを学習して、自然言語のパターンを
-予測・生成するAIモデルです。…
+A large language model (LLM) is an AI model trained on massive amounts of text to
+predict and generate natural-language patterns…
 
 ## Illustration
 ![[Images/LLM.png]]
 
 ## Key Takeaways
-- LLMは大量のテキストから言語の統計的パターンを学び、次の語を予測する…
-- 高い汎用性があり、プロンプトや追加学習によって多様なタスクに適応できる…
+- An LLM learns statistical patterns of language from large corpora and predicts
+  the next token…
+- It is highly general: prompting or fine-tuning adapts it to many tasks…
 
 ## Related Notes
-- [[AIエージェント]] — application
+- [[AI Agent]] — application
 - [[RAG]] — application
-- [[埋め込み]] — related
+- [[Embeddings]] — related
 ```
 
-(Notes are generated in the language you configure; the default is Japanese.)
+(Notes are generated in the language you configure; the default is Japanese —
+see [README.ja.md](README.ja.md) for a Japanese example.)
 
 ## Requirements
 
@@ -96,7 +101,7 @@ uv run asb "https://ledge.ai/..."        # a news article
 uv run asb --compare "GPT, Claude, Gemini"   # a comparison
 
 # Steer tone / audience / emphasis with --guidance
-uv run asb "Transformer" --guidance "高校生向けに、歴史的背景を含めて"
+uv run asb "Transformer" --guidance "For high-schoolers; include the history"
 
 # Explain across several illustration pages instead of one image
 uv run asb "Transformer" --pages 4      # exactly 4 facet pages
@@ -107,7 +112,7 @@ Each note is written into your vault with an educational illustration. Re-runnin
 the same input is a no-op (use `--overwrite` to regenerate, `--no-image` to skip
 the illustration).
 
-`--guidance "<自然文>"` adds a free-text instruction that steers the note body **and**
+`--guidance "<text>"` adds a free-text instruction that steers the note body **and**
 the illustration (tone, target audience, which angle to emphasize). It is recorded
 in the note's frontmatter. Guidance does not change idempotency — the same input is
 still skipped unless you pass `--overwrite` (so you can re-run with new guidance).
@@ -125,9 +130,9 @@ See [ADR 0012](docs/adr/0012-multi-page-illustration.md).
 Improve one part of a note without regenerating the whole thing:
 
 ```bash
-asb-revise "Transformer" "要約をもっと易しく"          # rewrite a text section
-asb-revise "AWS" "図を白背景で描き直して" --illustration  # redraw the illustration
-asb-revise "AWS" "背景を厚く" --section background       # force a section
+asb-revise "Transformer" "Make the summary simpler"            # rewrite a text section
+asb-revise "AWS" "Redraw the illustration on a white background" --illustration
+asb-revise "AWS" "Expand the background" --section background   # force a section
 ```
 
 `asb-revise` finds the note by title or filename, then rewrites **only** the
@@ -143,16 +148,18 @@ Git-managed, so history lives there. See
 - **Three knowledge types:** AI **concepts**, **news URLs** (fetched &
   summarized — including JS-rendered sites), and **comparisons** (with a table).
 - **Educational illustrations:** a consistent, hand-drawn visual per note
-  (gpt-image-2).
+  (gpt-image-2), optionally split into a multi-page series (`--pages`).
 - **Structured Markdown notes:** summary, background, key takeaways, related
   notes, references, tags — readable without any AI tool.
+- **Natural-language revision:** `asb-revise` improves one section or redraws the
+  illustration of an existing note, in place.
 - **Automatic linking:** the `asb-relink` Claude Code skill connects notes into a
   graph at no OpenAI cost; backlinks come from Obsidian.
 - **Capture from anywhere:** a local `00 Inbox` queue (`asb-inbox`) and chat
   capture via Claude Code Channels (Telegram) — local-first, no fixed hosting
   cost.
 - **Instant generation on the go (optional):** an AWS Lambda endpoint runs the
-  same pipeline in the cloud and commits the note to a Git-backed Vault, so you
+  same pipeline in the cloud and commits the note to a Git-backed vault, so you
   can generate from your phone without your Mac being on — infra ≈ free
   (scale-to-zero). Setup: [DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md),
   design: [ADR 0015](docs/adr/0015-serverless-instant-generation.md).
@@ -183,8 +190,9 @@ URL / Concept / Comparison
 ```
 
 Everything flows through the Knowledge Object, so new output formats consume the
-same canonical representation. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-and [docs/DATA_MODEL.md](docs/DATA_MODEL.md) for details.
+same canonical representation. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
+[docs/DATA_MODEL.md](docs/DATA_MODEL.md), and the before/after diagrams in
+[docs/ARCHITECTURE_DIAGRAMS.md](docs/ARCHITECTURE_DIAGRAMS.md).
 
 The Obsidian vault lives **outside** this repository (configured via
 `vault_path`); this repo tracks only code and docs, never knowledge data
@@ -210,8 +218,10 @@ no fixed hosting cost ([ADR 0006](docs/adr/0006-capture-interface-local-first.md
 - **Chat capture (Telegram):** message a bot via
   [Claude Code Channels](https://code.claude.com/docs/en/channels); Claude Code
   on your machine runs `asb` and replies. See
-  [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md) for the step-by-step setup
-  (bot token, plugin, pairing, and pre-approving commands so it runs unattended).
+  [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md) for the step-by-step setup.
+- **Instant, from your phone (optional):** an AWS Lambda endpoint generates in the
+  cloud even when your Mac is off — trigger it from an iOS Shortcut. Setup:
+  [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md).
 
 ### Login-required sites (captured content)
 
@@ -221,8 +231,7 @@ stub, `asb --captured-from <URL>`, or Claude Code reading the page through the
 Claude in Chrome extension. ASB never handles your credentials or cookies; it
 just summarizes the text you give it, stored as News under the source URL
 ([ADR 0009](docs/adr/0009-captured-content-ingestion.md)). See
-[docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) for the step-by-step guide
-(including a capture bookmarklet).
+[docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) for the step-by-step guide.
 
 ## Monthly digest
 
@@ -236,18 +245,10 @@ uv run asb-digest                       # this month, top 10 (fully automatic)
 uv run asb-digest --month 2026-08 --top 5
 ```
 
-The ranking is always the last 30 days; `--month` only labels the note (and is its
-idempotency key — the same month is skipped unless you pass `--overwrite`). The
-image carries ranks and short labels; the accurate one-line summaries live in the
-note. Run it monthly from cron/launchd (like `asb-inbox`), local-first, no daemon.
-
 **Higher-quality (Claude Code):** the `asb-digest` skill reads the actual article
 bodies and writes the labels/summaries itself — better captions, and **no OpenAI
-text cost** (only the illustration is billed; [ADR 0011](docs/adr/0011-digest-claude-authored-labels.md)).
-It splits into two helper commands the skill drives: `asb-digest fetch` (ranking +
-bodies as JSON, no OpenAI) and `asb-digest build --from <file>` (note + image from
-the authored JSON). The fully-automatic `asb-digest` above stays for unattended
-cron runs.
+text cost** (only the illustration is billed;
+[ADR 0011](docs/adr/0011-digest-claude-authored-labels.md)).
 
 ## Philosophy
 
@@ -268,11 +269,15 @@ The full vision and long-term goals live in
 
 ## Documentation
 
+Design docs are in Japanese; the README is bilingual.
+
 | Document | Purpose |
 |----------|---------|
 | [docs/PROJECT_CHARTER.md](docs/PROJECT_CHARTER.md) | Vision and long-term goals |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture |
+| [docs/ARCHITECTURE_DIAGRAMS.md](docs/ARCHITECTURE_DIAGRAMS.md) | Before/after architecture diagrams |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | The Knowledge Object schema |
+| [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md) | Deploy the serverless instant-generation endpoint |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Development roadmap |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | Capturing login-required articles |
 | [docs/adr/](docs/adr/) | Architecture Decision Records |
@@ -282,8 +287,10 @@ The full vision and long-term goals live in
 ## Roadmap & status
 
 🚧 Active development. **Phases 1–4 complete** (foundation, educational content,
-knowledge organization, local-first capture). **Phase 5 — AI Research Assistant**
-is next. See [docs/ROADMAP.md](docs/ROADMAP.md).
+knowledge organization, local-first capture). Recent additions: **multi-page
+illustrations** (`--pages`), **natural-language note revision** (`asb-revise`),
+and **optional serverless instant generation** (generate from your phone).
+**Phase 5 — AI Research Assistant** is next. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 

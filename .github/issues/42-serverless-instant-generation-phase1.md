@@ -5,7 +5,7 @@ Labels: enhancement, infrastructure, services
 ## Why
 現状はローカルファースト（ADR 0006）で、**Mac がオフだと外出先から生成できない**。課題の本質は「外出先で思いついた瞬間に、家の Mac 抜きでイラストを生成して見たい」という即時性。方針は [ADR 0015](../../docs/adr/0015-serverless-instant-generation.md)（Proposed）で決定済み：**ローカル経路を残したまま、AWS Lambda の常時稼働エンドポイントを1本足す。生成は OpenAI 直叩きのまま、AWS は実行＋配信だけを担う。**
 
-構成図は [docs/architecture-diagrams.md](../../docs/architecture-diagrams.md) の図2。
+構成図は [docs/ARCHITECTURE_DIAGRAMS.md](../../docs/ARCHITECTURE_DIAGRAMS.md) の図2。
 
 ## Goal（Phase 1 のスコープ）
 外出先の iPhone から HTTP で概念/URL を送ると、**Lambda が既存 `backend/` パイプラインを実行 → 画像を即返信 → ノート＋画像を Git(Vault) に保存**する、最小構成を作る。認証は簡易、入口はまず iOS ショートカットのみ。Telegram / Claude MCP アダプタ、既存ノートのイラスト改善（#29 のリモート化）は後続フェーズ。
