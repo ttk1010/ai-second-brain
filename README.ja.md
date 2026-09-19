@@ -185,6 +185,7 @@ Vault が育ってきたら、ノートをつないで知識グラフにしま�
 - **Inbox キュー：** Obsidian から `00 Inbox/` に URL や概念のメモ（スタブ）を置き、`uv run asb-inbox` でまとめてノートにします。
 - **チャット取り込み（Telegram）：** [Claude Code Channels](https://code.claude.com/docs/en/channels) 経由で bot にメッセージを送ると、手元の Claude Code が `asb` を実行して返信します。設定手順は [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md)。
 - **スマホから即時（任意）：** AWS Lambda のエンドポイントが、Mac が起動していなくてもクラウドで生成します。iOS ショートカットから起動できます。手順は [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md)。
+- **Claude のクラウドセッションから（任意）：** GitHub Actions（workflow_dispatch）がランナー上で `asb` を実行し、Vault リポジトリに push します。API キーは Actions Secrets 内に留まり、セッションには渡りません。追加インフラ不要。手順は [docs/CLOUD_GENERATION.md](docs/CLOUD_GENERATION.md)。
 
 ### ログインが必要なサイト（本文の持ち込み）
 
@@ -235,6 +236,7 @@ uv run asb-digest --month 2026-08 --top 5
 | [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md) | サーバーレス即時生成のデプロイ手順 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 開発ロードマップ |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | ログイン必須記事の取り込み |
+| [docs/CLOUD_GENERATION.md](docs/CLOUD_GENERATION.md) | クラウド生成（GitHub Actions + Secrets） |
 | [docs/adr/](docs/adr/) | Architecture Decision Records（設計判断の記録） |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | セットアップ・実行時のトラブル対処 |
 | [CLAUDE.md](CLAUDE.md) | AI 支援開発のためのエンジニアリングガイド |
