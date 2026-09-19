@@ -1,0 +1,120 @@
+name: Generate note
+
+# Cloud generation (Issue #43 / #84): run `asb` on a GitHub Actions runner with
+# the OpenAI key held in Actions Secrets, and push the generated note + images
+# to the vault repository. The key never reaches any Claude session's context.
+#
+# Trigger from a cloud session:
+#   gh workflow run generate-note.yml -f input="Transformer" -f guidance="..."
+# or from the GitHub mobile app (Actions → Generate note → Run workflow).
+#
+# Required repository secrets (docs/CLOUD_GENERATION.md):
+#   OPENAI_API_KEY    — generation key
+#   VAULT_PUSH_TOKEN  — fine-grained PAT, contents:write on the vault repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      input:
+        description: "Concept, article URL, or comparison list (e.g. 'GPT, Claude')"
+        required: true
+        type: string
+      guidance:
+        description: "Optional free-text guidance (tone / audience / emphasis)"
+        required: false
+        type: string
+        default: ""
+      pages:
+        description: "Illustration pages: a number or 'auto' (empty = single page)"
+        required: false
+        type: string
+        default: ""
+      compare:
+        description: "Treat the input as a comparison list"
+        required: false
+        type: boolean
+        default: false
+      no_image:
+        description: "Skip the illustration (cheaper)"
+        required: false
+        type: boolean
+        default: false
+      overwrite:
+        description: "Regenerate an existing note"
+        required: false
+        type: boolean
+        default: false
+
+# Queue runs so two generations never push to the vault at the same time.
+concurrency:
+  group: generate-note
+  cancel-in-progress: false
+
+env:
+  VAULT_REPO: ttk1010/asb-vault
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Check out vault
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.VAULT_REPO }}
+          token: ${{ secrets.VAULT_PUSH_TOKEN }}
+          path: vault
+
+      - name: Write settings.toml
+        run: |
+          sed "s|^vault_path = .*|vault_path = \"${GITHUB_WORKSPACE}/vault\"|" \
+            config/settings.example.toml > config/settings.toml
+          grep '^vault_path' config/settings.toml
+
+      # Inputs go through env (not inline interpolation) so quoting is safe.
+      - name: Generate note
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          INPUT: ${{ inputs.input }}
+          GUIDANCE: ${{ inputs.guidance }}
+          PAGES: ${{ inputs.pages }}
+          COMPARE: ${{ inputs.compare }}
+          NO_IMAGE: ${{ inputs.no_image }}
+          OVERWRITE: ${{ inputs.overwrite }}
+        run: |
+          args=()
+          [ -n "${PAGES}" ] && args+=(--pages "${PAGES}")
+          [ -n "${GUIDANCE}" ] && args+=(--guidance "${GUIDANCE}")
+          [ "${COMPARE}" = "true" ] && args+=(--compare)
+          [ "${NO_IMAGE}" = "true" ] && args+=(--no-image)
+          [ "${OVERWRITE}" = "true" ] && args+=(--overwrite)
+          uv run asb "${INPUT}" "${args[@]}"
+
+      - name: Commit and push to vault
+        working-directory: vault
+        env:
+          INPUT: ${{ inputs.input }}
+        run: |
+          git config user.name "asb-cloud-generation"
+          git config user.email "asb-cloud-generation@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes (idempotent skip) — nothing to push."
+            exit 0
+          fi
+          git commit -m "Add note via cloud generation: ${INPUT}
+
+          Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+          # Another path (mobile Lambda, local) may have pushed meanwhile.
+          git pull --rebase origin main
+          git push origin main

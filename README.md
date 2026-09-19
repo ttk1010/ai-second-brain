@@ -218,6 +218,10 @@ no fixed hosting cost.
 - **Instant, from your phone (optional):** an AWS Lambda endpoint generates in the
   cloud even when your Mac is off — trigger it from an iOS Shortcut. Setup:
   [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md).
+- **From a Claude cloud session (optional):** a `workflow_dispatch` GitHub Action
+  runs `asb` with the API key held in Actions Secrets (it never reaches the
+  session) and pushes the note to the vault repo — no extra infra. Setup:
+  [docs/CLOUD_GENERATION.md](docs/CLOUD_GENERATION.md).
 
 ### Login-required sites (captured content)
 
@@ -274,6 +278,7 @@ Design docs are in Japanese; the README is bilingual.
 | [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md) | Deploy the serverless instant-generation endpoint |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Development roadmap |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | Capturing login-required articles |
+| [docs/CLOUD_GENERATION.md](docs/CLOUD_GENERATION.md) | Cloud generation via GitHub Actions + Secrets |
 | [docs/adr/](docs/adr/) | Architecture Decision Records (design rationale) |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Setup & runtime troubleshooting |
 | [CLAUDE.md](CLAUDE.md) | Engineering guide for AI-assisted development |
