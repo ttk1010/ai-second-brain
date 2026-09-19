@@ -48,15 +48,15 @@ gh secret set VAULT_PUSH_TOKEN
 ### クラウドセッション・ターミナルから
 
 ```bash
-gh workflow run generate-note.yml -f input="Transformer"
+gh workflow run generate-note.yml -f input="LLM"
 ```
 
 オプション付きの例：
 
 ```bash
 gh workflow run generate-note.yml \
-  -f input="3次元スキャン" \
-  -f guidance="ロボティクス向けに、LIOを中心に" \
+  -f input="LLM" \
+  -f guidance="高校生向けに、歴史的背景を含めて" \
   -f pages=3
 ```
 
