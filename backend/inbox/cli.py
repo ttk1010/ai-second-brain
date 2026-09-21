@@ -16,6 +16,7 @@ from backend.cli import _pages_arg
 from backend.config import DEFAULT_SETTINGS_PATH, SettingsError, load_settings
 from backend.inbox.worker import InboxWorker
 from backend.services import build_pipeline
+from backend.storage.git import commit_note, push_vault, sync_vault
 from backend.storage.paths import INBOX_FOLDER
 
 
@@ -31,11 +32,36 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
 
+    if settings.auto_push:
+        sync_vault(settings.vault_path)
+
+    def _commit_consumed(stub, result) -> None:
+        # One commit per consumed stub: the stub deletion plus, for a created
+        # note, the note file and its illustration pages (Issue #44).
+        if not settings.auto_commit:
+            return
+        if result.status == "created" and result.path is not None:
+            paths = [stub, result.path] + [
+                settings.vault_path / ref for ref in result.knowledge_object.illustration_refs()
+            ]
+            message = f"Add note: {result.knowledge_object.title}"
+        else:
+            paths = [stub]
+            message = f"Consume inbox stub: {stub.name}"
+        commit_note(settings.vault_path, paths, message)
+
     pipeline = build_pipeline(settings, no_image=args.no_image)
     inbox_dir = settings.vault_path / INBOX_FOLDER
     summary = InboxWorker(
-        pipeline, inbox_dir, overwrite=args.overwrite, pages=args.pages
+        pipeline,
+        inbox_dir,
+        overwrite=args.overwrite,
+        pages=args.pages,
+        on_consumed=_commit_consumed,
     ).process_all()
+
+    if settings.auto_push and (summary.created or summary.skipped):
+        push_vault(settings.vault_path)
 
     print(
         f"Inbox: {summary.created} created, {summary.skipped} existing, "

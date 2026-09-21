@@ -49,6 +49,9 @@ class ReviseResult:
     message: str
     path: Path | None = None
     target: str | None = None
+    # Files the revision actually changed (the note for a section revision, the
+    # image file for an illustration revision) — what auto_commit should stage.
+    changed_paths: tuple[Path, ...] = ()
 
 
 class NoteReviser:
@@ -181,6 +184,7 @@ class NoteReviser:
             message=f"Revised {display}: {note.name}",
             path=note,
             target=target,
+            changed_paths=(note,),
         )
 
     def _revise_illustration(self, note: Path, markdown: str, instruction: str) -> ReviseResult:
@@ -233,6 +237,7 @@ class NoteReviser:
             message=f"Revised illustration: {embed}",
             path=note,
             target="illustration",
+            changed_paths=(image_path,),
         )
 
     def _title(self, markdown: str) -> str:

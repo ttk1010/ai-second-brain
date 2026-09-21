@@ -209,6 +209,11 @@ As your vault grows, connect notes into a knowledge graph:
 Capture is decoupled from processing by a queue, so everything runs locally with
 no fixed hosting cost.
 
+When the vault is a Git repository, set `auto_commit = true` and
+`auto_push = true` in `settings.toml` to have every local generation committed
+(note + illustrations) and pushed automatically — so local runs end up in the
+same place as the cloud routes below, and other devices just pull.
+
 - **Inbox queue:** drop a stub note (a URL or concept) into `00 Inbox/` from
   Obsidian; run `uv run asb-inbox` to turn the queue into notes.
 - **Chat capture (Telegram):** message a bot via

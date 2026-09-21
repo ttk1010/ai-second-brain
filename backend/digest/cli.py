@@ -34,7 +34,7 @@ from backend.parser import (
 )
 from backend.parser.fetcher import FetchError
 from backend.services import build_pipeline
-from backend.storage.git import commit_note
+from backend.storage.git import commit_note, push_vault, sync_vault
 
 _BODY_CHARS_DEFAULT = 1500
 
@@ -59,6 +59,9 @@ def _auto(argv: list[str]) -> int:
     except SettingsError as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
+
+    if settings.auto_push:
+        sync_vault(settings.vault_path)
 
     period = args.month or date.today().strftime("%Y-%m")
     pipeline = build_pipeline(settings, no_image=args.no_image)
@@ -135,6 +138,9 @@ def _build(argv: list[str]) -> int:
         print("Input error: digest JSON needs a period and at least one item.", file=sys.stderr)
         return 2
 
+    if settings.auto_push:
+        sync_vault(settings.vault_path)
+
     pipeline = build_pipeline(settings, no_image=args.no_image)
     try:
         result = pipeline.render_digest(
@@ -183,10 +189,13 @@ def _authored(data: dict) -> tuple[list[RankedArticle], DigestExtraction]:
 def _report(result, settings) -> int:
     print(result.message)
     if result.status == "created" and settings.auto_commit and result.path is not None:
-        if commit_note(
-            settings.vault_path, result.path, f"Add digest: {result.knowledge_object.title}"
-        ):
+        paths = [result.path] + [
+            settings.vault_path / ref for ref in result.knowledge_object.illustration_refs()
+        ]
+        if commit_note(settings.vault_path, paths, f"Add digest: {result.knowledge_object.title}"):
             print("Committed to Vault Git repository.")
+            if settings.auto_push and push_vault(settings.vault_path):
+                print("Pushed to Vault remote.")
     return 0
 
 

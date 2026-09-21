@@ -19,5 +19,10 @@ image_quality = "medium"
 # Language
 default_language = "ja"
 
-# Auto commit generated notes
+# Auto commit generated notes (the note and its illustration pages, one commit)
 auto_commit = false
+
+# After committing, also `git pull --rebase` + `git push` the Vault repository,
+# and sync it before generating (requires auto_commit). Keeps local generation
+# consistent with cloud routes (Lambda / GitHub Actions) that push directly.
+auto_push = false
