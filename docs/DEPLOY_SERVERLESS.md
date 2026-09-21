@@ -83,6 +83,10 @@ git -C "/Users/<you>/Documents/ai-catchup/Vault" push -u origin main
 - リモートは SSH（`git@github.com:...`）が楽（既存の SSH 鍵で認証）。HTTPS でも可（PAT が要る）。
 - Vault フォルダには小さな `.git` **ファイル**（ポインタ）だけが残り、実体は `~/asb-vault.git`。
 - 画像込みでも数十 MB 程度。private repo なので問題ない。
+- **モバイルの Obsidian からも読みたい場合**は、Vault を最初から
+  `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/<Vault名>` に置くとよい
+  （iOS 版 Obsidian はこのフォルダしか読めない）。あとから移動することもできる
+  — 手順は [MOBILE_OBSIDIAN.md](MOBILE_OBSIDIAN.md)。
 
 > ⚠️ **つまずき⑤：`cd "~/..."` は展開されない**
 > ダブルクォートで囲むと `~` がホームに展開されず `cd` が失敗し、**別ディレクトリでコマンドが走って事故る**。`~` はクォートしない、または上のように**絶対パス（`/Users/<you>/...`）**で書く。

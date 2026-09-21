@@ -284,6 +284,7 @@ Design docs are in Japanese; the README is bilingual.
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Development roadmap |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | Capturing login-required articles |
 | [docs/CLOUD_GENERATION.md](docs/CLOUD_GENERATION.md) | Cloud generation via GitHub Actions + Secrets |
+| [docs/MOBILE_OBSIDIAN.md](docs/MOBILE_OBSIDIAN.md) | Reading the vault in Obsidian on iOS (iCloud) |
 | [docs/adr/](docs/adr/) | Architecture Decision Records (design rationale) |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Setup & runtime troubleshooting |
 | [CLAUDE.md](CLAUDE.md) | Engineering guide for AI-assisted development |

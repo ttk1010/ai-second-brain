@@ -241,6 +241,7 @@ uv run asb-digest --month 2026-08 --top 5
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 開発ロードマップ |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | ログイン必須記事の取り込み |
 | [docs/CLOUD_GENERATION.md](docs/CLOUD_GENERATION.md) | クラウド生成（GitHub Actions + Secrets） |
+| [docs/MOBILE_OBSIDIAN.md](docs/MOBILE_OBSIDIAN.md) | Obsidian iOS での閲覧セットアップ（iCloud） |
 | [docs/adr/](docs/adr/) | Architecture Decision Records（設計判断の記録） |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | セットアップ・実行時のトラブル対処 |
 | [CLAUDE.md](CLAUDE.md) | AI 支援開発のためのエンジニアリングガイド |
