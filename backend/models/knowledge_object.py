@@ -78,3 +78,15 @@ class KnowledgeObject(BaseModel):
             "multiple pages exist, outputs['illustration'] mirrors the first page."
         ),
     )
+
+    def illustration_refs(self) -> list[str]:
+        """All Vault-relative illustration paths of this note, in page order.
+
+        Multi-page notes list every page in ``illustrations`` (the first page is
+        mirrored in ``outputs['illustration']``); single-page notes only set the
+        output. An empty list means the note has no illustration (--no-image).
+        """
+        if self.illustrations:
+            return list(self.illustrations)
+        single = self.outputs.get("illustration", "")
+        return [single] if single else []

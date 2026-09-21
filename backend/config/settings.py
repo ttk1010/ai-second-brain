@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     image_quality: ImageQuality = ImageQuality.MEDIUM
     default_language: str = "ja"
     auto_commit: bool = Field(default=False)
+    auto_push: bool = Field(default=False)
 
 
 class SettingsError(Exception):
@@ -81,6 +82,12 @@ def load_settings(
 
     if validate_vault:
         _validate_vault_path(settings.vault_path, path)
+
+    if settings.auto_push and not settings.auto_commit:
+        # auto_push only makes sense on top of auto_commit; ignore rather than
+        # fail so a config mistake never blocks generation.
+        logger.warning("auto_push requires auto_commit; ignoring auto_push.")
+        settings.auto_push = False
 
     logger.info("Loaded settings from %s (vault_path=%s)", path, settings.vault_path)
     return settings

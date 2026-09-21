@@ -133,3 +133,23 @@ def test_staged_build_allows_mutation() -> None:
     ko.relationships = [Relationship(type=RelationshipType.RELATED, target="RNN")]
     assert ko.concepts == ["attention"]
     assert ko.relationships[0].target == "RNN"
+
+
+def test_illustration_refs_empty_without_illustration() -> None:
+    assert _minimal_knowledge_object().illustration_refs() == []
+
+
+def test_illustration_refs_single_page_from_outputs() -> None:
+    ko = _minimal_knowledge_object()
+    ko.outputs["illustration"] = "Images/transformer.png"
+    assert ko.illustration_refs() == ["Images/transformer.png"]
+
+
+def test_illustration_refs_multi_page_prefers_pages_list() -> None:
+    ko = _minimal_knowledge_object()
+    ko.outputs["illustration"] = "Images/transformer.png"
+    ko.illustrations = ["Images/transformer.png", "Images/transformer-p2.png"]
+    assert ko.illustration_refs() == [
+        "Images/transformer.png",
+        "Images/transformer-p2.png",
+    ]

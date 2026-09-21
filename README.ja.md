@@ -182,6 +182,10 @@ Vault が育ってきたら、ノートをつないで知識グラフにしま�
 
 取り込みと処理はキューで切り離してあり、すべて手元で動くので固定の運用費がかかりません。
 
+Vault が Git リポジトリなら、`settings.toml` で `auto_commit = true` と `auto_push = true` を
+設定すると、ローカル生成のたびにノート＋イラストが自動でコミット・プッシュされます。
+ローカル生成もクラウド経路と同じく Vault リポジトリに集約され、他の端末は pull するだけになります。
+
 - **Inbox キュー：** Obsidian から `00 Inbox/` に URL や概念のメモ（スタブ）を置き、`uv run asb-inbox` でまとめてノートにします。
 - **チャット取り込み（Telegram）：** [Claude Code Channels](https://code.claude.com/docs/en/channels) 経由で bot にメッセージを送ると、手元の Claude Code が `asb` を実行して返信します。設定手順は [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md)。
 - **スマホから即時（任意）：** AWS Lambda のエンドポイントが、Mac が起動していなくてもクラウドで生成します。iOS ショートカットから起動できます。手順は [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md)。

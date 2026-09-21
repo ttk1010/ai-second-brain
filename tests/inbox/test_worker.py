@@ -140,3 +140,30 @@ def test_empty_stub_falls_back_to_filename(tmp_path: Path) -> None:
 def test_missing_inbox_is_noop(tmp_path: Path) -> None:
     summary = InboxWorker(_FakePipeline(), tmp_path / "nope").process_all()
     assert summary == summary.__class__()
+
+
+def test_on_consumed_called_for_created_and_exists(tmp_path: Path) -> None:
+    inbox = tmp_path / "00 Inbox"
+    _stub(inbox, "a.md", "Transformer")
+    _stub(inbox, "b.md", "LLM")
+    pipeline = _FakePipeline({"LLM": "exists"})
+    consumed: list[tuple[Path, str]] = []
+
+    InboxWorker(
+        pipeline,
+        inbox,
+        on_consumed=lambda stub, result: consumed.append((stub, result.status)),
+    ).process_all()
+
+    assert sorted((s.name, st) for s, st in consumed) == [("a.md", "created"), ("b.md", "exists")]
+
+
+def test_on_consumed_not_called_on_failure(tmp_path: Path) -> None:
+    inbox = tmp_path / "00 Inbox"
+    _stub(inbox, "a.md", "Transformer")
+    pipeline = _FakePipeline({"Transformer": "raise"})
+    consumed: list = []
+
+    InboxWorker(pipeline, inbox, on_consumed=lambda *a: consumed.append(a)).process_all()
+
+    assert consumed == []

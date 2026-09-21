@@ -11,12 +11,14 @@ idempotent (#24), so re-running is safe.
 
 import logging
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 from backend.parser.fetcher import FetchedArticle
 from backend.planner import PagesOption
 from backend.services import KnowledgePipeline
+from backend.services.pipeline import PipelineResult
 
 _URL_RE = re.compile(r"^https?://", re.IGNORECASE)
 
@@ -43,11 +45,15 @@ class InboxWorker:
         *,
         overwrite: bool = False,
         pages: PagesOption = None,
+        on_consumed: Callable[[Path, PipelineResult], None] | None = None,
     ) -> None:
         self._pipeline = pipeline
         self._inbox_dir = inbox_dir
         self._overwrite = overwrite
         self._pages = pages
+        # Called after a stub is consumed (deleted), with the stub path and the
+        # pipeline result — the auto_commit hook (Issue #44). Must not raise.
+        self._on_consumed = on_consumed
 
     def process_all(self) -> InboxSummary:
         """Process every ``*.md`` stub in the inbox directory once."""
@@ -81,6 +87,8 @@ class InboxWorker:
 
             if result.status in ("created", "exists"):
                 stub.unlink()  # consume the queue item
+                if self._on_consumed is not None:
+                    self._on_consumed(stub, result)
                 if result.status == "created":
                     created += 1
                 else:

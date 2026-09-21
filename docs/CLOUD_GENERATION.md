@@ -88,6 +88,9 @@ gh run watch
 - ローカル: Vault ディレクトリで `git pull`
 - モバイル: Obsidian の Vault 同期経由（同期設定に依存）
 
+ローカル生成側も `settings.toml` の `auto_commit = true` ＋ `auto_push = true` に
+しておくと、全経路が「main に入る → 各端末は pull」で統一されます（Issue #44）。
+
 ## 4. 挙動の補足
 
 - **冪等性**: 既存の概念/URL はスキップされ、その場合は何も push されません

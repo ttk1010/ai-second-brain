@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 from backend.config import DEFAULT_SETTINGS_PATH, SettingsError, load_settings
 from backend.services import build_pipeline
-from backend.storage.git import commit_note
+from backend.storage.git import commit_note, push_vault, sync_vault
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -32,6 +32,11 @@ def main(argv: list[str] | None = None) -> int:
     except SettingsError as exc:
         print(f"Configuration error: {exc}", file=sys.stderr)
         return 2
+
+    if settings.auto_push:
+        # See notes pushed by other routes (Lambda / Actions) before the
+        # idempotency check runs; best-effort, generation proceeds regardless.
+        sync_vault(settings.vault_path)
 
     pipeline = build_pipeline(settings, no_image=args.no_image)
 
@@ -71,11 +76,16 @@ def main(argv: list[str] | None = None) -> int:
 
     print(result.message)
     if settings.auto_commit and result.path is not None:
+        paths = [result.path] + [
+            settings.vault_path / ref for ref in result.knowledge_object.illustration_refs()
+        ]
         committed = commit_note(
-            settings.vault_path, result.path, f"Add note: {result.knowledge_object.title}"
+            settings.vault_path, paths, f"Add note: {result.knowledge_object.title}"
         )
         if committed:
             print("Committed to Vault Git repository.")
+            if settings.auto_push and push_vault(settings.vault_path):
+                print("Pushed to Vault remote.")
     return 0
 
 

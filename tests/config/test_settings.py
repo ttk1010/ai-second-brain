@@ -113,3 +113,36 @@ def test_example_settings_file_loads() -> None:
     settings = load_settings(EXAMPLE_SETTINGS_PATH, validate_vault=False)
     assert isinstance(settings, Settings)
     assert settings.image_model == "gpt-image-2"
+
+
+def test_auto_push_defaults_to_false(tmp_path: Path) -> None:
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    cfg = _write(tmp_path / "settings.toml", f'vault_path = "{vault}"\n')
+
+    assert load_settings(cfg).auto_push is False
+
+
+def test_auto_push_requires_auto_commit(tmp_path: Path) -> None:
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    cfg = _write(
+        tmp_path / "settings.toml",
+        f'vault_path = "{vault}"\nauto_commit = false\nauto_push = true\n',
+    )
+
+    # auto_push without auto_commit is ignored (warned), never an error.
+    assert load_settings(cfg).auto_push is False
+
+
+def test_auto_push_with_auto_commit_is_kept(tmp_path: Path) -> None:
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    cfg = _write(
+        tmp_path / "settings.toml",
+        f'vault_path = "{vault}"\nauto_commit = true\nauto_push = true\n',
+    )
+
+    settings = load_settings(cfg)
+    assert settings.auto_commit is True
+    assert settings.auto_push is True
