@@ -111,6 +111,6 @@ the design rationale in `docs/adr/`.
   uv sync --dev --no-editable
   ```
   恒久化はこのリポジトリでは 2 段構え：`.envrc`（direnv）と `.claude/settings.json` の両方で `UV_NO_EDITABLE=1` を設定済み。direnv 未導入の環境では `export UV_NO_EDITABLE=1` をシェルに設定する
-- **Notes:** non-editable でもコード変更は `uv run` が毎回自動 re-sync するため、開発体験はほぼ変わらない。フラグ側を外す対処（`chflags -R nohidden .venv`）はデーモンが即座に戻すため無効
+- **Notes:** non-editable ではソース変更が自動では再インストールされないため、`pyproject.toml` の `[tool.uv] cache-keys` に `backend/**/*.py` を含めてある（これで `uv run` が変更を検知して再ビルドする）。挙動が古いままに見えたら `uv sync --reinstall-package ai-second-brain`。フラグ側を外す対処（`chflags -R nohidden .venv`）はデーモンが即座に戻すため無効
 
 ### (add more CLI/environment entries here)
