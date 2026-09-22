@@ -1,0 +1,58 @@
+# Issue #45 option C: can gpt-image-2.5-flare keep ASB's hand-drawn,
+# textbook-inspired look? Read by scripts/measure_generation.py.
+#
+# flare "high" matches gpt-image-2 "medium" in output tokens and cost, so it is
+# the like-for-like quality. The reference is a gpt-image-2 illustration (the
+# README example), passed as a style-only guide.
+
+models = ["gpt-image-2.5-flare"]
+default_qualities = ["high"]
+
+[[cases]]
+name = "prompt-injection"
+input = "プロンプトインジェクション"
+
+[[cases]]
+name = "quantization"
+input = "compare: FP16, INT8, 4bit, 3値（Ternary）の量子化"
+
+[[styles]]
+name = "strong-text"
+style = """
+Create an educational illustration for a personal knowledge base.
+The illustration must teach, not decorate: simplify complexity, reveal
+relationships, explain processes, and emphasize the important concepts.
+
+Visual style (keep consistent across every illustration):
+- hand-drawn, textbook-inspired: visible pen or marker linework with slightly
+  uneven, organic strokes, like a teacher's carefully drawn notebook explainer
+- handwritten-style lettering for titles and labels
+- soft, light colored-pencil or watercolor-like fills on a clean white background
+- simple hand-drawn people and objects where they help explain
+- information-rich but visually calm
+- clear labels in English; no decorative noise
+Avoid flat vector graphics, uniform rounded-rectangle UI cards, gradients, and
+glossy corporate infographic or slide-deck aesthetics. Do not include
+photorealistic imagery, logos, or marketing aesthetics.
+"""
+
+[[styles]]
+name = "strong-text-ref"
+reference = "docs/examples/LLM.png"
+style = """
+Create an educational illustration for a personal knowledge base.
+The illustration must teach, not decorate: simplify complexity, reveal
+relationships, explain processes, and emphasize the important concepts.
+
+Visual style (keep consistent across every illustration):
+- hand-drawn, textbook-inspired: visible pen or marker linework with slightly
+  uneven, organic strokes, like a teacher's carefully drawn notebook explainer
+- handwritten-style lettering for titles and labels
+- soft, light colored-pencil or watercolor-like fills on a clean white background
+- simple hand-drawn people and objects where they help explain
+- information-rich but visually calm
+- clear labels in English; no decorative noise
+Avoid flat vector graphics, uniform rounded-rectangle UI cards, gradients, and
+glossy corporate infographic or slide-deck aesthetics. Do not include
+photorealistic imagery, logos, or marketing aesthetics.
+"""

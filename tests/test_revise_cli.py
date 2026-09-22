@@ -69,8 +69,8 @@ def _cfg(tmp_path: Path, vault: Path) -> Path:
 def _patch(monkeypatch, *, target: str = "summary") -> None:
     from backend.services import factory
 
-    monkeypatch.setattr(factory, "OpenAIProvider", lambda model: _MockLLM(target=target))
-    monkeypatch.setattr(factory, "OpenAIImageProvider", lambda model: _MockImageProvider())
+    monkeypatch.setattr(factory, "OpenAIProvider", lambda model, **_: _MockLLM(target=target))
+    monkeypatch.setattr(factory, "OpenAIImageProvider", lambda model, **_: _MockImageProvider())
 
 
 def test_revise_section(tmp_path: Path, vault: Path, monkeypatch, capsys) -> None:

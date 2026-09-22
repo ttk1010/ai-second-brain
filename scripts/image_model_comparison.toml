@@ -1,0 +1,36 @@
+# Measurement cases for Issue #45 (image model comparison) and Issue #35
+# (per-note cost). Read by scripts/measure_generation.py.
+#
+# Each case's text (extraction + Educational Plan) is generated once and the
+# same Knowledge Object is illustrated by every model, so only the image differs.
+
+models = ["gpt-image-2", "gpt-image-2.5-flare"]
+default_qualities = ["medium"]
+
+# Anchor: the README example; compare against the existing illustration.
+# Also measures cost across quality tiers for #35.
+[[cases]]
+name = "llm"
+input = "LLM"
+qualities = ["low", "medium", "high"]
+
+# Dense Japanese labels.
+[[cases]]
+name = "prompt-injection"
+input = "プロンプトインジェクション"
+
+# Multi-page series consistency (ADR 0012).
+[[cases]]
+name = "moe"
+input = "Mixture of Experts（MoE）"
+pages = 3
+
+# News pipeline (URL input).
+[[cases]]
+name = "news-spotify-claude-code"
+input = "https://ledge.ai/articles/spotify_claude_code_shunt_token_savings"
+
+# Comparison table.
+[[cases]]
+name = "quantization"
+input = "compare: FP16, INT8, 4bit, 3値（Ternary）の量子化"

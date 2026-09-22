@@ -8,11 +8,13 @@ no implementation is tied to a single vendor in the core layer).
 
 import base64
 import logging
+import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from backend.image.base import ImageError, ImageProvider
 from backend.models.enums import AspectRatio, ImageQuality
+from backend.models.usage import UsageRecord, UsageRecorder
 
 if TYPE_CHECKING:
     from openai import OpenAI
@@ -40,10 +42,12 @@ class OpenAIImageProvider(ImageProvider):
         *,
         api_key: str | None = None,
         client: "OpenAI | None" = None,
+        usage_recorder: UsageRecorder | None = None,
     ) -> None:
         self._model = model
         self._client = client
         self._api_key = api_key
+        self._usage_recorder = usage_recorder
 
     def _get_client(self) -> "OpenAI":
         if self._client is None:
@@ -68,10 +72,14 @@ class OpenAIImageProvider(ImageProvider):
         client = self._get_client()
         size = _SIZE_FOR_RATIO[aspect_ratio]
 
+        started = time.perf_counter()
         if reference_images:
+            operation = "edit"
             response = self._edit(client, prompt, size, quality, reference_images)
         else:
+            operation = "generate"
             response = self._generate(client, prompt, size, quality)
+        self._report_usage(response, operation, time.perf_counter() - started)
 
         image_bytes = _decode_first_image(response)
 
@@ -120,6 +128,38 @@ class OpenAIImageProvider(ImageProvider):
         finally:
             for handle in opened:
                 handle.close()
+
+    def _report_usage(self, response: object, operation: str, elapsed: float) -> None:
+        """Log the call's token usage and hand it to the recorder (Issue #35).
+
+        Usage is informational: a response without it is logged and skipped,
+        never treated as a failure.
+        """
+        usage = getattr(response, "usage", None)
+        if usage is None:
+            logger.debug("OpenAI image %s returned no usage data.", operation)
+            return
+        details = getattr(usage, "input_tokens_details", None)
+        record = UsageRecord(
+            kind="image",
+            model=self._model,
+            operation=operation,
+            input_tokens=getattr(usage, "input_tokens", 0) or 0,
+            output_tokens=getattr(usage, "output_tokens", 0) or 0,
+            input_image_tokens=getattr(details, "image_tokens", 0) or 0,
+            elapsed_seconds=elapsed,
+        )
+        logger.info(
+            "Image usage: %s %s in=%d (image %d) out=%d (%.1fs)",
+            record.model,
+            operation,
+            record.input_tokens,
+            record.input_image_tokens,
+            record.output_tokens,
+            elapsed,
+        )
+        if self._usage_recorder is not None:
+            self._usage_recorder(record)
 
 
 def _decode_first_image(response: object) -> bytes:

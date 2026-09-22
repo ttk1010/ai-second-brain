@@ -70,3 +70,44 @@ def test_complete_wraps_client_errors() -> None:
     provider = OpenAIProvider(client=_FakeClient(completions))
     with pytest.raises(LLMError, match="failed"):
         provider.complete("sys", "user")
+
+
+def test_complete_reports_usage_to_recorder() -> None:
+    """Issue #35: each completion's token usage reaches the injected recorder."""
+    completions = _FakeCompletions("hello")
+    details = type("Details", (), {"cached_tokens": 40})()
+    usage = type(
+        "Usage",
+        (),
+        {"prompt_tokens": 120, "completion_tokens": 30, "prompt_tokens_details": details},
+    )()
+    original_create = completions.create
+
+    def create_with_usage(**kwargs: object) -> _FakeResponse:
+        response = original_create(**kwargs)
+        response.usage = usage
+        return response
+
+    completions.create = create_with_usage  # type: ignore[method-assign]
+    records = []
+    provider = OpenAIProvider(
+        model="gpt-5.4", client=_FakeClient(completions), usage_recorder=records.append
+    )
+
+    provider.complete("sys", "user")
+
+    assert len(records) == 1
+    record = records[0]
+    assert (record.kind, record.model, record.operation) == ("text", "gpt-5.4", "complete")
+    assert (record.input_tokens, record.output_tokens) == (120, 30)
+    assert record.cached_input_tokens == 40
+
+
+def test_complete_without_usage_data_still_succeeds() -> None:
+    """Usage is informational: a response without it is not an error."""
+    records = []
+    provider = OpenAIProvider(
+        client=_FakeClient(_FakeCompletions("ok")), usage_recorder=records.append
+    )
+    assert provider.complete("sys", "user") == "ok"
+    assert records == []

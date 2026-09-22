@@ -9,6 +9,7 @@ from backend.config import Settings
 from backend.image import OpenAIImageProvider
 from backend.llm import OpenAIProvider
 from backend.markdown import MarkdownGenerator
+from backend.models.usage import UsageRecorder
 from backend.parser import (
     ComparisonExtractor,
     ConceptExtractor,
@@ -24,20 +25,27 @@ from backend.services.reviser import NoteReviser
 from backend.storage import IllustrationWriter, VaultWriter
 
 
-def build_pipeline(settings: Settings, *, no_image: bool = False) -> KnowledgePipeline:
+def build_pipeline(
+    settings: Settings,
+    *,
+    no_image: bool = False,
+    usage_recorder: UsageRecorder | None = None,
+) -> KnowledgePipeline:
     """Build a KnowledgePipeline from settings.
 
     Args:
         settings: Loaded application settings.
         no_image: When True, illustrations are not generated (cost saving).
+        usage_recorder: Optional callback receiving each API call's token usage
+            (Issue #35); used by the measurement script.
     """
-    provider = OpenAIProvider(model=settings.llm_model)
+    provider = OpenAIProvider(model=settings.llm_model, usage_recorder=usage_recorder)
 
     illustration_writer = None
     if not no_image:
         illustration_writer = IllustrationWriter(
             settings.vault_path,
-            OpenAIImageProvider(model=settings.image_model),
+            OpenAIImageProvider(model=settings.image_model, usage_recorder=usage_recorder),
             image_output_dir=settings.image_output_dir,
             quality=settings.image_quality,
             default_aspect_ratio=settings.default_aspect_ratio,

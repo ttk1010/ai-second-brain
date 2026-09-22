@@ -177,3 +177,55 @@ def test_edit_wraps_api_errors(tmp_path: Path) -> None:
             output_path=tmp_path / "out.png",
             reference_images=[ref],
         )
+
+
+def _with_usage(client: _FakeClient, *, input_tokens: int, image_tokens: int, output: int) -> None:
+    details = type("Details", (), {"image_tokens": image_tokens})()
+    client.images._response.usage = type(  # type: ignore[attr-defined]
+        "Usage",
+        (),
+        {"input_tokens": input_tokens, "output_tokens": output, "input_tokens_details": details},
+    )()
+
+
+def test_generate_reports_usage_to_recorder(tmp_path: Path) -> None:
+    """Issues #35/#45: each image call's token usage reaches the injected recorder."""
+    client = _client()
+    _with_usage(client, input_tokens=50, image_tokens=0, output=4000)
+    records = []
+    provider = OpenAIImageProvider(
+        model="gpt-image-2.5-flare", client=client, usage_recorder=records.append
+    )
+
+    provider.generate(
+        "x", aspect_ratio=AspectRatio.WIDE, quality=ImageQuality.LOW, output_path=tmp_path / "a.png"
+    )
+
+    assert len(records) == 1
+    record = records[0]
+    assert (record.kind, record.model, record.operation) == (
+        "image",
+        "gpt-image-2.5-flare",
+        "generate",
+    )
+    assert (record.input_tokens, record.output_tokens) == (50, 4000)
+
+
+def test_edit_reports_reference_image_tokens(tmp_path: Path) -> None:
+    ref = tmp_path / "ref.png"
+    ref.write_bytes(PNG_BYTES)
+    client = _client()
+    _with_usage(client, input_tokens=900, image_tokens=800, output=4000)
+    records = []
+    provider = OpenAIImageProvider(client=client, usage_recorder=records.append)
+
+    provider.generate(
+        "x",
+        aspect_ratio=AspectRatio.WIDE,
+        quality=ImageQuality.MEDIUM,
+        output_path=tmp_path / "b.png",
+        reference_images=[ref],
+    )
+
+    assert records[0].operation == "edit"
+    assert records[0].input_image_tokens == 800
