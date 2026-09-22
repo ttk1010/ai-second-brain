@@ -87,7 +87,7 @@ See a real generated note (text + illustration) in
 
 Measured on 2026-09-22 with the defaults (`gpt-5.4` + `gpt-image-2` at
 `medium`, one 1536×1024 illustration). OpenAI prices change; see the
-[pricing page](https://openai.com/api/pricing/).
+[pricing page](https://developers.openai.com/api/docs/pricing).
 
 | Note | Approx. cost (USD) |
 |---|---:|
@@ -232,6 +232,10 @@ When the vault is a Git repository, set `auto_commit = true` and
 (note + illustrations) and pushed automatically — so local runs end up in the
 same place as the cloud routes below, and other devices just pull.
 
+Which route to use when (Mac required or not, conversational or one-shot, how
+you get the result) is compared in
+[docs/GENERATION_ROUTES.md](docs/GENERATION_ROUTES.md) (Japanese).
+
 - **Inbox queue:** drop a stub note (a URL or concept) into `00 Inbox/` from
   Obsidian; run `uv run asb-inbox` to turn the queue into notes.
 - **Chat capture (Telegram):** message a bot via
@@ -298,6 +302,7 @@ Design docs are in Japanese; the README is bilingual.
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture |
 | [docs/ARCHITECTURE_DIAGRAMS.md](docs/ARCHITECTURE_DIAGRAMS.md) | Before/after architecture diagrams |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | The Knowledge Object schema |
+| [docs/GENERATION_ROUTES.md](docs/GENERATION_ROUTES.md) | Choosing a generation route (CLI, Telegram, iOS Shortcut, cloud session) |
 | [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md) | Deploy the serverless instant-generation endpoint |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Development roadmap |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | Capturing login-required articles |

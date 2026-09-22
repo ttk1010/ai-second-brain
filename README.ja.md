@@ -81,7 +81,7 @@ tags: [Transformer, Generative AI, Foundation Model, RAG, Attention, ...]
 ### 1ノートあたりの費用の目安
 
 2026-09-22 に既定設定（`gpt-5.4` ＋ `gpt-image-2` の `medium`、1536×1024 のイラスト1枚）で
-実測した値です。OpenAI の料金は変わるので、最新は[料金ページ](https://openai.com/api/pricing/)を
+実測した値です。OpenAI の料金は変わるので、最新は[料金ページ](https://developers.openai.com/api/docs/pricing)を
 確認してください。
 
 | ノート | 費用の目安（USD） |
@@ -203,6 +203,9 @@ Vault が Git リポジトリなら、`settings.toml` で `auto_commit = true` �
 設定すると、ローカル生成のたびにノート＋イラストが自動でコミット・プッシュされます。
 ローカル生成もクラウド経路と同じく Vault リポジトリに集約され、他の端末は pull するだけになります。
 
+経路ごとの特徴と使い分け（Mac が必要か、会話できるか、結果をどう受け取るか）は
+[docs/GENERATION_ROUTES.md](docs/GENERATION_ROUTES.md) にまとめています。
+
 - **Inbox キュー：** Obsidian から `00 Inbox/` に URL や概念のメモ（スタブ）を置き、`uv run asb-inbox` でまとめてノートにします。
 - **チャット取り込み（Telegram）：** [Claude Code Channels](https://code.claude.com/docs/en/channels) 経由で bot にメッセージを送ると、手元の Claude Code が `asb` を実行して返信します。設定手順は [docs/TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md)。
 - **スマホから即時（任意）：** AWS Lambda のエンドポイントが、Mac が起動していなくてもクラウドで生成します。iOS ショートカットから起動できます。手順は [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md)。
@@ -254,6 +257,7 @@ uv run asb-digest --month 2026-08 --top 5
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | システムアーキテクチャ |
 | [docs/ARCHITECTURE_DIAGRAMS.md](docs/ARCHITECTURE_DIAGRAMS.md) | before/after の構成図 |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | Knowledge Object のスキーマ |
+| [docs/GENERATION_ROUTES.md](docs/GENERATION_ROUTES.md) | 生成経路（CLI・Telegram・iOS ショートカット・クラウドセッション）の使い分け |
 | [docs/DEPLOY_SERVERLESS.md](docs/DEPLOY_SERVERLESS.md) | サーバーレス即時生成のデプロイ手順 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 開発ロードマップ |
 | [docs/CAPTURED_CONTENT.md](docs/CAPTURED_CONTENT.md) | ログイン必須記事の取り込み |
