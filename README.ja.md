@@ -78,6 +78,23 @@ tags: [Transformer, Generative AI, Foundation Model, RAG, Attention, ...]
   リンク用スキル `asb-relink` と Telegram 取り込み（Claude Code Channels）にだけ必要で、
   中心となる `asb` コマンドには不要です。
 
+### 1ノートあたりの費用の目安
+
+2026-09-22 に既定設定（`gpt-5.4` ＋ `gpt-image-2` の `medium`、1536×1024 のイラスト1枚）で
+実測した値です。OpenAI の料金は変わるので、最新は[料金ページ](https://openai.com/api/pricing/)を
+確認してください。
+
+| ノート | 費用の目安（USD） |
+|---|---:|
+| 概念（`asb "LLM"`） | 約 $0.07 |
+| ニュース（URL）／比較（`--compare`） | 約 $0.08 |
+| イラストなし（`--no-image`） | 約 $0.02〜0.04 |
+| 3ページのイラスト（`--pages 3`） | 約 $0.18 |
+
+費用の約3分の2はイラストで、`image_quality` で変わります（1枚あたり `low` 約 $0.007、
+`medium` 約 $0.044、`high` 約 $0.17）。1ドル＝150円なら1ノート約10〜12円です。同じ入力の
+再実行には費用がかかりません。計測は `scripts/measure_generation.py` で再現できます。
+
 ## クイックスタート
 
 [uv](https://docs.astral.sh/uv/) と Python 3.12 が必要です（上の「動作要件」参照）。

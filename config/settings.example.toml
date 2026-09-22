@@ -16,6 +16,11 @@ image_model = "gpt-image-2"
 # Image quality tier: low | medium | high (higher = more detail and higher cost)
 image_quality = "medium"
 
+# Wording of the illustration style: standard | explicit-hand-drawn
+# (explicit-hand-drawn spells out the hand-drawn look for image models that
+# otherwise drift to flat vector art, e.g. gpt-image-2.5-flare)
+illustration_style = "standard"
+
 # Language
 default_language = "ja"
 

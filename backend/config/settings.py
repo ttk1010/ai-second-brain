@@ -13,7 +13,7 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from backend.models.enums import AspectRatio, ImageQuality
+from backend.models.enums import AspectRatio, IllustrationStyle, ImageQuality
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-5.4"
     image_model: str = "gpt-image-2"
     image_quality: ImageQuality = ImageQuality.MEDIUM
+    illustration_style: IllustrationStyle = IllustrationStyle.STANDARD
     default_language: str = "ja"
     auto_commit: bool = Field(default=False)
     auto_push: bool = Field(default=False)

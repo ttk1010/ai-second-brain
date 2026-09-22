@@ -16,7 +16,7 @@ from pathlib import Path
 from backend.image.base import ImageProvider
 from backend.models import KnowledgeObject
 from backend.models.educational_plan import PageSpec
-from backend.models.enums import AspectRatio, ImageQuality
+from backend.models.enums import AspectRatio, IllustrationStyle, ImageQuality
 from backend.prompts.illustration import (
     build_illustration_page_prompt,
     build_illustration_prompt,
@@ -37,12 +37,14 @@ class IllustrationWriter:
         image_output_dir: str = "Images",
         quality: ImageQuality = ImageQuality.MEDIUM,
         default_aspect_ratio: AspectRatio = AspectRatio.WIDE,
+        style: IllustrationStyle = IllustrationStyle.STANDARD,
     ) -> None:
         self._vault_path = vault_path
         self._provider = image_provider
         self._image_output_dir = image_output_dir
         self._quality = quality
         self._default_aspect_ratio = default_aspect_ratio
+        self._style = style
 
     def write(
         self,
@@ -91,7 +93,7 @@ class IllustrationWriter:
         _cleanup_extra_pages(folder, stem, keep=1, overwrite=overwrite)
         target = resolve_target(folder, stem, overwrite=overwrite, suffix=".png")
         self._provider.generate(
-            build_illustration_prompt(ko, guidance=guidance),
+            build_illustration_prompt(ko, guidance=guidance, style=self._style),
             aspect_ratio=self._aspect_ratio(ko),
             quality=self._quality,
             output_path=target,
@@ -127,6 +129,7 @@ class IllustrationWriter:
                 total=len(pages),
                 guidance=guidance,
                 has_reference=anchor is not None,
+                style=self._style,
             )
             self._provider.generate(
                 prompt,

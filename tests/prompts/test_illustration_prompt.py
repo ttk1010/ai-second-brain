@@ -3,12 +3,19 @@
 from backend.models import (
     AspectRatio,
     EducationalPlan,
+    IllustrationStyle,
     KnowledgeObject,
+    PageSpec,
     Source,
     SourceType,
     VisualizationStrategy,
 )
-from backend.prompts.illustration import ILLUSTRATION_STYLE, build_illustration_prompt
+from backend.prompts.illustration import (
+    ILLUSTRATION_STYLE,
+    ILLUSTRATION_STYLE_EXPLICIT,
+    build_illustration_page_prompt,
+    build_illustration_prompt,
+)
 
 
 def _ko(*, plan: EducationalPlan | None) -> KnowledgeObject:
@@ -65,3 +72,27 @@ def test_prompt_falls_back_to_summary_without_plan() -> None:
     assert "- attention" in prompt
     # No aspect ratio line without a plan.
     assert "Aspect ratio:" not in prompt
+
+
+def test_standard_style_is_the_default() -> None:
+    """Local generation keeps the original wording unless a style is chosen."""
+    prompt = build_illustration_prompt(_ko(plan=_plan()))
+    assert ILLUSTRATION_STYLE in prompt
+    assert ILLUSTRATION_STYLE_EXPLICIT not in prompt
+
+
+def test_explicit_style_spells_out_the_hand_drawn_look() -> None:
+    """Issue #45: the explicit wording steers models away from flat vector art."""
+    prompt = build_illustration_prompt(
+        _ko(plan=_plan()), style=IllustrationStyle.EXPLICIT_HAND_DRAWN
+    )
+    assert ILLUSTRATION_STYLE_EXPLICIT in prompt
+    assert "Avoid flat vector graphics" in prompt
+
+
+def test_explicit_style_applies_to_series_pages() -> None:
+    page = PageSpec(title="p", learning_objective="obj", aspect_ratio=AspectRatio.WIDE)
+    prompt = build_illustration_page_prompt(
+        _ko(plan=_plan()), page, index=2, total=3, style=IllustrationStyle.EXPLICIT_HAND_DRAWN
+    )
+    assert ILLUSTRATION_STYLE_EXPLICIT in prompt

@@ -8,6 +8,7 @@ from backend.image.base import ImageError, ImageProvider
 from backend.models import (
     AspectRatio,
     EducationalPlan,
+    IllustrationStyle,
     ImageQuality,
     KnowledgeObject,
     PageSpec,
@@ -185,3 +186,11 @@ def test_write_overwrite_single_cleans_previous_pages(tmp_path: Path) -> None:
     assert (folder / "Transformer.png").exists()
     assert not (folder / "Transformer-p2.png").exists()
     assert not (folder / "Transformer-p3.png").exists()
+
+
+def test_write_uses_the_configured_illustration_style(tmp_path: Path) -> None:
+    """Issue #45: the cloud path selects the explicit hand-drawn wording."""
+    provider = _FakeImageProvider()
+    writer = IllustrationWriter(tmp_path, provider, style=IllustrationStyle.EXPLICIT_HAND_DRAWN)
+    writer.write(_ko())
+    assert "Avoid flat vector graphics" in provider.calls[0]["prompt"]

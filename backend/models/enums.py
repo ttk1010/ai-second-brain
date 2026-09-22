@@ -46,6 +46,18 @@ class AspectRatio(StrEnum):
     TALL = "9:16"  # Step-by-step Guide
 
 
+class IllustrationStyle(StrEnum):
+    """Which wording of the illustration visual language to use (Issue #45).
+
+    Both describe the same hand-drawn, textbook-inspired look. ``EXPLICIT_HAND_DRAWN``
+    spells it out for image models that otherwise drift to flat vector graphics
+    (gpt-image-2.5-flare on the cloud path, ADR 0016).
+    """
+
+    STANDARD = "standard"
+    EXPLICIT_HAND_DRAWN = "explicit-hand-drawn"
+
+
 class ImageQuality(StrEnum):
     """Illustration quality tier. Cost differs widely across tiers (see ADR 0002)."""
 
