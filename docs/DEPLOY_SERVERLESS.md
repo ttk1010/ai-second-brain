@@ -140,7 +140,17 @@ sam deploy --guided
 | **…Function URL … no auth … Is this okay?** | **`y`**（意図通り。アプリ内で Bearer 認証） |
 | Save arguments to configuration file | `Y` |
 
-出力（Outputs）の **`FunctionUrl`** を控える。2 回目以降は保存済み設定で `sam deploy` だけで再デプロイできる。
+出力（Outputs）の **`FunctionUrl`** を控える。
+
+**コードを更新したときの再デプロイ**（`git pull` のあと）：
+
+```bash
+export DOCKER_HOST=unix://$HOME/.docker/run/docker.sock
+sam build -t infra/template.yaml
+sam deploy
+```
+
+`sam build` には毎回 `-t infra/template.yaml` が必要（省くと `Template file not found at .../template.yml`）。`sam deploy` はビルド結果と `samconfig.toml` を自動で使うので引数不要。Function URL は変わらないので、ショートカットの修正は要らない。
 
 > ⚠️ **つまずき⑦：`sam build` が「container runtime が無い」**
 > Docker は動いているのに SAM が見つけない場合、macOS + Docker Desktop で既定ソケット `/var/run/docker.sock` が無いのが原因。次のどちらかで解決：
