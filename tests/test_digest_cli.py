@@ -34,7 +34,7 @@ class _FakeRanking(RankingFetcher):
 def _patch(monkeypatch) -> None:
     from backend.services import factory
 
-    monkeypatch.setattr(factory, "OpenAIProvider", lambda model: _MockProvider())
+    monkeypatch.setattr(factory, "OpenAIProvider", lambda model, **_: _MockProvider())
     monkeypatch.setattr(factory, "LedgeAiRankingFetcher", lambda: _FakeRanking())
 
 
