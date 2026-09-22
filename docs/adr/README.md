@@ -39,3 +39,4 @@
 | [0013](0013-overwrite-in-place.md) | `--overwrite` replaces the existing note in place (keep filename, no duplicates/orphans) | Accepted |
 | [0014](0014-note-revision.md) | Natural-language note revision (`asb-revise`): read-back, section-safe rewrite, illustration edit | Accepted |
 | [0015](0015-serverless-instant-generation.md) | Serverless (AWS Lambda) endpoint for instant on-the-go generation (OpenAI direct, Git-synced Vault) | Accepted |
+| [0016](0016-cloud-image-model.md) | Cloud path uses gpt-image-2.5-flare (high, explicit hand-drawn wording); local keeps gpt-image-2 | Accepted |

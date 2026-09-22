@@ -5,8 +5,14 @@ import json
 from pathlib import Path
 
 from backend.cloud.github_publisher import PublishError
-from backend.cloud.handler import Handler
-from backend.models import KnowledgeObject, Source, SourceType
+from backend.cloud.handler import Handler, cloud_settings
+from backend.models import (
+    IllustrationStyle,
+    ImageQuality,
+    KnowledgeObject,
+    Source,
+    SourceType,
+)
 from backend.services.pipeline import PipelineResult
 
 SECRET = "s3cret"
@@ -143,3 +149,12 @@ def test_publish_failure_still_returns_image() -> None:
     assert resp["statusCode"] == 200
     assert resp["headers"]["Content-Type"] == "image/png"
     assert resp["headers"]["X-ASB-Warning"] == "publish-failed"
+
+
+def test_cloud_settings_use_the_fast_image_model(tmp_path: Path) -> None:
+    """Issue #45 / ADR 0016: flare high keeps gpt-image-2 medium's detail at ~2x speed,
+    with the explicit wording so it stays hand-drawn."""
+    settings = cloud_settings(tmp_path)
+    assert settings.image_model == "gpt-image-2.5-flare"
+    assert settings.image_quality is ImageQuality.HIGH
+    assert settings.illustration_style is IllustrationStyle.EXPLICIT_HAND_DRAWN

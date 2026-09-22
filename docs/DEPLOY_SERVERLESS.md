@@ -2,7 +2,7 @@
 
 外出先の iPhone から、家の Mac 抜きでイラストを即時生成する構成（[ADR 0015](adr/0015-serverless-instant-generation.md)、構成図は [ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md) の図2）を、**ゼロから完走する**ための手順。実際に構築したときにハマった箇所を「⚠️ つまずき」として各所に記載する。
 
-**全体像**：iPhone（iOS ショートカット）→ Lambda Function URL → 既存 `backend/` パイプラインを実行 → 画像を即返信＋ノート/画像を GitHub（`asb-vault`）にコミット → Mac が `git pull` で取り込み、iCloud で iPhone のファイルアプリからも閲覧。生成は OpenAI 直叩き（`gpt-image-2`）のまま。
+**全体像**：iPhone（iOS ショートカット）→ Lambda Function URL → 既存 `backend/` パイプラインを実行 → 画像を即返信＋ノート/画像を GitHub（`asb-vault`）にコミット → Mac が `git pull` で取り込み、iCloud で iPhone のファイルアプリからも閲覧。生成は OpenAI 直叩き。クラウド経路の画像は速度を優先して `gpt-image-2.5-flare`（`high`）を使う（ローカルは `gpt-image-2`、[ADR 0016](adr/0016-cloud-image-model.md)）。
 
 > **前提**：AWS の操作・シークレット登録・デプロイは各自の手元で行う。macOS（Apple Silicon / arm64）を想定。所要 1〜2 時間。
 
@@ -192,7 +192,7 @@ open out.png
 > 「URL の内容を取得」の一番上が「（テキスト変数）の内容を取得」になっていると、変数を URL として POST してしまい失敗する。青い変数を消し、**Function URL を直接入力**する（「URL の内容を取得」と表示されれば正）。
 >
 > ⚠️ **つまずき⑩：ショートカットが約 60 秒でタイムアウト**
-> iOS の「URL の内容を取得」は約 60 秒で打ち切られる（設定変更不可）。生成が長いと画像が表示されない（サーバー側は成功していて `asb-vault` には保存されている）。**本リポジトリではクラウド経路を高速化済み**（画像品質 `low`＝16:9 維持・教育プランをスキップ、[Issue #42](https://github.com/ttk1010/ai-second-brain/issues/80)）。高画質が欲しい生成は手元の CLI（`asb`）で。
+> iOS の「URL の内容を取得」は約 60 秒で打ち切られる（設定変更不可）。生成が長いと画像が表示されない（サーバー側は成功していて `asb-vault` には保存されている）。**本リポジトリではクラウド経路を高速化済み**：教育プランをスキップし（[Issue #42](https://github.com/ttk1010/ai-second-brain/issues/80)）、画像は `gpt-image-2` より約2倍速い `gpt-image-2.5-flare` の `high` で生成する（1枚約25秒、[Issue #45](https://github.com/ttk1010/ai-second-brain/issues/89)）。手元の CLI（`asb`）は引き続き `gpt-image-2`。
 
 ---
 

@@ -1,6 +1,6 @@
 """Educational illustration prompt.
 
-- Version: 1
+- Version: 2 (adds the explicit hand-drawn wording, Issue #45)
 - Purpose: Turn a Knowledge Object (and its Educational Plan) into a prompt for
   generating a consistent, educational illustration.
 - Expected input: a Knowledge Object whose ``educational_plan`` is preferred but
@@ -13,7 +13,7 @@ follow the same visual language so the same concept looks consistent over time
 (Illustration Principles).
 """
 
-from backend.models import KnowledgeObject, PageSpec
+from backend.models import IllustrationStyle, KnowledgeObject, PageSpec
 
 # System layer: the long-term visual language. This rarely changes so that the
 # same concept is always drawn in the same style (PROMPT_STYLE_GUIDE.md).
@@ -29,8 +29,39 @@ Visual style (keep consistent across every illustration):
 - clear labels in English; no decorative noise
 Do not include photorealistic imagery, logos, or marketing aesthetics."""
 
+# The same visual language, spelled out concretely. Some image models
+# (gpt-image-2.5-flare) ignore a bare "hand-drawn" and draw flat vector
+# infographics; this wording keeps them in the house style (Issue #45, ADR 0016).
+ILLUSTRATION_STYLE_EXPLICIT = """\
+Create an educational illustration for a personal knowledge base.
+The illustration must teach, not decorate: simplify complexity, reveal
+relationships, explain processes, and emphasize the important concepts.
 
-def build_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str:
+Visual style (keep consistent across every illustration):
+- hand-drawn, textbook-inspired: visible pen or marker linework with slightly
+  uneven, organic strokes, like a teacher's carefully drawn notebook explainer
+- handwritten-style lettering for titles and labels
+- soft, light colored-pencil or watercolor-like fills on a clean white background
+- simple hand-drawn people and objects where they help explain
+- information-rich but visually calm
+- clear labels in English; no decorative noise
+Avoid flat vector graphics, uniform rounded-rectangle UI cards, gradients, and
+glossy corporate infographic or slide-deck aesthetics. Do not include
+photorealistic imagery, logos, or marketing aesthetics."""
+
+
+def _style_block(style: IllustrationStyle) -> str:
+    if style is IllustrationStyle.EXPLICIT_HAND_DRAWN:
+        return ILLUSTRATION_STYLE_EXPLICIT
+    return ILLUSTRATION_STYLE
+
+
+def build_illustration_prompt(
+    ko: KnowledgeObject,
+    *,
+    guidance: str = "",
+    style: IllustrationStyle = IllustrationStyle.STANDARD,
+) -> str:
     """Build the illustration prompt for a Knowledge Object.
 
     Uses the Educational Plan when present (its learning objective, key messages
@@ -40,11 +71,12 @@ def build_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str
 
     ``guidance`` is the user's optional generation-time instruction (Issue #32);
     it steers the illustration so it stays consistent with the note body.
+    ``style`` selects the wording of the visual language (Issue #45).
     """
     if ko.digest is not None and ko.digest.items:
-        return _digest_illustration_prompt(ko, guidance=guidance)
+        return _digest_illustration_prompt(ko, guidance=guidance, style=style)
 
-    lines = [ILLUSTRATION_STYLE, "", f"Subject: {ko.title}"]
+    lines = [_style_block(style), "", f"Subject: {ko.title}"]
 
     plan = ko.educational_plan
     if plan is not None:
@@ -76,6 +108,7 @@ def build_illustration_page_prompt(
     total: int,
     guidance: str = "",
     has_reference: bool = False,
+    style: IllustrationStyle = IllustrationStyle.STANDARD,
 ) -> str:
     """Build the prompt for one page of a multi-page illustration series (Issue #41).
 
@@ -86,7 +119,7 @@ def build_illustration_page_prompt(
     image model as a reference image, so the prompt tells it to match that style.
     """
     lines = [
-        ILLUSTRATION_STYLE,
+        _style_block(style),
         "",
         f"This is page {index} of {total} in ONE consistent illustration series about: {ko.title}.",
         f"This page teaches: {page.learning_objective}",
@@ -117,10 +150,12 @@ def build_illustration_page_prompt(
 _DIGEST_LABEL_MAX = 16
 
 
-def _digest_illustration_prompt(ko: KnowledgeObject, *, guidance: str = "") -> str:
+def _digest_illustration_prompt(
+    ko: KnowledgeObject, *, guidance: str, style: IllustrationStyle
+) -> str:
     digest = ko.digest
     lines = [
-        ILLUSTRATION_STYLE,
+        _style_block(style),
         "",
         f"Subject: a single-image monthly overview of the top AI news — {ko.title}.",
         "Compose one information-rich overview image that reads at a glance:",

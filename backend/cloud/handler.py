@@ -29,7 +29,7 @@ from pathlib import Path
 from backend.cloud.github_publisher import GitHubPublisher, PublishError
 from backend.config import Settings
 from backend.models import KnowledgeObject
-from backend.models.enums import ImageQuality
+from backend.models.enums import IllustrationStyle, ImageQuality
 from backend.planner import PagesOption
 from backend.services import KnowledgePipeline, build_pipeline
 
@@ -181,13 +181,29 @@ def _json(status: int, obj: dict) -> dict:
     }
 
 
+# The cloud path must answer within the mobile client's ~60s timeout (Issue #42).
+# gpt-image-2.5-flare at "high" matches gpt-image-2 "medium" in cost and detail
+# but renders in ~25s instead of ~50s, so the cloud path uses it while local
+# generation keeps gpt-image-2 (Issue #45, ADR 0016). flare needs the explicit
+# hand-drawn wording to stay in the house style.
+CLOUD_IMAGE_MODEL = "gpt-image-2.5-flare"
+CLOUD_IMAGE_QUALITY = ImageQuality.HIGH
+CLOUD_ILLUSTRATION_STYLE = IllustrationStyle.EXPLICIT_HAND_DRAWN
+
+
+def cloud_settings(vault: Path) -> Settings:
+    """Settings for the latency-sensitive cloud path."""
+    return Settings(
+        vault_path=vault,
+        image_model=CLOUD_IMAGE_MODEL,
+        image_quality=CLOUD_IMAGE_QUALITY,
+        illustration_style=CLOUD_ILLUSTRATION_STYLE,
+    )
+
+
 def _default_pipeline_factory(vault: Path) -> KnowledgePipeline:
     vault.mkdir(parents=True, exist_ok=True)
-    # LOW image quality keeps the 16:9 composition but generates faster/cheaper,
-    # so the synchronous response fits under the mobile client's ~60s timeout
-    # (Issue #42). Higher quality stays available via the local CLI.
-    settings = Settings(vault_path=vault, image_quality=ImageQuality.LOW)
-    return build_pipeline(settings, no_image=False)
+    return build_pipeline(cloud_settings(vault), no_image=False)
 
 
 def lambda_handler(event: dict, context: object = None) -> dict:

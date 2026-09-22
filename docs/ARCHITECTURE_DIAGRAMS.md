@@ -53,7 +53,7 @@ flowchart LR
     SM["Secrets Manager<br/>OPENAI_API_KEY / GitHub PAT"]
     CW["CloudWatch Logs"]
   end
-  OAI["OpenAI API<br/>gpt-5.4 / gpt-image-2<br/>直叩き・変更なし"]
+  OAI["OpenAI API（直叩き）<br/>gpt-5.4 / gpt-image-2.5-flare"]
   GIT[("GitHub リポジトリ<br/>Vault · private")]
   SC -->|"① 概念 / URL"| FURL
   FURL --> PIPE
@@ -75,10 +75,10 @@ flowchart LR
 
 | | 内容 |
 | --- | --- |
-| **変わる点** | 入口が iPhone → Lambda Function URL に（Mac 起動に非依存で即時生成）／実行は Lambda（未使用時ゼロスケール、個人利用は無料枠内）／保存は GitHub API コミット |
-| **変わらない点** | 生成は OpenAI 直叩き（`gpt-image-2`）／`backend/` パイプラインと Knowledge Object 設計は無改修／プロバイダ抽象は維持（将来 `BedrockImageProvider` も差し替え可能）／ローカル経路も併存 |
+| **変わる点** | 入口が iPhone → Lambda Function URL に（Mac 起動に非依存で即時生成）／実行は Lambda（未使用時ゼロスケール、個人利用は無料枠内）／保存は GitHub API コミット／クラウド経路の画像は速度優先で `gpt-image-2.5-flare`（ADR 0016） |
+| **変わらない点** | 生成は OpenAI 直叩き（ローカル経路は `gpt-image-2`）／`backend/` パイプラインと Knowledge Object 設計は無改修／プロバイダ抽象は維持（将来 `BedrockImageProvider` も差し替え可能）／ローカル経路も併存 |
 
 ## 補足
 
 - **Bedrock は今回見送り**：Bedrock の画像モデルは Nova / Stability 系のみで `gpt-image-2` が無く、検証済みの絵柄・複数参照 edit・画像内日本語を失うため。プロバイダ抽象は残すので将来の選択肢としては保持する。
-- 関連：[ADR 0005](adr/0005-knowledge-organization-cost-model.md)（コストモデル）、[ADR 0006](adr/0006-capture-interface-local-first.md)（capture local-first）、ADR 0015（serverless 化・Proposed）。
+- 関連：[ADR 0005](adr/0005-knowledge-organization-cost-model.md)（コストモデル）、[ADR 0006](adr/0006-capture-interface-local-first.md)（capture local-first）、ADR 0015（serverless 化）、ADR 0016（クラウド経路の画像モデル）。

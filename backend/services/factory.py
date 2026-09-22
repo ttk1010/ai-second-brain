@@ -49,6 +49,7 @@ def build_pipeline(
             image_output_dir=settings.image_output_dir,
             quality=settings.image_quality,
             default_aspect_ratio=settings.default_aspect_ratio,
+            style=settings.illustration_style,
         )
 
     return KnowledgePipeline(

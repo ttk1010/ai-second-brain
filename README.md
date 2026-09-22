@@ -83,6 +83,24 @@ See a real generated note (text + illustration) in
   Only needed for the `asb-relink` linking skill and Telegram capture (Claude
   Code Channels); the core `asb` commands do not require it.
 
+### Cost per note
+
+Measured on 2026-09-22 with the defaults (`gpt-5.4` + `gpt-image-2` at
+`medium`, one 1536×1024 illustration). OpenAI prices change; see the
+[pricing page](https://openai.com/api/pricing/).
+
+| Note | Approx. cost (USD) |
+|---|---:|
+| Concept (`asb "LLM"`) | ~$0.07 |
+| News (URL) / Comparison (`--compare`) | ~$0.08 |
+| Without illustration (`--no-image`) | ~$0.02–0.04 |
+| 3-page illustration (`--pages 3`) | ~$0.18 |
+
+The illustration is about two thirds of the cost; `image_quality` changes it
+(`low` ~$0.007, `medium` ~$0.044, `high` ~$0.17 per image). Re-running the same
+input costs nothing. The measurement is reproducible with
+`scripts/measure_generation.py`.
+
 ## Quickstart
 
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.12 (see Requirements above).
