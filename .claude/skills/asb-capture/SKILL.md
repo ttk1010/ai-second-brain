@@ -15,6 +15,23 @@ When the user (or an incoming Channels message) gives you an AI **concept** or a
 
 ## Steps
 
+0. **Determine the execution route first.** `asb` needs `OPENAI_API_KEY` and a
+   configured `config/settings.toml` (`vault_path`) to run locally — a Claude
+   **cloud session** (claude.ai/code) never has these (by design: the key must
+   never enter an LLM context, docs/CLOUD_GENERATION.md). Check which situation
+   this is before doing anything else:
+   - **Cloud session**, or local config/key missing — use the **cloud
+     generation route** instead of running `backend.cli` directly: trigger the
+     `generate-note.yml` workflow with the GitHub MCP tool
+     (`actions_run_trigger`, `method: "run_workflow"`, `workflow_id:
+     "generate-note.yml"`, `ref: "main"`), passing the same options as
+     `workflow_dispatch` inputs (`input`, `guidance`, `pages`, `compare`,
+     `no_image`, `overwrite` — same meaning as the CLI flags below). Poll with
+     `actions_get`/`actions_list` until the run completes, then read the result
+     from the vault repo (it is pushed straight to its `main`). Full guide:
+     docs/CLOUD_GENERATION.md.
+   - **Local** (Telegram bridge, user's own machine) with `config/settings.toml`
+     and `OPENAI_API_KEY` already set up — continue with step 1.
 1. Identify the input: the concept text (e.g. `Transformer`), the URL, or — if the
    message asks to **compare** several things — the list of items.
 2. From the repo root, run:
